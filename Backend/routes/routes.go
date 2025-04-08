@@ -3,6 +3,7 @@ package routes
 import (
 	"backend/Backend/database"
 	"backend/Backend/handlers"
+	"backend/Backend/middleware"
 	"backend/Backend/services"
 
 	"github.com/gin-gonic/gin"
@@ -10,24 +11,29 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
-
 	r := gin.Default()
 
-	RouteRouter(r, handlers.NewRouteHandler(&services.RouteServiceImpl{RouteCollection: database.Client.Database("pip").Collection("route"), Validate: validator.New()}))
+	authService := services.NewAuthServiceImpl(database.Client.Database("pip").Collection("usuarios"))
+	routeService := &services.RouteServiceImpl{
+		RouteCollection: database.Client.Database("pip").Collection("route"),
+		Validate:        validator.New(),
+	}
 
-	//r.POST("/register", handler.)
-	//r.POST("/login", handler.)
+	authHandler := handlers.NewAuthHandler(authService)
+	routeHandler := handlers.NewRouteHandler(routeService)
+
+	r.POST("/register", authHandler.Register)
+	r.POST("/login", authHandler.Login)
 
 	protected := r.Group("/")
-	protected.Use()
+	protected.Use(middleware.AuthMiddleware())
+	RouteRouter(protected, routeHandler)
 
 	return r
-
 }
 
-func RouteRouter(ginEngine *gin.Engine, routeHandler *handlers.RouteHandler) {
-	router := ginEngine.Group("/route")
+func RouteRouter(router *gin.RouterGroup, routeHandler *handlers.RouteHandler) {
+	route := router.Group("/route")
 
-	router.GET("", routeHandler.FindAll)
-	// continuar ....
+	route.GET("", routeHandler.FindAll)
 }
