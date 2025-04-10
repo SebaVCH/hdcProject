@@ -34,7 +34,7 @@ func (a *AuthServiceImpl) Login(email, password string) (string, error) {
 		return "", errors.New("Error al iniciar sesion")
 	}
 
-	token, err := utils.GenerateToken(user.ID.Hex(), user.Roles)
+	token, err := utils.GenerateToken(user.ID.Hex())
 	if err != nil {
 		return "", err
 	}
@@ -43,18 +43,20 @@ func (a *AuthServiceImpl) Login(email, password string) (string, error) {
 }
 
 func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
+
 	existing := a.UserCollection.FindOne(context.TODO(), bson.M{"email": user.Email})
 	if existing.Err() == nil {
 		return "", errors.New("El usuario ya existe")
 	}
 
-	user.Roles = []string{"voluntario"}
-
 	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		return "", err
 	}
+
 	user.Password = hashedPassword
+	user.CompletedRoutes = 0
+	user.ListRoutes = []models.Route{}
 
 	res, err := a.UserCollection.InsertOne(context.TODO(), user)
 	if err != nil {
@@ -63,21 +65,15 @@ func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
 
 	usuarioID := res.InsertedID.(bson.ObjectID)
 
-	voluntario := models.Voluntario{
-		UsuarioID:       usuarioID,
-		CompletedRoutes: 0,
-		ListRoutes:      []models.Route{},
-	}
-	_, err = a.UserCollection.Database().Collection("voluntarios").InsertOne(context.TODO(), voluntario)
+	_, err = a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
 	if err != nil {
 		return "", err
 	}
 
-	token, err := utils.GenerateToken(usuarioID.Hex(), user.Roles)
+	token, err := utils.GenerateToken(usuarioID.Hex())
 	if err != nil {
 		return "", err
 	}
 
 	return token, nil
 }
-

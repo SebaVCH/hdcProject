@@ -8,5 +8,6 @@ type Usuario struct {
 	Email    string        `bson:"email" json:"email"`
 	Password string        `bson:"password" json:"password"`
 	Phone    string        `bson:"phone" json:"phone"`
-	Roles    []string      `bson:"roles" json:"roles"`
+	CompletedRoutes int           `bson:"completed_routes" json:"completed_routes"`
+	ListRoutes      []Route       `bson:"list_routes" json:"list_routes"`
 }

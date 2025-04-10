@@ -6,10 +6,9 @@ import (
 	"time"
 )
 
-func GenerateToken(userID string, roles []string) (string, error) {
+func GenerateToken(userID string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"roles":   roles,
 		"exp":     time.Now().Add(time.Hour * 2).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
