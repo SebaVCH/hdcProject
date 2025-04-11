@@ -13,6 +13,8 @@ import (
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
 
+	r.Use(middleware.CORSMiddleware())
+
 	authService := services.NewAuthServiceImpl(database.Client.Database("pip").Collection("usuarios"))
 	routeService := &services.RouteServiceImpl{
 		RouteCollection: database.Client.Database("pip").Collection("route"),

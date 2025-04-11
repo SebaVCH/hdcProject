@@ -1,9 +1,13 @@
-import { useFetchUser } from "../../api/services/UserService"
+import { useState } from "react"
+import { useCheckLogin } from "../../api/adapters/UserAdapter"
 
 
 export default function Home() {
 
-    const { isLoading, error, data } = useFetchUser()
+    
+
+
+    const { isLoading, error, data } = useCheckLogin("cristian@gmail.com", "123")
 
     if(isLoading) {
         return (
@@ -16,12 +20,14 @@ export default function Home() {
     if(error) {
         console.log("An error ocurred while fetching the user data ", error)
     }
+    
+    console.log(data)
 
     return (
         <>
             <p>Home</p>
-            <p>{data?.email}</p>
-            <p>{data?.password}</p>
+            <p>{data?.token}</p>
+            <p>password</p>
         </>
     )
 } 
