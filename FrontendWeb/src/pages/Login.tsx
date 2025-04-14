@@ -8,36 +8,39 @@ export default function Login() {
     const [password, setPassword] = useState<string>('')
 
 
-    const onClickLogin = function() {
+    const onSubmitForm = (e :React.FormEvent) => {
+        e.preventDefault()
+
         console.log("enviando...")
         console.log(email)
         console.log(password)
     }  
 
     return (
-        <div style={{border: "solid", borderWidth: "1px", padding:"40px"}}>
-            <div>
-                <h3>Iniciar Sesión</h3>
-            </div>
-            <div>
-                <div> 
-                    <p>Correo electronico</p>
-                    <input type={"email"} onChange={(e) => setEmail(e.currentTarget.value)} />
-                </div>
-            </div>
-            <div>
+        <form  onSubmit={onSubmitForm}>
+            <div style={{border: "solid", borderWidth: "1px", padding:"40px"}}>
                 <div>
-                    <p>Contraseña</p>
-                    <input type={"password"} onChange={(e) => setPassword(e.currentTarget.value)}/>
+                    <h3>Iniciar Sesión</h3>
+                </div>
+                <div>
+                    <div> 
+                        <p>Correo electronico</p>
+                        <input type={"email"} onChange={(e) => setEmail(e.currentTarget.value)} />
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <p>Contraseña</p>
+                        <input type={"password"} onChange={(e) => setPassword(e.currentTarget.value)}/>
+                    </div>
+                </div>
+                <div>
+                    <button style={{marginTop:"40px"}}>
+                        enviar
+                    </button>
                 </div>
             </div>
-            <div>
-                <button style={{marginTop:"40px"}} onClick={onClickLogin}>
-                    enviar
-                </button>
-            </div>
-        </div>
-
+        </form>
     )   
 
 }

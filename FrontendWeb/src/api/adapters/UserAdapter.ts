@@ -1,10 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { UserService } from "../services/UserService";
+import { IUser } from "../interfaces/IUser";
 
 
-export function useCheckLogin(email: string, password: string) {
-    return useQuery({
-        queryKey: ['checklogin'],
-        queryFn: () => (UserService.CheckLogin(email, password))
-    })
+
+export class UserAdapter {
+
+    static useLoginMutation(email: string, password: string) {
+        return useMutation({
+            mutationFn: () => (UserService.Login(email, password))
+        })
+    }
+
+    static useRegisterMutation(user: IUser) {
+        return useMutation({
+            mutationFn: () => (UserService.Register(user))
+        })
+    }
+
+
+
+
 }
