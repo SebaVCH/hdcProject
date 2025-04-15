@@ -28,7 +28,11 @@ export class UserService {
 
     static async Login(email: string, password: string) : Promise<TLoginResponse> {
         const body :TLoginRequest  = { email: email, password: password}
+        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
         
+        return { token: data?.token, error: false }
+        
+        /*
         try {
             const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
             return { token: data?.token, error: false }
@@ -46,6 +50,7 @@ export class UserService {
                 error: true
             }
         }
+        */
     }
 
     static async Register(user : IUser) : Promise<TRegisterResponse> {

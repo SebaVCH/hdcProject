@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import Home from './pages/home'
 import Login from './pages/Login'
@@ -8,7 +8,8 @@ const queryClient = new QueryClient()
 
 
 function App() {
-  
+
+ 
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
