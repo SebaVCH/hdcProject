@@ -10,8 +10,8 @@ interface InitialScreenProps {
 const InitialScreen = ({ navigation }: InitialScreenProps) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Bienvenido a la App</Text>
-      <Button title="Ir a Login" onPress={() => navigation.navigate('Login')} />
+      <Text style={styles.title}>Bienvenido a RED CALLE</Text>
+      <Button title="Iniciar" onPress={() => navigation.navigate('Login')} />
     </View>
   );
 };
