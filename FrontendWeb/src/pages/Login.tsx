@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { UserAdapter } from "../api/adapters/UserAdapter";
 import { useNavigate } from "react-router-dom";
+import useSessionStore from "../stores/useSessionStore";
 
 
 
@@ -9,12 +10,19 @@ export default function Login() {
     const navigate = useNavigate()
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
+    const { accessToken } = useSessionStore()
     const { isPending, mutate, error, isError, isSuccess } = UserAdapter.useLoginMutation(email, password)
 
     const onSubmitForm = (e :React.FormEvent) => {
         e.preventDefault()
         mutate()
     }  
+    useEffect(() => {
+        if(accessToken) {
+            navigate('/')
+        }
+    }, [])
+
     useEffect(() => {
         if(isSuccess) {
             navigate('/')
