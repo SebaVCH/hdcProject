@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { UserAdapter } from "../api/adapters/UserAdapter";
+import { UserAdapter } from "../../api/adapters/UserAdapter";
 import { useNavigate } from "react-router-dom";
-import useSessionStore from "../stores/useSessionStore";
+import useSessionStore from "../../stores/useSessionStore";
 
 
 
