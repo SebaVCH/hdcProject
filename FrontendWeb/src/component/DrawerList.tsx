@@ -14,6 +14,10 @@ export default function DrawerList() {
         navigate('/profile')
     }
 
+    const onClickUsuarios = () => {
+        navigate('admin/usuarios')
+    }
+
 
     
     return (
@@ -31,6 +35,11 @@ export default function DrawerList() {
             <div className="w-full">
                 <Button fullWidth>
                     Historial
+                </Button>
+            </div>
+            <div className="w-full">
+                <Button fullWidth onClick={onClickUsuarios}>
+                    Usuarios
                 </Button>
             </div>
             <div className="flex grow items-end w-full">
