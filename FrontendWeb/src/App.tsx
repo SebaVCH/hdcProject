@@ -5,17 +5,28 @@ import Login from './pages/login'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import Profile from './pages/profile'
 import Usuarios from './pages/admin/usuarios/Usuarios'
+import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { interceptorResponse } from './api/services/axiosInstance'
+import useSessionStore from './stores/useSessionStore'
 
 const queryClient = new QueryClient()
 
 
 function App() {
 
+  const { clearSession } = useSessionStore()
+
+  const navigate = useNavigate()
+
+  useEffect(()=> {
+    interceptorResponse(navigate, clearSession)
+  }, [navigate])
  
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
-          <Route  path='/' element={<Home/>} />
+          <Route path='/' element={<Home/>} />
           <Route path='/login' element={<Login />} />
           <Route path='/profile' element={<Profile />} />
           <Route path='/admin/usuarios' element={<Usuarios />} />

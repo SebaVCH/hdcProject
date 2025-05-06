@@ -21,6 +21,20 @@ export type TRegisterRequest = {
     phone: string
 }
 
+export type TProfileResponse = {
+    _id : string
+    name : string
+    email : string 
+    phone : string 
+    completedRoutes : string 
+    listRoutes : string[]
+}
+
+
+export type TProfileRequest = TProfileResponse 
+
+export type TProfileUpdateResponse = TProfileResponse
+
 export type TRegisterResponse = TLoginResponse
 
 
@@ -29,28 +43,7 @@ export class UserService {
     static async Login(email: string, password: string) : Promise<TLoginResponse> {
         const body :TLoginRequest  = { email: email, password: password}
         const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
-        
         return { token: data?.token, error: false }
-        
-        /*
-        try {
-            const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
-            return { token: data?.token, error: false }
-
-        } catch(err : any) {
-
-            const error = err as Error | AxiosError
-            if(!axios.isAxiosError(error)) 
-                return { errorMessage: error.message, error: true }
-            
-            const axiosError = err as AxiosError
-            return {
-                errorMessage: (axiosError.request ? 'Cannot connect with the server' : '') + axiosError.message,
-                errorCode: axiosError.code,
-                error: true
-            }
-        }
-        */
     }
 
     static async Register(user : IUser) : Promise<TRegisterResponse> {
@@ -77,6 +70,45 @@ export class UserService {
                 error: true
             }
         }
+    }
+
+    static async GetProfile(accessToken : string) : Promise<TProfileResponse> {
+        console.log("service")
+        try {
+            const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/profile`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            return {
+                _id: data?.user?._id,
+                name: data?.user?.name,
+                email: data?.user?.email,
+                phone: data?.user?.phone,
+                completedRoutes: data?.user?.completedRoutes,
+                listRoutes: data?.user?.listRoutes
+            };
+        } catch (error: any) {
+            console.log(error)
+            throw new Error(error?.response?.data?.message || 'Error al obtener el perfil');
+        }
+    }
+
+    static async UpdateProfile(user : TProfileRequest, accessToken : string) : Promise<TProfileUpdateResponse> {
+        
+        const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/user/update`, user, {
+            headers: {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        return {
+            _id : data?.user?._id,
+            name : data?.user?.name,
+            email : data?.user?.email,
+            phone : data?.user?.phone,
+            completedRoutes : data?.user?.completedRoutes,
+            listRoutes : data?.user?.listRoutes
+        } 
     }
 
     
