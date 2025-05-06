@@ -29,7 +29,8 @@ export class UserAdapter {
         return useQuery({
             queryKey : ['profile'],
             queryFn : () => (UserService.GetProfile(accessToken as string)),
-            enabled : accessToken ? true : false
+            enabled : accessToken ? true : false,
+            
         })
     }
 

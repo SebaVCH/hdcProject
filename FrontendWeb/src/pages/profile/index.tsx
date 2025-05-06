@@ -12,18 +12,18 @@ import { useNavigate } from "react-router-dom"
 export default function Profile() {
 
     const navigate = useNavigate()
-    const { accessToken, clearSession } = useSessionStore()
-    const { isError, data, isLoading, isSuccess } = UserAdapter.useGetProfile(accessToken)
+    const { accessToken } = useSessionStore()
+    const { data, isLoading, isSuccess } = UserAdapter.useGetProfile(accessToken)
     const [ user, setUser ] = useState<TProfileResponse>()
     const { mutate, isPending } = UserAdapter.useUpdateProfile(user as TProfileRequest, accessToken as string)
 
 
+
     useEffect(() => {
-        if(isError) {
-            clearSession()
+        if(!accessToken) {
             navigate('/login')
         }
-    }, [isError])
+    }, [])
 
     useEffect(() => {
         if(data) {
@@ -41,7 +41,6 @@ export default function Profile() {
 
     
     return (
-
         <div className="flex flex-row justify-between items-start">
             <CustomDrawer DrawerList={DrawerListProfile} />
             <div className="flex grow ">

@@ -73,19 +73,24 @@ export class UserService {
     }
 
     static async GetProfile(accessToken : string) : Promise<TProfileResponse> {
-
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/profile`, {
-            headers: {
-                Authorization : `Bearer ${accessToken}`
-            }
-        })
-        return {
-            _id : data?.user?._id,
-            name : data?.user?.name,
-            email : data?.user?.email,
-            phone : data?.user?.phone,
-            completedRoutes : data?.user?.completedRoutes,
-            listRoutes : data?.user?.listRoutes
+        console.log("service")
+        try {
+            const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/profile`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            return {
+                _id: data?.user?._id,
+                name: data?.user?.name,
+                email: data?.user?.email,
+                phone: data?.user?.phone,
+                completedRoutes: data?.user?.completedRoutes,
+                listRoutes: data?.user?.listRoutes
+            };
+        } catch (error: any) {
+            console.log(error)
+            throw new Error(error?.response?.data?.message || 'Error al obtener el perfil');
         }
     }
 
