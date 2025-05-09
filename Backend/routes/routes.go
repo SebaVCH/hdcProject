@@ -5,9 +5,7 @@ import (
 	"backend/Backend/handlers"
 	"backend/Backend/middleware"
 	"backend/Backend/services"
-
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 func SetupRouter() *gin.Engine {
@@ -17,11 +15,8 @@ func SetupRouter() *gin.Engine {
 
 	authService := services.NewAuthServiceImpl(database.Client.Database("pip").Collection("usuarios"))
 	userService := services.NewUserServiceImpl(database.Client.Database("pip").Collection("usuarios"))
-	alertService := services.NewAlertServiceImpl(database.Client.Database("pip").Collection("alertas"))
-	routeService := &services.RouteServiceImpl{
-		RouteCollection: database.Client.Database("pip").Collection("route"),
-		Validate:        validator.New(),
-	}
+	alertService := services.NewAlertServiceImpl(database.Client.Database("pip").Collection("alertas"), database.Client.Database("pip").Collection("usuarios"))
+	routeService := services.NewRouteServiceImpl(database.Client.Database("pip").Collection("route"))
 
 	authHandler := handlers.NewAuthHandler(authService)
 	routeHandler := handlers.NewRouteHandler(routeService)

@@ -2,10 +2,8 @@ package services
 
 import (
 	"backend/Backend/models"
+	"context"
 	"errors"
-	"time"
-
-	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -15,57 +13,83 @@ type RouteService interface {
 	FindById(routeId string) (models.Route, error)
 	CreateRoute(route models.Route) (models.Route, error)
 	UpdateRoute(route models.Route) (models.Route, error)
-	DeleteRoute(routeId models.Route) error
+	DeleteRoute(routeId string) error
 }
 
 type RouteServiceImpl struct {
 	RouteCollection *mongo.Collection
-	Validate        *validator.Validate
 }
 
-func NewRouteServiceImpl(routeCollection *mongo.Collection, validate *validator.Validate) (service RouteService, err error) {
-	if validate == nil {
-		return nil, errors.New("validator cannot be nil")
-	}
+func NewRouteServiceImpl(routeCollection *mongo.Collection) RouteService {
 	return &RouteServiceImpl{
 		RouteCollection: routeCollection,
-		Validate:        validate,
-	}, nil
-
+	}
 }
 
-// FindAll implements RouteService.
-func (r *RouteServiceImpl) FindAll() (routes []models.Route, err error) {
+func (r *RouteServiceImpl) FindAll() ([]models.Route, error) {
+	cursor, err := r.RouteCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
 
-	routes = append(routes,
-		models.Route{
-			Description: "unimplemented",
-			RouteLeader: bson.NewObjectID(),
-			Team:        []bson.ObjectID{},
-			HelpPoints:  []models.PuntoAyuda{},
-			Status:      "unimplemented",
-			DateCreated: time.Time{},
-			Alert:       bson.NewObjectID(),
-		})
+	var routes []models.Route
+	if err := cursor.All(context.Background(), &routes); err != nil {
+		return nil, err
+	}
 	return routes, nil
 }
 
-// FindById implements RouteService.
 func (r *RouteServiceImpl) FindById(routeId string) (models.Route, error) {
-	panic("unimplemented")
+	objID, err := bson.ObjectIDFromHex(routeId)
+	if err != nil {
+		return models.Route{}, errors.New("ID de ruta inválido")
+	}
+
+	var route models.Route
+	err = r.RouteCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&route)
+	if err != nil {
+		return models.Route{}, err
+	}
+	return route, nil
 }
 
-// CreateRoute implements RouteService.
 func (r *RouteServiceImpl) CreateRoute(route models.Route) (models.Route, error) {
-	panic("unimplemented")
+	route.ID = bson.NewObjectID()
+	_, err := r.RouteCollection.InsertOne(context.Background(), route)
+	if err != nil {
+		return models.Route{}, err
+	}
+	return route, nil
 }
 
-// DeleteRoute implements RouteService.
-func (r *RouteServiceImpl) DeleteRoute(routeId models.Route) error {
-	panic("unimplemented")
-}
-
-// UpdateRoute implements RouteService.
 func (r *RouteServiceImpl) UpdateRoute(route models.Route) (models.Route, error) {
-	panic("unimplemented")
+	if route.ID.IsZero() {
+		return models.Route{}, errors.New("ID de ruta no proporcionado")
+	}
+
+	filter := bson.M{"_id": route.ID}
+	update := bson.M{"$set": route}
+
+	_, err := r.RouteCollection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return models.Route{}, err
+	}
+
+	var updatedRoute models.Route
+	err = r.RouteCollection.FindOne(context.Background(), filter).Decode(&updatedRoute)
+	if err != nil {
+		return models.Route{}, err
+	}
+	return updatedRoute, nil
+}
+
+func (r *RouteServiceImpl) DeleteRoute(routeId string) error {
+	objID, err := bson.ObjectIDFromHex(routeId)
+	if err != nil {
+		return errors.New("ID de ruta inválido")
+	}
+
+	_, err = r.RouteCollection.DeleteOne(context.Background(), bson.M{"_id": objID})
+	return err
 }

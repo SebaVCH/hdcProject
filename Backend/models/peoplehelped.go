@@ -8,7 +8,6 @@ import (
 
 type PersonaAyudada struct {
 	ID     bson.ObjectID `bson:"_id,omitempty" json:"_id"`
-	Name   string        `bson:"name" json:"name"`
 	Age    int           `bson:"age" json:"age"`
 	Gender string        `bson:"gender" json:"gender"`
 	Date   time.Time     `bson:"date" json:"date"`

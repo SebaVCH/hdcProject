@@ -2,15 +2,15 @@ package services
 
 import (
 	"backend/Backend/models"
+	"backend/Backend/utils"
 	"context"
 	"errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"time"
 )
 
 type AlertService interface {
-	CreateAlert(alert *models.Alerta) error
+	CreateAlert(alert models.Alerta) error
 	DeleteAlert(alertID string) error
 	UpdateAlert(data map[string]interface{}) (models.Alerta, error)
 	GetAlerts() ([]models.Alerta, error)
@@ -18,17 +18,42 @@ type AlertService interface {
 
 type AlertServiceImpl struct {
 	AlertsCollection *mongo.Collection
+	UserCollection   *mongo.Collection
 }
 
-func NewAlertServiceImpl(alertsCollection *mongo.Collection) AlertService {
-	return &AlertServiceImpl{AlertsCollection: alertsCollection}
+func NewAlertServiceImpl(alertsCollection, usersCollection *mongo.Collection) AlertService {
+	return &AlertServiceImpl{
+		AlertsCollection: alertsCollection,
+		UserCollection:   usersCollection,
+	}
 }
 
-func (s *AlertServiceImpl) CreateAlert(alert *models.Alerta) error {
+func (s *AlertServiceImpl) CreateAlert(alert models.Alerta) error {
 	alert.ID = bson.NewObjectID()
-	alert.CreatedAt = time.Now()
-	_, err := s.AlertsCollection.InsertOne(context.Background(), alert)
-	return err
+	_, err := s.AlertsCollection.InsertOne(
+		context.Background(), alert,
+	)
+	if err != nil {
+		return err
+	}
+
+	cursor, err := s.UserCollection.Find(
+		context.Background(), bson.M{},
+	)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		var user models.Usuario
+		if err := cursor.Decode(&user); err != nil {
+			continue
+		}
+		go utils.SendMail(user, alert)
+	}
+
+	return nil
 }
 
 func (s *AlertServiceImpl) DeleteAlert(alertID string) error {

@@ -24,7 +24,7 @@ func (a *AlertHandler) CreateAlert(c *gin.Context) {
 		return
 	}
 
-	err := a.AlertService.CreateAlert(&alert)
+	err := a.AlertService.CreateAlert(alert)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al crear alerta: " + err.Error()})
 		return

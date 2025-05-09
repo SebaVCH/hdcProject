@@ -1,4 +1,3 @@
-// services/auth_service.go
 package services
 
 import (
@@ -58,17 +57,12 @@ func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
 	user.CompletedRoutes = 0
 	user.ListRoutes = []models.Route{}
 
-	res, err := a.UserCollection.InsertOne(context.TODO(), user)
+	res, err := a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
 	if err != nil {
 		return "", err
 	}
 
 	usuarioID := res.InsertedID.(bson.ObjectID)
-
-	_, err = a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
-	if err != nil {
-		return "", err
-	}
 
 	token, err := utils.GenerateToken(usuarioID.Hex())
 	if err != nil {
