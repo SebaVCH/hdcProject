@@ -3,60 +3,54 @@ import useSessionStore from "../../stores/useSessionStore"
 import { useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from 'react-leaflet'
-import { Divider, Paper } from "@mui/material";
+import { Divider, IconButton, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
+import MensajesFijados from "../../component/MensajesFijados";
+import Mapa from "../../component/Mapa";
+import NavigationIcon from '@mui/icons-material/Navigation';
+import ListIconHome from "../../component/ListIconHome";
+
+
+
+const actions = [
+    { icon: <NavigationIcon />, name: "Crear Ruta"}
+]
 
 
 
 export default function Home() {
 
-    const navigate = useNavigate()
-    const { accessToken, clearSession } = useSessionStore()
     const [ openDrawer, setOpenDrawer ] = useState(false)
-
     const toggleDrawer = (toggleDrawer : boolean) => () => {
         setOpenDrawer(toggleDrawer)
     }
 
-    const onCerrarSesion = () => {
-        clearSession()
-        navigate('/login')
-    }
 
     return (
         <div className="flex flex-grow">
-            <div className="shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-30 px-1">
+            <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-30">
                 <CustomDrawer DrawerList={DrawerList}/>
+                <Divider variant="middle"/>
+                <ListIconHome />
+                <div className="flex grow justify-center items-end py-4">
+                    <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
+                </div>
             </div>
             <div className="relative flex grow flex-col justify-between">
-                <MapContainer 
-                    center={[-29.959003986327698, -71.34176826076656]} 
-                    zoom={15} 
-                    scrollWheelZoom={true} 
-                    className="h-full w-full z-0"
-                    zoomControl={false}
-                >
-                    <ZoomControl position="bottomleft" />
-                    <TileLayer
-                        attribution="Google Maps"
-                        url="https://www.google.cn/maps/vt?lyrs=m@189&gl=cn&x={x}&y={y}&z={z}"
+                <Mapa />
+                <MensajesFijados />
+                <SpeedDial className="absolute bottom-16 right-16 scale-110" ariaLabel={"agregar ruta"} FabProps={{ color: "secondary" }} icon={<SpeedDialIcon/>}>
+                    {actions.map((value, index) => (
+                        <SpeedDialAction 
+                            key={index}
+                            icon={value.icon}
+                            slotProps={{
+                                tooltip : {
+                                    title: value.name
+                                }
+                            }}
                         />
-                    <Marker position={[-29.959003986327698, -71.34176826076656]}>
-                        <Popup>
-                        A pretty CSS3 popup. <br /> Easily customizable.
-                        </Popup>
-                    </Marker>
-                </MapContainer>
-                <Paper className="absolute top-4 left-1/2 -translate-x-1/2 w-3/5 flex flex-col items-start gap-2 bg-white p-2 z-10">
-                    <p className="text-lg">Mensajes Importantes</p>
-                    <Divider className="w-full" />
-                    <div className="flex flex-row grow w-full gap-2">
-                        <p>Cristian Nettle</p>
-                        <Divider orientation="vertical" flexItem/>
-                        <p>Este es un mensaje muy importante</p>
-                    </div>
-                </Paper>
-
+                    ))}
+                </SpeedDial>
             </div>
         </div>
     )
