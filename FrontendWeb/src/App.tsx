@@ -9,6 +9,8 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { interceptorResponse } from './api/services/axiosInstance'
 import useSessionStore from './stores/useSessionStore'
+import { ThemeProvider } from '@emotion/react'
+import { createTheme } from '@mui/material/styles'
 
 const queryClient = new QueryClient()
 
@@ -24,14 +26,20 @@ function App() {
   }, [navigate])
  
   return (
-    <QueryClientProvider client={queryClient}>
-      <Routes>
-          <Route path='/' element={<Home/>} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/profile' element={<Profile />} />
-          <Route path='/admin/usuarios' element={<Usuarios />} />
-      </Routes>
-    </QueryClientProvider>
+    <ThemeProvider theme={createTheme({
+      typography: {
+        fontFamily: 'Roboto, Arial, sans-serif',
+      },
+    })}>
+      <QueryClientProvider client={queryClient}>
+        <Routes>
+            <Route path='/' element={<Home/>} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/profile' element={<Profile />} />
+            <Route path='/admin/usuarios' element={<Usuarios />} />
+        </Routes>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }
 

@@ -1,4 +1,4 @@
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { IUser } from "../../../api/interfaces/IUser";
 import CustomDrawer from "../../../component/CustomDrawer";
 import DrawerListProfile from "../../../component/DrawerListProfile";
@@ -27,9 +27,9 @@ export default function Usuarios() {
     return (
         <div className="flex flex-row grow justify-stretch items-start gap-5">
             <CustomDrawer DrawerList={DrawerListProfile} />
-            <div className="flex grow flex-col self-stretch justify-start items-start justify-items-start gap-10 my-5 border border-red-100">
+            <div className="flex grow flex-col self-stretch justify-start items-start justify-items-start gap-10 my-5 border border-neutral-300 rounded-xs p-5">
                 <div>
-                    <p>Usuarios</p>
+                    <Typography variant="h5">Usuarios</Typography>
                 </div>
                 <div>
                     <Button>
