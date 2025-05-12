@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Constants from 'expo-constants';
+
+const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
+const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
 
 type LoginScreenProps = {
   navigation: NavigationProp<any>;
@@ -14,7 +18,8 @@ const authenticate = async (
   password: string
 ): Promise<{ accessToken: string } | null> => {
   try {
-    const response = await axios.post(`${process.env.EXPO_PUBLIC_URL_BACKEND}/login`, {
+    console.log('🔍 Backend URL:', backendUrl);
+    const response = await axios.post(`${backendUrl}/login`, {
       email,
       password,
     });
@@ -22,7 +27,8 @@ const authenticate = async (
     return {
       accessToken: response.data.token,
     };
-  } catch {
+  } catch (error: any) {
+    console.error('Error de login:', error?.response?.data || error.message);
     return null;
   }
 };
