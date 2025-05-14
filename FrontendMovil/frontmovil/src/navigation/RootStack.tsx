@@ -4,6 +4,7 @@ import LoginScreen from '../screens/Auth/LoginScreen';
 import HomeScreen from '../screens/Common/HomeScreen';
 import InitialScreen from '../screens/InitialScreen';
 import ProfileScreen from '../screens/Common/ProfileScreen';
+import UsersScreen from '../screens/Common/UsersScreen';
 
 export type RootStackParamList = {
   Initial: undefined;
@@ -29,6 +30,9 @@ const RootStackNavigation = () => {
         </Stack.Group>
         <Stack.Group screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Profile" component={ProfileScreen} />
+        </Stack.Group>
+        <Stack.Group screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Users" component={UsersScreen} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
