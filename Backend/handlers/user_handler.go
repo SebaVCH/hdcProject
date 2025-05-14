@@ -60,6 +60,15 @@ func (h *UserHandler) UpdateUserInfo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"user": updatedUser})
 }
 
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+	users, err := h.UserService.GetAllUsers()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener usuarios: " + err.Error()})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{"users": users})
+}
+
 func (h *UserHandler) ValidateUser(c *gin.Context) (models.Usuario, bool) {
 	claims, exists := c.Get("user")
 	if !exists {

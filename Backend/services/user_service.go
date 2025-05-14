@@ -13,6 +13,7 @@ type UserService interface {
 	GetUserByID(id string) (models.Usuario, error)
 	GetUserProfile(userID string) (models.Usuario, error)
 	UpdateUserInfo(userID bson.ObjectID, userData map[string]interface{}) (models.Usuario, error)
+	GetAllUsers() ([]models.Usuario, error)
 }
 
 type UserServiceImpl struct {
@@ -23,6 +24,19 @@ func NewUserServiceImpl(userCollection *mongo.Collection) UserService {
 	return &UserServiceImpl{UserCollection: userCollection}
 }
 
+func (s *UserServiceImpl) GetAllUsers() ([]models.Usuario, error) {
+	cursor, err := s.UserCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.Background())
+
+	var users []models.Usuario
+	if err := cursor.All(context.Background(), &users); err != nil {
+		return nil, err
+	}
+	return users, nil
+}
 func (s *UserServiceImpl) GetUserByID(id string) (models.Usuario, error) {
 	var user models.Usuario
 	objID, err := bson.ObjectIDFromHex(id)

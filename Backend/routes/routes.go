@@ -44,6 +44,7 @@ func RouteRouter(router *gin.RouterGroup, routeHandler *handlers.RouteHandler) {
 func UserRouter(router *gin.RouterGroup, userHandler *handlers.UserHandler) {
 	user := router.Group("/user")
 	user.GET("/profile", userHandler.GetUserProfile)
+	user.GET("/", userHandler.GetAllUsers)
 	user.GET("/:id", userHandler.GetUserByID)
 	user.PUT("/update", userHandler.UpdateUserInfo)
 }
