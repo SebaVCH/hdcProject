@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NavigationProp } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,16 +32,19 @@ const authenticate = async (
       password,
     });
 
-    return {
-      accessToken: response.data.token,
-    };
+    const token = response.data.token;
+    console.log('✅ TOKEN RECIBIDO DEL BACKEND:', token);
+
+    if (!token) return null;
+
+    return { accessToken: token };
   } catch (error: any) {
     console.error('Error de login:', error?.response?.data || error.message);
     return null;
   }
 };
 
-const LoginScreen = ({ navigation }: LoginScreenProps) => {
+export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,11 +54,17 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     const tokens = await authenticate(email, password);
     setLoading(false);
 
-    if (tokens) {
-      await AsyncStorage.setItem('accessToken', tokens.accessToken);
-      setEmail('');
-      setPassword('');
-      navigation.navigate('Home');
+    if (tokens?.accessToken) {
+      try {
+        await AsyncStorage.setItem('accessToken', tokens.accessToken);
+        console.log("🔐 Token guardado en AsyncStorage");
+        setEmail('');
+        setPassword('');
+        navigation.navigate('Home');
+      } catch (err) {
+        console.error('❌ Error guardando el token:', err);
+        Alert.alert('Error', 'No se pudo guardar la sesión');
+      }
     } else {
       Alert.alert('Error de autenticación', 'Correo o contraseña incorrectos');
     }
@@ -94,7 +111,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -151,5 +168,3 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 });
-
-export default LoginScreen;
