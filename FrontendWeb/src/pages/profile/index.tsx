@@ -7,6 +7,8 @@ import useSessionStore from "../../stores/useSessionStore"
 import { TLoginRequest, TLoginResponse, TProfileRequest, TProfileResponse } from "../../api/services/UserService"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import ListIconHome from "../../component/ListIconHome"
+import DrawerList from "../../component/DrawerList"
 
 
 export default function Profile() {
@@ -41,10 +43,17 @@ export default function Profile() {
 
     
     return (
-        <div className="flex flex-row justify-between items-start">
-            <CustomDrawer DrawerList={DrawerListProfile} />
-            <div className="flex grow ">
-                <div className="flex flex-col grow justify-start items-start p-5 g-5 w-full">
+        <div className="flex flex-grow">
+            <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-30">
+                <CustomDrawer DrawerList={DrawerList}/>
+                <Divider variant="middle"/>
+                <ListIconHome />
+                <div className="flex grow justify-center items-end py-4">
+                    <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
+                </div>
+            </div>
+            <div className="flex grow flex-col self-stretch justify-start items-start justify-items-start gap-10 border border-neutral-300 rounded-xs p-5 bg-gray-100">
+                <div className="flex flex-col justify-start items-start p-5 g-5 w-full">
                     <p  className="text-2xl font-semibold">Perfil</p>
                     <Divider className="my-4 w-full" />
                     { isLoading || !isSuccess || !user ? <p>Cargando...</p>  : <TableProfile user={user as TProfileResponse} setUser = {setUser}/> }
