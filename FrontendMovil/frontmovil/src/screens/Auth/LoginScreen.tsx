@@ -70,10 +70,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     }
   };
 
-  const handleRegister = () => {
-    navigation.navigate('Register');
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -102,10 +98,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         <View style={styles.buttonsH}>
           <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
             <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Ingresar'}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-            <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Registrarse'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,7 +146,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingVertical: 12,
     borderRadius: 10,
-    marginHorizontal: 8,
     marginTop: 10,
   },
   buttonText: {
@@ -163,8 +154,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   buttonsH: {
-    flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
+    alignItems: 'center',
   },
 });
