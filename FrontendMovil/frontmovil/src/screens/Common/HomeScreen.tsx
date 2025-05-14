@@ -52,23 +52,21 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const fetchAlerts = async () => {
-  try {
-    const token = await AsyncStorage.getItem('accessToken');
-    const res = await axios.get(`${backendUrl}/alert`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const res = await axios.get(`${backendUrl}/alert`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    console.log("📦 Respuesta de /alert:", res.data);
+      const alertsArray = res.data.alerts || [];
+      const userName = await AsyncStorage.getItem('userName');
 
-    const alertsArray = res.data.alerts || [];
-    const userName = await AsyncStorage.getItem('userName');
-
-    const formatted = alertsArray.map((a: any) => `${userName || 'Usuario'}: ${a.description}`);
-    setAlertLog(formatted.reverse());
-  } catch (err) {
-    console.error('Error al obtener alertas:', err);
-  }
-};
+      const formatted = alertsArray.map((a: any) => `${userName || 'Usuario'}: ${a.description}`);
+      setAlertLog(formatted.reverse());
+    } catch (err) {
+      console.error('Error al obtener alertas:', err);
+    }
+  };
 
   useEffect(() => {
     fetchAlerts();
@@ -121,7 +119,7 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.sidebar, { left: slideAnim }]}>
+      <Animated.View style={[styles.sidebar, { left: slideAnim }]}>...
         {menuOptions.map((option) => (
           <TouchableOpacity
             key={option.route}
@@ -150,20 +148,22 @@ export default function HomeScreen({ navigation }: Props) {
         <Text style={styles.alertToggleButtonText}>Abrir Avisos</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.mapWrapper}
-        onPress={() => setMapFullScreen(true)}
-        activeOpacity={0.95}
-      >
+      <View style={styles.mapWrapper}>
         <MapComponent />
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.addMarkerButton} onPress={() => {}}>
+          <Icon name="plus" size={20} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.expandButton} onPress={() => setMapFullScreen(true)}>
+          <Icon name="arrows-alt" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
       <Modal visible={mapFullScreen} animationType="fade">
         <TouchableOpacity
           style={styles.fullscreenCloseButton}
           onPress={() => setMapFullScreen(false)}
         >
-          <Icon name="close" size={28} color="#fff" />
+          <Icon name="close" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.fullscreenMap}>
           <MapComponent />
@@ -287,6 +287,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 10,
     overflow: 'hidden',
+    position: 'relative',
   },
   fullscreenMap: {
     flex: 1,
@@ -321,5 +322,23 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#ccc',
     marginVertical: 10,
+  },
+  expandButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: '#000',
+    padding: 10,
+    borderRadius: 30,
+    zIndex: 5,
+  },
+  addMarkerButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    backgroundColor: '#000',
+    padding: 10,
+    borderRadius: 30,
+    zIndex: 5,
   },
 });
