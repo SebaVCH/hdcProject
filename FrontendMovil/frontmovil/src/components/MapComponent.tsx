@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Region, Circle } from 'react-native-maps';
 
 type MarkerData = {
   id: string;
@@ -36,7 +36,7 @@ export default function MapComponent({ markers = defaultMarkers }: Props) {
   const [region, setRegion] = useState(initialRegion);
 
   const handleZoom = (zoomIn: boolean) => {
-    const factor = zoomIn ? 0.5 : 2; // 0.5 = zoom in, 2 = zoom out
+    const factor = zoomIn ? 0.5 : 2;
     const newRegion: Region = {
       ...region,
       latitudeDelta: region.latitudeDelta * factor,
@@ -53,21 +53,31 @@ export default function MapComponent({ markers = defaultMarkers }: Props) {
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         region={region}
-        zoomEnabled={true}
-        scrollEnabled={true}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
+        zoomEnabled
+        scrollEnabled
+        showsUserLocation
+        showsMyLocationButton
       >
         {markers.map((marker) => (
-          <Marker
-            key={marker.id}
-            coordinate={{
-              latitude: marker.latitude,
-              longitude: marker.longitude,
-            }}
-            title={marker.title}
-            description={marker.description}
-          />
+          <React.Fragment key={marker.id}>
+            <Marker
+              coordinate={{
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+              }}
+              title={marker.title}
+              description={marker.description}
+            />
+            <Circle
+              center={{
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+              }}
+              radius={200} // En metros
+              strokeColor="rgba(0, 122, 255, 0.6)" // borde
+              fillColor="rgba(0, 122, 255, 0.2)"   // relleno
+            />
+          </React.Fragment>
         ))}
       </MapView>
 

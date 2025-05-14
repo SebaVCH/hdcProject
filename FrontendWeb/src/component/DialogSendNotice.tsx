@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -7,12 +6,15 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
-import { Checkbox, FormControlLabel, Input, TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, TextField } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { NoticeAdapter } from '../api/adapters/NoticeAdapter';
+import useSessionStore from '../stores/useSessionStore';
+import { red } from '@mui/material/colors';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
@@ -22,9 +24,27 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export default function DialogSendAviso({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
+    const { accessToken } = useSessionStore()
+    const [ message, setMessage ] = useState<string>('')
+    const { isError, mutate, data } = NoticeAdapter.usePostNoticeMutation({ description : message, type: 'aviso'}, accessToken)
+
+    const onChangeTextField = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        e.preventDefault()
+        setMessage(e.target.value)
+    }
+
     const handleClose = () => {
         setOpen(false);
     }
+
+    const onPostNotice = () => {
+        mutate()
+        handleClose()
+    }
+
+    useEffect(() => {
+        console.log(data)
+    }, [data])
 
     return (
         <>
@@ -44,7 +64,7 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
                         position: 'absolute',
                         right: 8,
                         top: 8,
-                        color: theme.palette.grey[500],
+                        color: theme.palette.grey[600],
                     })}
                     >
                     <CloseIcon />
@@ -57,14 +77,15 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
                         size="small"
                         placeholder="Escribe el mensaje" 
                         type={"text"} 
+                        value={message}
+                        onChange={onChangeTextField}
                     />
-                    <div className='flex justify-start px-4'>
+                    <div className='flex justify-start'>
                         <FormControlLabel label="Enviar por Email" control={<Checkbox />}/>
                     </div>
-                    
                 </DialogContent>
                 <DialogActions>
-                    <Button>
+                    <Button variant='contained' onClick={onPostNotice}>
                         Enviar Aviso
                     </Button>
                 </DialogActions>
@@ -72,39 +93,3 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
         </>
     )    
 };
-
-
-/* import * as React from 'react';
-
-
-export default function CustomizedDialogs() {
-  
-
-  return (
-    <React.Fragment>
-        <DialogContent dividers>
-          <Typography gutterBottom>
-            Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-            dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-            consectetur ac, vestibulum at eros.
-          </Typography>
-          <Typography gutterBottom>
-            Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
-            Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.
-          </Typography>
-          <Typography gutterBottom>
-            Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus
-            magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec
-            ullamcorper nulla non metus auctor fringilla.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Save changes
-          </Button>
-        </DialogActions>
-      </BootstrapDialog>
-    </React.Fragment>
-  );
-}
-*/
