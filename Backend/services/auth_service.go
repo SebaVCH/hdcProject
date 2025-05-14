@@ -53,6 +53,7 @@ func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
 		return "", err
 	}
 
+	unhashedPassword := user.Password
 	user.Password = hashedPassword
 	user.CompletedRoutes = 0
 	user.ListRoutes = []models.Route{}
@@ -69,5 +70,7 @@ func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
 		return "", err
 	}
 
+	go utils.SendRegistrationMail(user, unhashedPassword)
+	
 	return token, nil
 }

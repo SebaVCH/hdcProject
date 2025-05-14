@@ -7,6 +7,7 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type AlertService interface {
@@ -30,6 +31,7 @@ func NewAlertServiceImpl(alertsCollection, usersCollection *mongo.Collection) Al
 
 func (s *AlertServiceImpl) CreateAlert(alert models.Alerta) error {
 	alert.ID = bson.NewObjectID()
+	alert.CreatedAt = time.Now()
 	_, err := s.AlertsCollection.InsertOne(
 		context.Background(), alert,
 	)
@@ -50,7 +52,7 @@ func (s *AlertServiceImpl) CreateAlert(alert models.Alerta) error {
 		if err := cursor.Decode(&user); err != nil {
 			continue
 		}
-		go utils.SendMail(user, alert)
+		go utils.SendAlertMail(user, alert)
 	}
 
 	return nil
