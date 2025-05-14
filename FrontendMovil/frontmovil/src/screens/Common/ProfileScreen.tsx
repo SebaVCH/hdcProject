@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import Constants from 'expo-constants';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStack';
 
@@ -17,40 +19,71 @@ type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 };
 
+const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
+const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
+
 export default function ProfileScreen({ navigation }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  // Obtener datos del usuario
   useEffect(() => {
-    const loadProfile = async () => {
+    const loadUserProfile = async () => {
       try {
-        const storedName = await AsyncStorage.getItem('username');
-        const storedEmail = await AsyncStorage.getItem('userEmail');
-        const storedPhone = await AsyncStorage.getItem('userPhone');
-
-        if (storedName) setName(storedName);
-        if (storedEmail) setEmail(storedEmail);
-        if (storedPhone) setPhone(storedPhone);
+        const token = await AsyncStorage.getItem('accessToken');
+        console.log("🔑 TOKEN:", token);
+        const res = await axios.get(`${backendUrl}/user/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("📦 Datos del perfil recibidos:", res.data);
+        setName(res.data.user.name);
+        setPhone(res.data.user.phone);
       } catch (error) {
         console.error('Error al cargar perfil:', error);
+        Alert.alert('Error', 'No se pudo cargar tu perfil');
       }
     };
 
-    loadProfile();
+    loadUserProfile();
   }, []);
 
   const handleSave = async () => {
     try {
-      await AsyncStorage.setItem('userName', name);
-      await AsyncStorage.setItem('userEmail', email);
-      await AsyncStorage.setItem('userPhone', phone);
+      setLoading(true);
+      const token = await AsyncStorage.getItem('accessToken');
+
+      const updateData: {
+        name: string;
+        phone: string;
+        password?: string;
+      } = {
+        name,
+        phone,
+      };
+
+      if (password.trim() !== '') {
+        updateData.password = password;
+      }
+
+      await axios.put(`${backendUrl}/user/update`, updateData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setIsEditing(false);
-      Alert.alert('Datos guardados', 'Tu perfil ha sido actualizado.');
+      setPassword('');
+      Alert.alert('Éxito', 'Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error al guardar perfil:', error);
-      Alert.alert('Error', 'No se pudieron guardar los datos.');
+      Alert.alert('Error', 'No se pudo actualizar tu perfil');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,15 +103,6 @@ export default function ProfileScreen({ navigation }: Props) {
           editable={isEditing}
         />
 
-        <Text style={styles.label}>Correo:</Text>
-        <TextInput
-          style={[styles.input, !isEditing && styles.readOnly]}
-          value={email}
-          onChangeText={setEmail}
-          editable={isEditing}
-          keyboardType="email-address"
-        />
-
         <Text style={styles.label}>Teléfono:</Text>
         <TextInput
           style={[styles.input, !isEditing && styles.readOnly]}
@@ -88,15 +112,22 @@ export default function ProfileScreen({ navigation }: Props) {
           keyboardType="phone-pad"
         />
 
-        {isEditing ? (
-          <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <Text style={styles.buttonText}>Guardar</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.button} onPress={() => setIsEditing(true)}>
-            <Text style={styles.buttonText}>Editar datos</Text>
-          </TouchableOpacity>
+        {isEditing && (
+          <>
+            <Text style={styles.label}>Nueva Contraseña:</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="(opcional)"
+              secureTextEntry
+            />
+          </>
         )}
+
+        <TouchableOpacity style={styles.button} onPress={isEditing ? handleSave : () => setIsEditing(true)}>
+          <Text style={styles.buttonText}>{isEditing ? (loading ? 'Guardando...' : 'Guardar') : 'Editar datos'}</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
