@@ -28,6 +28,7 @@ export type TProfileResponse = {
     phone : string 
     completedRoutes : string 
     listRoutes : string[]
+    password ?: string
 }
 
 
@@ -41,6 +42,7 @@ export type TRegisterResponse = TLoginResponse
 export class UserService {
 
     static async Login(email: string, password: string) : Promise<TLoginResponse> {
+        console.log({email, password})
         const body :TLoginRequest  = { email: email, password: password}
         const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
         return { token: data?.token, error: false }
@@ -79,14 +81,15 @@ export class UserService {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
-            });
+            })
             return {
                 _id: data?.user?._id,
                 name: data?.user?.name,
                 email: data?.user?.email,
                 phone: data?.user?.phone,
                 completedRoutes: data?.user?.completedRoutes,
-                listRoutes: data?.user?.listRoutes
+                listRoutes: data?.user?.listRoutes,
+                password: data?.user?.password
             };
         } catch (error: any) {
             console.log(error)

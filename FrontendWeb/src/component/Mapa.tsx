@@ -1,5 +1,7 @@
 import L, { svg } from "leaflet";
+import { useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
+import { useLeafletContext } from '@react-leaflet/core'
 
 
 var greenIcon = new L.Icon({
@@ -29,8 +31,45 @@ var alertIcon = new L.Icon({
     shadowSize: [41, 41]
 })
 
+export type Coord = {
+    latitude : number
+    longitude : number
+}
+
+
+export function Position() {
+    const context = useLeafletContext()
+    context.map.locate({
+        setView : true,
+        maxZoom : 16,
+        watch : true
+    })
+}
 
 export default function Mapa() {
+
+    const [ location, setLocation ] = useState<Coord>()
+
+    const success = (position : GeolocationPosition) => {
+        const latitude = position.coords.latitude
+        const longitude = position.coords.longitude
+        setLocation({latitude, longitude})
+    }
+
+    const error = () => {
+        console.log("Error al encontrar la ubicación")
+    }   
+
+    const handleCurrentLocation = () => {
+        if(navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error)
+        } else {
+            console.log("NO SOPORTA GEOLOCALIZACIÓN")
+        }
+    }
+
+
+
     return (
         <>
             <MapContainer 
@@ -65,6 +104,7 @@ export default function Mapa() {
                        <b>No hay iluminación</b> <br /> 01-05-2025
                     </Popup>
                 </Marker>
+            
             </MapContainer>
         </>
     )

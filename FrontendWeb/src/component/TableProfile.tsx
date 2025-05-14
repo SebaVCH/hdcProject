@@ -1,8 +1,12 @@
-import { TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { TProfileResponse } from "../api/services/UserService";
+import { useState } from "react";
+import DialogChangePassword from "./DialogChangePassword";
 
 
 export default function TableProfile({ user, setUser } : { user : TProfileResponse, setUser : (arg0: TProfileResponse) => void }) {
+
+     const [ open, setOpen ] = useState(false)
 
      const onChangeName = (name : string) => {
           setUser({ ...user, name }) 
@@ -35,6 +39,10 @@ export default function TableProfile({ user, setUser } : { user : TProfileRespon
                 disabled
                 size="small"
            />
+           <Button onClick={() => {setOpen(true)}}>
+               Cambiar Contraseña
+           </Button>
+           <DialogChangePassword open={open} setOpen={setOpen} email={user.email} />
         </div>
     )
 };
