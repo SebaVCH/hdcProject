@@ -20,7 +20,7 @@ type Props = {
 };
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
-const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
+const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '192.168.0.8') : rawUrl;
 
 export default function ProfileScreen({ navigation }: Props) {
   const [isEditing, setIsEditing] = useState(false);

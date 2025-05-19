@@ -5,6 +5,7 @@ import (
 	"backend/Backend/utils"
 	"context"
 	"errors"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -71,6 +72,7 @@ func (a *AuthServiceImpl) Register(user models.Usuario) (string, error) {
 	}
 
 	go utils.SendRegistrationMail(user, unhashedPassword)
-	
+
+
 	return token, nil
 }
