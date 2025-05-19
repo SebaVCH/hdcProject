@@ -1,13 +1,13 @@
 import { IconButton, ListItem, ListItemText } from "@mui/material";
 import  DeleteIcon from '@mui/icons-material/Delete';
-import { Message } from "./MensajesFijados";
+import { TNotice } from "../api/services/NoticeService";
 
 
 
 
 
 
-export default function Mensaje({index, author, message, list, setList } : {index: number, author : string, message : string, list: Message[], setList : (a0 : Message[]) => void}) {
+export default function Mensaje({index, author, message, list, setList } : {index: number, author : string, message : string, list: TNotice[], setList : (a0 : TNotice[]) => void}) {
 
 
 

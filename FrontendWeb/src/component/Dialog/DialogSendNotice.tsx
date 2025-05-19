@@ -8,9 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { NoticeAdapter } from '../api/adapters/NoticeAdapter';
-import useSessionStore from '../stores/useSessionStore';
-import { red } from '@mui/material/colors';
+import useSessionStore from '../../stores/useSessionStore';
+import { NoticeAdapter } from '../../api/adapters/NoticeAdapter';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {

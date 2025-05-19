@@ -39,7 +39,6 @@ const authenticate = async (
 
     return { accessToken: token };
   } catch (error: any) {
-    console.error('Error de login:', error?.response?.data || error.message);
     return null;
   }
 };
@@ -62,7 +61,6 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         setPassword('');
         navigation.navigate('Home');
       } catch (err) {
-        console.error('❌ Error guardando el token:', err);
         Alert.alert('Error', 'No se pudo guardar la sesión');
       }
     } else {

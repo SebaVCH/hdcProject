@@ -94,7 +94,6 @@ export default function HomeScreen({ navigation }: Props) {
       setAlertModalVisible(false);
       RNAlert.alert('Aviso enviado');
     } catch (error) {
-      console.error('Error al enviar alerta:', error);
       RNAlert.alert('Error', 'No se pudo enviar el aviso');
     }
   };

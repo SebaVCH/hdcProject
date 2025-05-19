@@ -47,7 +47,7 @@ func SendAlertMail(user models.Usuario, alert models.Alerta) error {
 }
 func SendRegistrationMail(user models.Usuario, unhashedPass string) error {
 
-	HTMLLoad, err := template.ParseFiles("Backend/utils/Template_Registration.html")
+	HTMLLoad, err := template.ParseFiles("utils/Template_Registration.html")
 	if err != nil {
 		return err
 	}
@@ -78,6 +78,9 @@ func SendRegistrationMail(user models.Usuario, unhashedPass string) error {
 	}
 
 	dialer := gomail.NewDialer(os.Getenv("SMTP_HOST"), port, os.Getenv("EMAIL_FROM"), os.Getenv("EMAIL_PASS"))
+
+	print("Aca en sendMail")
+	print(dialer.DialAndSend(newMail))
 
 	return dialer.DialAndSend(newMail)
 }

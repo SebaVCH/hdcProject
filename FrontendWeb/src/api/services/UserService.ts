@@ -39,6 +39,9 @@ export type TProfileUpdateResponse = TProfileResponse
 export type TRegisterResponse = TLoginResponse
 
 
+export type TFindAllUsers = IUser[]  
+
+
 export class UserService {
 
     static async Login(email: string, password: string) : Promise<TLoginResponse> {
@@ -56,6 +59,9 @@ export class UserService {
             password: user.password,
             phone: user.phone
         }
+        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/register`, body)
+        const isTokenUn = (data?.token == undefined ? true : false)
+        return { token: data?.token, error : isTokenUn, errorCode : "DATA_NOT_FOUND", errorMessage: "token is undefined"}
 
         try {
             const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/register`, body)
@@ -114,9 +120,18 @@ export class UserService {
         } 
     }
 
-    
+    static async FindAllUsers(accessToken : string) : Promise<IUser[]> {
+        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/`, {
+            headers : {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        return (data?.users as any[]).map((value, _) => ({
+            name : value?.name,
+            email : value?.email,
+            phone : value?.phone,
+            password : value?.password
+        }))
 
-
-
-
+    }
 } 

@@ -2,7 +2,6 @@ import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody
 import { IUser } from "../api/interfaces/IUser";
 import { visuallyHidden } from '@mui/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import React, { useEffect } from "react";
 import { Order, getComparator } from "../utils/utilsSort";
 
@@ -141,11 +140,8 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
           </IconButton>
         </Tooltip>
       ) : (
-        <Tooltip title="Filter list">
-          <IconButton >
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
+        <>
+        </>
       )}
     </Toolbar>
   );
