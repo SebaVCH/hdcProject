@@ -15,13 +15,15 @@ func SetupRouter() *gin.Engine {
 
 	authService := services.NewAuthServiceImpl(database.Client.Database("pip").Collection("usuarios"))
 	userService := services.NewUserServiceImpl(database.Client.Database("pip").Collection("usuarios"))
-	alertService := services.NewAlertServiceImpl(database.Client.Database("pip").Collection("alertas"), database.Client.Database("pip").Collection("usuarios"))
+	notificationService := services.NewNotificationServiceImpl(database.Client.Database("pip").Collection("alertas"), database.Client.Database("pip").Collection("usuarios"))
 	routeService := services.NewRouteServiceImpl(database.Client.Database("pip").Collection("route"))
+	helpingPointService := services.NewHelpPointServiceImpl(database.Client.Database("pip").Collection("helping_points"))
 
 	authHandler := handlers.NewAuthHandler(authService)
 	routeHandler := handlers.NewRouteHandler(routeService)
 	userHandler := handlers.NewUserHandler(userService)
-	alertHandler := handlers.NewAlertHandler(alertService)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
+	helpingPointHandler := handlers.NewHelpingPointHandler(helpingPointService)
 
 	r.POST("/register", authHandler.Register)
 	r.POST("/login", authHandler.Login)
@@ -31,7 +33,8 @@ func SetupRouter() *gin.Engine {
 
 	UserRouter(protected, userHandler)
 	RouteRouter(protected, routeHandler)
-	AlertRouter(protected, alertHandler)
+	NotificationRouter(protected, notificationHandler)
+	HelpingPointRouter(protected, helpingPointHandler)
 
 	return r
 }
@@ -49,10 +52,18 @@ func UserRouter(router *gin.RouterGroup, userHandler *handlers.UserHandler) {
 	user.PUT("/update", userHandler.UpdateUserInfo)
 }
 
-func AlertRouter(router *gin.RouterGroup, alertHandler *handlers.AlertHandler) {
-	alert := router.Group("/alert")
-	alert.POST("", alertHandler.CreateAlert)
-	alert.GET("", alertHandler.GetAlerts)
-	alert.PUT("/:id", alertHandler.UpdateAlert)
-	alert.DELETE("/:id", alertHandler.DeleteAlert)
+func NotificationRouter(router *gin.RouterGroup, notificationHandler *handlers.NotificationHandler) {
+	alert := router.Group("/notification")
+	alert.POST("", notificationHandler.CreateNotification)
+	alert.GET("", notificationHandler.GetNotifications)
+	alert.PUT("/:id", notificationHandler.UpdateNotification)
+	alert.DELETE("/:id", notificationHandler.DeleteNotification)
+}
+
+func HelpingPointRouter(router *gin.RouterGroup, helpingPointHandler *handlers.PuntoAyudaHandler) {
+	helpingPoint := router.Group("/helping-point")
+	helpingPoint.POST("", helpingPointHandler.CreateHelpingPoint)
+	helpingPoint.GET("", helpingPointHandler.GetAllPoints)
+	helpingPoint.PUT("/:id", helpingPointHandler.UpdateHelpingPoint)
+	helpingPoint.DELETE("/:id", helpingPointHandler.DeleteHelpingPoint)
 }

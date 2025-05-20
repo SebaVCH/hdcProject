@@ -21,7 +21,7 @@ func (h *RouteHandler) FindAll(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener rutas: " + err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"routes": routes})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": routes})
 }
 
 func (h *RouteHandler) FindById(c *gin.Context) {
@@ -31,7 +31,7 @@ func (h *RouteHandler) FindById(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Ruta no encontrada"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"route": route})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": route})
 }
 
 func (h *RouteHandler) CreateRoute(c *gin.Context) {
@@ -47,7 +47,7 @@ func (h *RouteHandler) CreateRoute(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"route": createdRoute})
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": createdRoute})
 }
 
 func (h *RouteHandler) UpdateRoute(c *gin.Context) {
@@ -63,7 +63,7 @@ func (h *RouteHandler) UpdateRoute(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"route": updatedRoute})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedRoute})
 }
 
 func (h *RouteHandler) DeleteRoute(c *gin.Context) {

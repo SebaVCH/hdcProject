@@ -25,7 +25,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		c.IndentedJSON(http.StatusNotFound, gin.H{"error": "Usuario no encontrado"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"user": user})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": user})
 }
 
 func (h *UserHandler) GetUserProfile(c *gin.Context) {
@@ -34,7 +34,7 @@ func (h *UserHandler) GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"user": user})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": user})
 
 }
 
@@ -57,7 +57,7 @@ func (h *UserHandler) UpdateUserInfo(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"user": updatedUser})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedUser})
 }
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
@@ -66,7 +66,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener usuarios: " + err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, gin.H{"users": users})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": users})
 }
 
 func (h *UserHandler) ValidateUser(c *gin.Context) (models.Usuario, bool) {

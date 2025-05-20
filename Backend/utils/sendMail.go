@@ -9,19 +9,19 @@ import (
 	"strconv"
 )
 
-func SendAlertMail(user models.Usuario, alert models.Alerta) error {
+func SendNotificationMail(user models.Usuario, notification models.Aviso) error {
 
-	HTMLLoad, err := template.ParseFiles("Backend/utils/Template_Alert.html")
+	HTMLLoad, err := template.ParseFiles("Backend/utils/Template_Notification.html")
 	if err != nil {
 		return err
 	}
 
 	data := struct {
 		UserName string
-		Alert    models.Alerta
+		Aviso    models.Aviso
 	}{
 		UserName: user.Name,
-		Alert:    alert,
+		Aviso:    notification,
 	}
 
 	var body bytes.Buffer
@@ -32,7 +32,7 @@ func SendAlertMail(user models.Usuario, alert models.Alerta) error {
 	newMail := gomail.NewMessage()
 	newMail.SetHeader("From", os.Getenv("EMAIL_FROM"))
 	newMail.SetHeader("To", user.Email)
-	newMail.SetHeader("Subject", "Alerta de ruta")
+	newMail.SetHeader("Subject", "Aviso de ruta")
 	newMail.SetBody("text/html", body.String())
 
 	portStr := os.Getenv("SMTP_PORT")
