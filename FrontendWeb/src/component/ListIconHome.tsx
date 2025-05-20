@@ -5,8 +5,8 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import { IconButton, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import DialogSendNotice from './DialogSendNotice';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import DialogSendNotice from './Dialog/DialogSendNotice';
 
 export default function ListIconHome() {
 
@@ -29,11 +29,15 @@ export default function ListIconHome() {
         navigate('/admin/usuarios')
     }
 
+    const onClickSchedule = () => {
+        navigate('/schedule')
+    }
+
     return(
         <div className="flex flex-col py-5 gap-7 justify-start items-center">
             <Tooltip title="Perfil"><IconButton onClick={onClickProfile}><AccountBoxIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
             <Tooltip title="Historial"><IconButton><HistoryIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
-            <Tooltip title="Agendar ruta"><IconButton><EventIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
+            <Tooltip title="Agendar ruta"><IconButton onClick={onClickSchedule}><EventIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
             <Tooltip title="Enviar aviso"><IconButton onClick={handleClickOpen}><CampaignIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
             <Tooltip title="Gestionar Usuarios"><IconButton onClick={onClickUsers}><PeopleAltIcon htmlColor='gray' fontSize='large'/></IconButton></Tooltip>
             <DialogSendNotice open={open} setOpen={setOpen} />

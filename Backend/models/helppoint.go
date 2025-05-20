@@ -13,3 +13,4 @@ type PuntoAyuda struct {
 	PeopleHelped    []PersonaAyudada `bson:"people_helped" json:"people_helped"`
 	LastTimeVisited time.Time        `bson:"last_time_visited" json:"last_time_visited"`
 }
+

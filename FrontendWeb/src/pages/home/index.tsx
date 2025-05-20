@@ -1,13 +1,16 @@
-import { useNavigate } from "react-router-dom"
-import useSessionStore from "../../stores/useSessionStore"
 import { useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Divider, IconButton, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
+import { Backdrop, BackdropRoot, Button, Divider, Fab, IconButton, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
-import Mapa from "../../component/Mapa";
-import NavigationIcon from '@mui/icons-material/Navigation';
+import Mapa, { Position } from "../../component/Mapa";
 import ListIconHome from "../../component/ListIconHome";
+import NavigationIcon from '@mui/icons-material/Navigation';
+import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
+import useSessionStore from "../../stores/useSessionStore";
+import ButtonFinalizarRuta from "../../component/Button/ButtonFinalizarRuta";
+import SpeedDialRoute from "../../component/Button/SpeedDialRoute";
+
 
 
 
@@ -19,10 +22,18 @@ const actions = [
 
 export default function Home() {
 
+
+    const { routeStatus } = useSessionStore()
     const [ openDrawer, setOpenDrawer ] = useState(false)
+    const [ openDialogRoute, setOpenDialogRoute ] = useState(false)
+
+
     const toggleDrawer = (toggleDrawer : boolean) => () => {
         setOpenDrawer(toggleDrawer)
     }
+
+    const [ openDialRoute, setOpenDialRoute ] = useState(false)
+
 
 
     return (
@@ -37,20 +48,19 @@ export default function Home() {
             </div>
             <div className="relative flex grow flex-col justify-between">
                 <Mapa />
-                <MensajesFijados />
-                <SpeedDial className="absolute bottom-16 right-16 scale-110" ariaLabel={"agregar ruta"} FabProps={{ color: "secondary" }} icon={<SpeedDialIcon/>}>
-                    {actions.map((value, index) => (
-                        <SpeedDialAction 
-                            key={index}
-                            icon={value.icon}
-                            slotProps={{
-                                tooltip : {
-                                    title: value.name
-                                }
-                            }}
-                        />
-                    ))}
-                </SpeedDial>
+                <Backdrop open={openDialRoute}/>
+                { routeStatus ? <ButtonFinalizarRuta /> : <MensajesFijados />}
+                <div className="absolute bottom-16 right-16 scale-120">
+                    {!routeStatus ? 
+                        <Fab color="secondary" onClick={() => {setOpenDialogRoute(true)}}>
+                            <NavigationIcon />
+                        </Fab> 
+                        :
+                        <SpeedDialRoute open={openDialRoute} setOpen={setOpenDialRoute} />
+                    }
+                    
+                    <DialogCreateRoute open={openDialogRoute} setOpen={setOpenDialogRoute} />
+                </div>
             </div>
         </div>
     )

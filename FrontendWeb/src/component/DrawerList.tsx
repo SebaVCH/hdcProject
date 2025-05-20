@@ -19,7 +19,7 @@ export default function DrawerList() {
     }
 
     const onClickUsuarios = () => {
-        navigate('admin/usuarios')
+        navigate('/admin/usuarios')
     }
 
     const onClickCerrarSesion = () => {
@@ -37,7 +37,7 @@ export default function DrawerList() {
         <div className="py-5 gap-5 w-50 flex grow flex-col flex-wrap justify-items-between">
             <Button fullWidth onClick={onClickHome}>
                 <div className="flex w-full justify-start px-5 gap-10 items-center">
-                    <AccountBoxIcon />
+                    <HomeIcon />
                      <Typography>Home</Typography>
                  </div>
             </Button>
@@ -59,9 +59,9 @@ export default function DrawerList() {
                     <Typography>Historial</Typography>
                 </div>
             </Button>
-            <Button fullWidth>
+            <Button fullWidth onClick={onClickUsuarios}>
                 <div className="flex w-full justify-start px-5 gap-10 items-center">
-                    <GroupIcon />
+                    <GroupIcon/>
                     <Typography>Usuarios</Typography>
                 </div>
             </Button>

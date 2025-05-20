@@ -1,40 +1,35 @@
 import { Button, Divider, IconButton, InputBase, Paper, Typography } from "@mui/material";
 import { IUser } from "../../../api/interfaces/IUser";
 import CustomDrawer from "../../../component/CustomDrawer";
-import DrawerListProfile from "../../../component/DrawerListProfile";
 import TableUser from "../../../component/TableUser";
 import SearchIcon from '@mui/icons-material/Search';
 import DrawerList from "../../../component/DrawerList";
 import ListIconHome from "../../../component/ListIconHome";
-import { useState } from "react";
-import DialogCreateUser from "../../../component/DialogCreateUser";
+import { useEffect, useState } from "react";
+import { UserAdapter } from "../../../api/adapters/UserAdapter";
+import useSessionStore from "../../../stores/useSessionStore";
+import DialogCreateUser from "../../../component/Dialog/DialogCreateUser";
 
 
 export default function Usuarios() {
 
 
-    const [ users, setUsers ] = useState<IUser[]>(
-    [{
-        name: "Cristian",
-        password: "123",
-        phone: "+56 80123123",
-        email: "cristian@gmail.com"
-    }, 
-    {
-        name: "pepe",
-        password: "123",
-        phone: "+56 123123123",
-        email: "pepe@gmail.com"
-    },
-    {
-        name: "Antonio",
-        password: "123",
-        phone: "+56 80123123",
-        email: "antonio@gmail.com"
-    }])
+    const [ users, setUsers ] = useState<IUser[]>([])
+    const { accessToken } = useSessionStore()
+
+    const {isError, isSuccess, data} = UserAdapter.useFindAllUsers(accessToken)
+
+
+    useEffect(() => {
+        console.log(data)
+        if(data) {
+            setUsers(data)
+        }
+    }, [data])
 
     const [ prefix, setPrefix ] = useState<string>('')   
     const [ open, setOpen ] = useState(false) 
+
 
     return (
         <div className="flex flex-row grow">
@@ -72,7 +67,7 @@ export default function Usuarios() {
                         </Button>
                         <DialogCreateUser open={open} setOpen={setOpen} />
                     </div>
-                    <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/>
+                    { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}
                 </div>
             </div>
         </div>
