@@ -1,12 +1,13 @@
 import { axiosInstance } from "./axiosInstance"
+import { UserService } from "./UserService"
 
 
 export type TNoticeResponse = {
     _id ?: string 
-    type : string 
-    description : string
+    description ?: string
     createdAt ?: string 
-    author ?: string
+    authorId ?: string
+    authorName ?: string
 } 
 
 export type TNoticeDeleteResponse = {
@@ -15,41 +16,52 @@ export type TNoticeDeleteResponse = {
 
 export type TNotice = TNoticeResponse
 
+
+type TNoticeRequest = {
+    description : string,
+    author_id : string
+}
+
 export class NoticeService {
 
+    private static readonly RESOURCE_NAME = 'notification'
+
     static async GetNotices(accessToken ?: string) : Promise<TNoticeResponse[]>{
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/alert`, {
+        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
         }) 
-        console.log("Get notices: ", data)
-        return (data?.alerts as any[]).map((value, _) => ({
+
+
+        return Promise.all((data?.message as any[]).map(async (value, _) => ({
             _id : value?._id,
             type : value?.type,
             description : value?.description,
-            createdAt : value?.created_at
-        }))
+            createdAt : value?.created_at,
+            authorId : value?.author_id,
+            authorName : (await UserService.FindUserById(value?.author_id, accessToken)).name
+        })))
     }
 
-    static async PostNotice( body : TNotice, accessToken ?: string ) : Promise<TNoticeResponse> {
-        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/alert`, body, {
+    static async PostNotice( body : TNoticeRequest, accessToken ?: string ) : Promise<TNoticeResponse> {
+        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}`, body, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
         })
         console.log("En Post Notice" ,data)
         return {
-            _id : data?.alert?._id,
-            type : data?.alert?.type,
-            description : data?.alert?.description,
-            createdAt : data?.alert?.created_at
+            _id : data?.Aviso?._id,
+            description : data?.Aviso?.description,
+            createdAt : data?.Aviso?.created_at,
+            authorId : data?.Aviso?.author_id
         }
     }
 
 
     static async DeleteNotice( _id : string, accessToken ?: string ) : Promise<TNoticeDeleteResponse> {
-        const { data } = await axiosInstance.delete(`${import.meta.env.VITE_URL_BACKEND}/alert/${_id}`, {
+        const { data } = await axiosInstance.delete(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/${_id}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
@@ -61,17 +73,17 @@ export class NoticeService {
     }
 
     static async UpdateNotice( body : TNotice, accessToken ?: string ) : Promise<TNoticeResponse> {
-        const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/alert/${body._id}`, body, {
+        const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/${body._id}`, body, {
             headers : {
                 Authorization: `Bearer ${accessToken}`
             }
         })
         console.log("En update Notice: ", data)
         return {
-            _id : data?.alert?._id,
-            type : data?.alert?.type,
-            description : data?.alert?.description,
-            createdAt : data?.alert?.created_at
+            _id : data?.message?._id,
+            description : data?.message?.description,
+            createdAt : data?.message?.created_at,
+            authorId : data?.message?.author_id
         }
     } 
 

@@ -1,7 +1,8 @@
 import L, { svg } from "leaflet";
 import { useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents, ZoomControl } from "react-leaflet";
 import { useLeafletContext } from '@react-leaflet/core'
+import { Position } from "../utils/getCurrentLocation";
 
 
 var greenIcon = new L.Icon({
@@ -31,13 +32,8 @@ var alertIcon = new L.Icon({
     shadowSize: [41, 41]
 })
 
-export type Coord = {
-    latitude : number
-    longitude : number
-}
 
-
-export function Position() {
+export function PositionLeaflet() {
     const context = useLeafletContext()
     context.map.locate({
         setView : true,
@@ -45,29 +41,18 @@ export function Position() {
         watch : true
     })
 }
+const MapEvents = ({setCoord, setOnSelectLocationMap, setOpenDialogAttended} : { setCoord : (coords : Position) => void, setOnSelectLocationMap : (arg : boolean) => void , setOpenDialogAttended : (arg : boolean) => void}) => {
+    useMapEvents({
+      click(e) {
+        setCoord({latitude: e.latlng.lat, longitude: e.latlng.lng})
+        setOnSelectLocationMap(false)
+        setOpenDialogAttended(true)
+      },
+    });
+    return false;
+}
 
-export default function Mapa() {
-
-    const [ location, setLocation ] = useState<Coord>()
-
-    const success = (position : GeolocationPosition) => {
-        const latitude = position.coords.latitude
-        const longitude = position.coords.longitude
-        setLocation({latitude, longitude})
-    }
-
-    const error = () => {
-        console.log("Error al encontrar la ubicación")
-    }   
-
-    const handleCurrentLocation = () => {
-        if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(success, error)
-        } else {
-            console.log("NO SOPORTA GEOLOCALIZACIÓN")
-        }
-    }
-
+export default function Mapa({ setOnSelectLocationMap, setLocation, setOpenDialogAttended } :{ setOnSelectLocationMap : (arg : boolean) => void, setLocation : (arg : Position) => void, setOpenDialogAttended : (arg : boolean) => void}) {
 
 
     return (
@@ -104,7 +89,7 @@ export default function Mapa() {
                        <b>No hay iluminación</b> <br /> 01-05-2025
                     </Popup>
                 </Marker>
-            
+                <MapEvents setCoord={setLocation} setOnSelectLocationMap={setOnSelectLocationMap} setOpenDialogAttended={setOpenDialogAttended}/>
             </MapContainer>
         </>
     )

@@ -24,9 +24,8 @@ export interface HelpPoint {
     id: string
     coords: CoordDD
     dateRegister: Date
-    peopleHelped: [HelpedPerson]
+    peopleHelped: HelpedPerson[]
     lastTimeVisited: Date
-
 }
 
 export type CoordDD = {

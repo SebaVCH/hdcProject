@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import DialogCreateAttended from "../Dialog/DialogCreateAttended";
 import DialogCreateRisk from "../Dialog/DialogCreateRisk";
 import DialogCreateRoute from "../Dialog/DialogCreateRoute";
+import { Position } from "../../utils/getCurrentLocation";
 
 
 
@@ -16,13 +17,12 @@ const icons = [
     {icon : <NavigationIcon />, name: 'Resumen Ruta'} 
 ]
 
-export default function SpeedDialRoute({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
+export default function SpeedDialRoute({ open, setOpen, setOnSelectLocationMap, location, openDialogAttended, setOpenDialogAttended  } : { open : boolean, setOpen: (ar : boolean) => void, setOnSelectLocationMap : (arg: boolean) => void, location : Position, openDialogAttended : boolean, setOpenDialogAttended : (arg : boolean) => void}) {
 
     
     const handleOpen = () =>  setOpen(true) 
     const handleClose = () => setOpen(false) 
 
-    const [ openDialogAttended, setOpenDialogAttended ] = useState(false)
     const [ openDialogRisk, setOpenDialogRisk ] = useState(false)
     const [ openDialogRoute, setOpenDialogRoute ] = useState(false) 
 
@@ -86,7 +86,7 @@ export default function SpeedDialRoute({ open, setOpen } : { open : boolean, set
                     />
                 ))}
             </SpeedDial>
-            <DialogCreateAttended open={list[0].open} setOpen={list[0].setOpen} />
+            <DialogCreateAttended open={list[0].open} setOpen={list[0].setOpen} setOnSelectLocationMap={setOnSelectLocationMap} location={location} />
             <DialogCreateRisk open={list[1].open} setOpen={list[1].setOpen} />
             <DialogCreateRoute open={list[2].open} setOpen={list[2].setOpen} />
         </>
