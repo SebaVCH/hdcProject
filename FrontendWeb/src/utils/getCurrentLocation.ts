@@ -11,7 +11,7 @@ export default function getCurrentLocation(): Promise<Position> {
                 (position : GeolocationPosition) => {
                     resolve({
                         latitude : position.coords.latitude,
-                        longitude : position.coords.latitude
+                        longitude : position.coords.longitude
                     })
                 }, 
                 (error) => {

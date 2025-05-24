@@ -1,8 +1,9 @@
 import L, { svg } from "leaflet";
 import { useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents, ZoomControl } from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
 import { useLeafletContext } from '@react-leaflet/core'
 import { Position } from "../utils/getCurrentLocation";
+import { Risk } from "../api/interfaces/IRoute";
 
 
 var greenIcon = new L.Icon({
@@ -33,27 +34,13 @@ var alertIcon = new L.Icon({
 })
 
 
-export function PositionLeaflet() {
-    const context = useLeafletContext()
-    context.map.locate({
-        setView : true,
-        maxZoom : 16,
-        watch : true
-    })
-}
-const MapEvents = ({setCoord, setOnSelectLocationMap, setOpenDialogAttended} : { setCoord : (coords : Position) => void, setOnSelectLocationMap : (arg : boolean) => void , setOpenDialogAttended : (arg : boolean) => void}) => {
-    useMapEvents({
-      click(e) {
-        setCoord({latitude: e.latlng.lat, longitude: e.latlng.lng})
-        setOnSelectLocationMap(false)
-        setOpenDialogAttended(true)
-      },
-    });
-    return false;
-}
+type MapaProps = {
+    risks : Risk[]
+    children : React.ReactNode
+} 
 
-export default function Mapa({ setOnSelectLocationMap, setLocation, setOpenDialogAttended } :{ setOnSelectLocationMap : (arg : boolean) => void, setLocation : (arg : Position) => void, setOpenDialogAttended : (arg : boolean) => void}) {
 
+export default function Mapa({ risks, children } : MapaProps) {
 
     return (
         <>
@@ -84,12 +71,16 @@ export default function Mapa({ setOnSelectLocationMap, setLocation, setOpenDialo
                         Sector Coquimbo Mall <br /> 01-05-2025
                     </Popup>
                 </Marker>
-                <Marker icon={alertIcon} position={[-29.952903159, -71.3408491873]}>
-                    <Popup >
-                       <b>No hay iluminación</b> <br /> 01-05-2025
-                    </Popup>
-                </Marker>
-                <MapEvents setCoord={setLocation} setOnSelectLocationMap={setOnSelectLocationMap} setOpenDialogAttended={setOpenDialogAttended}/>
+                
+                {risks.map((risk, index) => (
+                    <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
+                        <Popup >
+                        <b>{risk.description}</b> <br /> {risk.createdAt}
+                        </Popup>
+                    </Marker>
+                ))}
+
+                {children}
             </MapContainer>
         </>
     )
