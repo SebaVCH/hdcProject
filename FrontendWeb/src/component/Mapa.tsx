@@ -2,6 +2,8 @@ import L, { svg } from "leaflet";
 import { useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
 import { useLeafletContext } from '@react-leaflet/core'
+import { Position } from "../utils/getCurrentLocation";
+import { Risk } from "../api/interfaces/IRoute";
 
 
 var greenIcon = new L.Icon({
@@ -31,44 +33,14 @@ var alertIcon = new L.Icon({
     shadowSize: [41, 41]
 })
 
-export type Coord = {
-    latitude : number
-    longitude : number
-}
+
+type MapaProps = {
+    risks : Risk[]
+    children : React.ReactNode
+} 
 
 
-export function Position() {
-    const context = useLeafletContext()
-    context.map.locate({
-        setView : true,
-        maxZoom : 16,
-        watch : true
-    })
-}
-
-export default function Mapa() {
-
-    const [ location, setLocation ] = useState<Coord>()
-
-    const success = (position : GeolocationPosition) => {
-        const latitude = position.coords.latitude
-        const longitude = position.coords.longitude
-        setLocation({latitude, longitude})
-    }
-
-    const error = () => {
-        console.log("Error al encontrar la ubicación")
-    }   
-
-    const handleCurrentLocation = () => {
-        if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(success, error)
-        } else {
-            console.log("NO SOPORTA GEOLOCALIZACIÓN")
-        }
-    }
-
-
+export default function Mapa({ risks, children } : MapaProps) {
 
     return (
         <>
@@ -99,12 +71,16 @@ export default function Mapa() {
                         Sector Coquimbo Mall <br /> 01-05-2025
                     </Popup>
                 </Marker>
-                <Marker icon={alertIcon} position={[-29.952903159, -71.3408491873]}>
-                    <Popup >
-                       <b>No hay iluminación</b> <br /> 01-05-2025
-                    </Popup>
-                </Marker>
-            
+                
+                {risks.map((risk, index) => (
+                    <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
+                        <Popup >
+                        <b>{risk.description}</b> <br /> {risk.createdAt}
+                        </Popup>
+                    </Marker>
+                ))}
+
+                {children}
             </MapContainer>
         </>
     )

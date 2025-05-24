@@ -53,4 +53,11 @@ export class UserAdapter {
 
         })
     }
+
+    static useFindUserById( id : string, accessToken ?: string) {
+        return useQuery({
+            queryKey : ['findUserId'],
+            queryFn : () => (UserService.FindUserById(id, accessToken)),
+        })
+    }
 }

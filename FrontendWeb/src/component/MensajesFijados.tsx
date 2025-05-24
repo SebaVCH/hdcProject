@@ -5,13 +5,15 @@ import Mensaje from "./Mensaje";
 import { TNotice } from "../api/services/NoticeService";
 import { NoticeAdapter } from "../api/adapters/NoticeAdapter";
 import useSessionStore from "../stores/useSessionStore";
+import { UserService } from "../api/services/UserService";
+
+
 
 
 export default function MensajesFijados() {
 
-    const [list, setList] = useState<TNotice[]>([]);
+    const [ list, setList ] = useState<TNotice[]>([]);
     const { accessToken } = useSessionStore()
-
     const { isSuccess, data } = NoticeAdapter.useGetNotices(accessToken)
 
     useEffect(() => {
@@ -34,7 +36,7 @@ export default function MensajesFijados() {
                 <AccordionDetails>
                     <List className="max-h-[210px] overflow-y-auto">
                         {isSuccess ? list.map((value, index) => (
-                            <Mensaje key={index} index={index} list={list} setList={setList} author={value.author ?? 'placeholder'} message={value.description ?? ' placeholder'}  />
+                            <Mensaje key={index} index={index} list={list} setList={setList} author={value.authorName ?? 'placeholder'} message={value.description ?? ' placeholder'}  />
                         )) : <p>Cargando...</p>}
                     </List>
                 </AccordionDetails>

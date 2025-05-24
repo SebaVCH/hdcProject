@@ -7,7 +7,10 @@ export class NoticeAdapter {
 
     static usePostNoticeMutation(body : TNotice, accessToken ?: string) {
         return useMutation({
-            mutationFn: () => (NoticeService.PostNotice(body, accessToken)),
+            mutationFn: () => (NoticeService.PostNotice({
+                description : (body.description as string),
+                author_id : (body.authorId as string)
+            }, accessToken)),   
         })
     }
 

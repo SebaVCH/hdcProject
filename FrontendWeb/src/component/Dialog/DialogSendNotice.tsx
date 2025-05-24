@@ -10,6 +10,8 @@ import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import { NoticeAdapter } from '../../api/adapters/NoticeAdapter';
+import { TNotice } from '../../api/services/NoticeService';
+import { UserAdapter } from '../../api/adapters/UserAdapter';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -24,12 +26,16 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function DialogSendAviso({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
     const { accessToken } = useSessionStore()
-    const [ message, setMessage ] = useState<string>('')
-    const { isError, mutate, data } = NoticeAdapter.usePostNoticeMutation({ description : message, type: 'aviso'}, accessToken)
+    const [ notice, setNotice ] = useState<TNotice>({})
+    const { isError, mutate, data } = NoticeAdapter.usePostNoticeMutation( notice , accessToken)
+    const useQueryResult = UserAdapter.useGetProfile( accessToken )
+
+
+
 
     const onChangeTextField = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault()
-        setMessage(e.target.value)
+        setNotice({ ...notice, description : e.target.value})
     }
 
     const handleClose = () => {
@@ -44,6 +50,16 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
     useEffect(() => {
         console.log(data)
     }, [data])
+
+    useEffect(() => {
+        console.log("hola: ", useQueryResult.data)
+        if(useQueryResult.data) {
+            setNotice(prev => ({
+                ...prev,
+                authorId: useQueryResult.data._id
+            }))
+        }
+    }, [useQueryResult.data])
 
     return (
         <>
@@ -76,7 +92,7 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
                         size="small"
                         placeholder="Escribe el mensaje" 
                         type={"text"} 
-                        value={message}
+                        value={notice.description}
                         onChange={onChangeTextField}
                     />
                     <div className='flex justify-start'>

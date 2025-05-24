@@ -141,22 +141,22 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
                 <DialogContent>
                     <div className="flex flex-col gap-6">
                         <div className='flex flex-row gap-5 justify-between px-2'>
-                            <FormControl variant="standard" required={inputError.firstName} error={inputError.firstName} className='rounded-b-sm border border-gray-600 w-1/2'>
+                            <FormControl variant="standard" required error={inputError.firstName} className='rounded-b-sm border border-gray-600 w-1/2'>
                                 <InputLabel htmlFor="nombres-input" shrink>Nombre Completo</InputLabel>
                                 <Input onBlur={handleInputChange('firstName')} onChange={handleInputChange('firstName')} id="nombres-input" placeholder="Ingresa el Nombre Completo" />
                             </FormControl>
-                            <FormControl  variant="standard" required={inputError.lastName} error={inputError.lastName} className='rounded-b-sm border border-gray-600 w-1/2'>
+                            <FormControl  variant="standard" required error={inputError.lastName} className='rounded-b-sm border border-gray-600 w-1/2'>
                                 <InputLabel htmlFor="ap1-input" shrink>Apellidos</InputLabel>
                                 <Input onBlur={handleInputChange('lastName')}  onChange={handleInputChange('lastName')} id="ap1-input" placeholder="Ingresa los Apellidos" />
                             </FormControl>
                         </div>
                         <div className='flex flex-col gap-6 px-2'>
-                             <FormControl variant="standard" required={inputError.email} error={inputError.email} className='rounded-b-sm border border-gray-600'>
+                             <FormControl variant="standard" required error={inputError.email} className='rounded-b-sm border border-gray-600'>
                                 <InputLabel htmlFor="email-input" shrink>Correo Electrónico</InputLabel>
                                 <Input onBlur={handleInputChange('email')} onChange={handleInputChange('email')} id="email-input" placeholder="Ingresa el Correo Electrónico" />
                             </FormControl>
 
-                            <FormControl variant="standard" required={inputError.phone} error={inputError.phone} className='rounded-b-sm border border-gray-600'>
+                            <FormControl variant="standard" required error={inputError.phone} className='rounded-b-sm border border-gray-600'>
                                 <InputLabel htmlFor="phone-input" shrink>Teléfono</InputLabel>
                                 <Input onBlur={handleInputChange('phone')} onChange={handleInputChange('phone')} id="phone-input" placeholder="Ingresa el Número de Teléfono" />
                             </FormControl>

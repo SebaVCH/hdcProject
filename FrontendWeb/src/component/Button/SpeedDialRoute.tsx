@@ -3,10 +3,8 @@ import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
 import ReportIcon from '@mui/icons-material/Report';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import { useEffect, useState } from "react";
-import DialogCreateAttended from "../Dialog/DialogCreateAttended";
-import DialogCreateRisk from "../Dialog/DialogCreateRisk";
-import DialogCreateRoute from "../Dialog/DialogCreateRoute";
+import { Children, useEffect, useState } from "react";
+
 
 
 
@@ -16,15 +14,26 @@ const icons = [
     {icon : <NavigationIcon />, name: 'Resumen Ruta'} 
 ]
 
-export default function SpeedDialRoute({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
+export type SpeedDialogRouteProps = {
+    stateOpen : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
+    stateOpenDialogAttended : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
+    stateOpenDialogRisk : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
+    stateOpenDialogRoute : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
+    children : React.ReactNode
+} 
+
+export default function SpeedDialRoute({ stateOpen, stateOpenDialogAttended, stateOpenDialogRisk, stateOpenDialogRoute, children } : SpeedDialogRouteProps ) {
+
+
+    const [ open, setOpen ] = stateOpen
+
+    const [ openDialogAttended, setOpenDialogAttended ] = stateOpenDialogAttended
+    const [ openDialogRisk, setOpenDialogRisk ] = stateOpenDialogRisk
+    const [ openDialogRoute, setOpenDialogRoute ] = stateOpenDialogRoute
     
     const handleOpen = () =>  setOpen(true) 
     const handleClose = () => setOpen(false) 
-
-    const [ openDialogAttended, setOpenDialogAttended ] = useState(false)
-    const [ openDialogRisk, setOpenDialogRisk ] = useState(false)
-    const [ openDialogRoute, setOpenDialogRoute ] = useState(false) 
 
     const list = [{ 
         open : openDialogAttended, 
@@ -86,9 +95,7 @@ export default function SpeedDialRoute({ open, setOpen } : { open : boolean, set
                     />
                 ))}
             </SpeedDial>
-            <DialogCreateAttended open={list[0].open} setOpen={list[0].setOpen} />
-            <DialogCreateRisk open={list[1].open} setOpen={list[1].setOpen} />
-            <DialogCreateRoute open={list[2].open} setOpen={list[2].setOpen} />
+            {children}
         </>
     )
 };
