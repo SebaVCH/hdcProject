@@ -78,6 +78,17 @@ export default function DialogCreateRisk({ open, setOpen } : { open : boolean, s
                             onBlur={(_) => {if(!description) setRequired(true)}}             
                         />
                         {required ? <p className='text-red-600'> Debes de Ingresar una descripción</p> : <br />}
+                        <div className='flex flex-col gap-2'>
+                            <Typography>Seleccionar Ubicación</Typography>
+                            <div className='flex grow justify-center items-center gap-2'>
+                                <Button fullWidth variant='contained'>
+                                    Utilizar Mi Ubicación Actual
+                                </Button>
+                                <Button fullWidth variant='contained' color='secondary'>
+                                    Selecccionar en el mapa
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </DialogContent>
                 <DialogActions>

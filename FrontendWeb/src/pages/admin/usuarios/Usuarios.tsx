@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { UserAdapter } from "../../../api/adapters/UserAdapter";
 import useSessionStore from "../../../stores/useSessionStore";
 import DialogCreateUser from "../../../component/Dialog/DialogCreateUser";
+import { THelpPoint } from "../../../api/services/HelpPointService";
 
 
 export default function Usuarios() {
@@ -16,8 +17,10 @@ export default function Usuarios() {
 
     const [ users, setUsers ] = useState<IUser[]>([])
     const { accessToken } = useSessionStore()
-
     const {isError, isSuccess, data} = UserAdapter.useFindAllUsers(accessToken)
+
+
+
 
 
     useEffect(() => {

@@ -89,13 +89,13 @@ export class UserService {
                 }
             })
             return {
-                _id: data?.user?._id,
-                name: data?.user?.name,
-                email: data?.user?.email,
-                phone: data?.user?.phone,
-                completedRoutes: data?.user?.completedRoutes,
-                listRoutes: data?.user?.listRoutes,
-                password: data?.user?.password
+                _id: data?.message?._id,
+                name: data?.message?.name,
+                email: data?.message?.email,
+                phone: data?.message?.phone,
+                completedRoutes: data?.message?.completedRoutes,
+                listRoutes: data?.message?.listRoutes,
+                password: data?.message?.password
             };
         } catch (error: any) {
             console.log(error)
@@ -111,12 +111,12 @@ export class UserService {
             }
         })
         return {
-            _id : data?.user?._id,
-            name : data?.user?.name,
-            email : data?.user?.email,
-            phone : data?.user?.phone,
-            completedRoutes : data?.user?.completedRoutes,
-            listRoutes : data?.user?.listRoutes
+            _id : data?.message?._id,
+            name : data?.message?.name,
+            email : data?.message?.email,
+            phone : data?.message?.phone,
+            completedRoutes : data?.message?.completedRoutes,
+            listRoutes : data?.message?.listRoutes
         } 
     }
 
@@ -126,12 +126,25 @@ export class UserService {
                 Authorization : `Bearer ${accessToken}`
             }
         })
-        return (data?.users as any[]).map((value, _) => ({
+        return (data?.message as any[]).map((value, _) => ({
             name : value?.name,
             email : value?.email,
             phone : value?.phone,
             password : value?.password
         }))
+    }
 
+    static async FindUserById(id : string, accessToken ?: string) : Promise<IUser> {
+        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/${id}`, {
+            headers : {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        return {
+            name : data?.message?.name,
+            email : data?.message?.email,
+            phone : data?.message?.phone,
+            password : ''
+        }
     }
 } 
