@@ -22,7 +22,18 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 
-export default function DialogCreateAttended({ open, setOpen, setOnSelectLocationMap, location } : { open : boolean, setOpen: (ar : boolean) => void, setOnSelectLocationMap: (arg : boolean) => void, location : Position}) {
+export type DialogCreateAttendedProps = { 
+    stateOpen : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
+    stateOnSelectLocationMap : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
+    location : Position
+}
+
+
+export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationMap, location } : DialogCreateAttendedProps) {
+
+
+    const [ open, setOpen ] = stateOpen
+    const [ _, setOnSelectLocationMap ] = stateOnSelectLocationMap
 
     const [ name, setName ] = useState<string>('Sin Especificar')
     const [ age, setAge ] = useState<number>(-1)
@@ -86,103 +97,102 @@ export default function DialogCreateAttended({ open, setOpen, setOnSelectLocatio
 
 
     return (
-        <>
-            <BootstrapDialog 
-                fullWidth
-                open={open} 
-                onClose={handleClose}
-                aria-labelledby='attended-titulo'
-            >
-                <DialogTitle className='m-0 p-2' id="attended-titulo">
-                    Crear Un Registro
-                </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={(theme) => ({
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: theme.palette.grey[600],
-                    })}
-                    >
-                    <CloseIcon />
-                </IconButton>
-                <DialogContent>
-                    <form className='flex flex-col gap-10 p-2'>
-                        <div className='flex flex-row gap-5'>
-                            <TextField
-                                fullWidth
-                                id="name" 
-                                variant='standard'
-                                defaultValue='Sin Especificar'
-                                onChange={(e) => {setName(e.target.value)}}
-                                label='Nombre '
-                                slotProps={{
-                                    inputLabel: {
+        <BootstrapDialog 
+            fullWidth
+            open={open} 
+            onClose={handleClose}
+            aria-labelledby='attended-titulo'
+            keepMounted
+        >
+            <DialogTitle className='m-0 p-2' id="attended-titulo">
+                Crear Un Registro
+            </DialogTitle>
+            <IconButton
+                aria-label="close"
+                onClick={handleClose}
+                sx={(theme) => ({
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: theme.palette.grey[600],
+                })}
+                >
+                <CloseIcon />
+            </IconButton>
+            <DialogContent>
+                <form className='flex flex-col gap-10 p-2'>
+                    <div className='flex flex-row gap-5'>
+                        <TextField
+                            fullWidth
+                            id="name" 
+                            variant='standard'
+                            defaultValue='Sin Especificar'
+                            onChange={(e) => {setName(e.target.value)}}
+                            label='Nombre '
+                            slotProps={{
+                                inputLabel: {
+                                shrink: true,
+                                },
+                            }}    
+                            onFocus={(event) => {
+                                    event.target.select();
+                            }}
+                        />
+                        <TextField
+                            id="edad"
+                            variant='standard'
+                            onChange={(e) => {setAge(Number(e.target.value))}}
+                            label='edad'
+                            type='number'
+                            slotProps={{
+                                inputLabel: {
                                     shrink: true,
-                                    },
-                                }}    
-                                onFocus={(event) => {
-                                        event.target.select();
-                                }}
-                            />
-                            <TextField
-                                id="edad"
-                                variant='standard'
-                                onChange={(e) => {setAge(Number(e.target.value))}}
-                                label='edad'
-                                type='number'
-                                slotProps={{
-                                    inputLabel: {
-                                        shrink: true,
-                                    }
-                                }}
-                            />
+                                }
+                            }}
+                        />
+                    </div>
+                    <div className='flex grow'>
+                        <ComboBox 
+                            className='grow'
+                            label={'Ciudad de Origen'} 
+                            onChange={(e, value) => {setCity(value as string)}}
+                            options={['Santiago', 'La Serena', 'Coquimbo']}  
+                            defaultValue={'Coquimbo'}                          
+                        
+                        />
+                    </div>
+                    <div className='flex grow'>
+                        <ComboBox
+                            className='grow'
+                            label='Nacionalidad'
+                            onChange={(e, value) => {setNationality(value as string)}}
+                            options={['Chile', 'Perú']}
+                            defaultValue={'Chile'}
+                        />
+                    </div>
+                    <div className='flex flex-col gap-2'>
+                        <Typography>Seleccionar Ubicación</Typography>
+                        <div className='flex grow justify-center items-center gap-2'>
+                            <Button fullWidth variant='contained' onClick={handleCurrentLocation}>
+                                Utilizar Mi Ubicación Actual
+                            </Button>
+                            <Button fullWidth variant='contained' color='secondary' onClick={handleSelectLocationMap}>
+                                Selecccionar en el mapa
+                            </Button>
                         </div>
-                        <div className='flex grow'>
-                            <ComboBox 
-                                className='grow'
-                                label={'Ciudad de Origen'} 
-                                onChange={(e, value) => {setCity(value as string)}}
-                                options={['Santiago', 'La Serena', 'Coquimbo']}  
-                                defaultValue={'Coquimbo'}                          
-                            
-                            />
-                        </div>
-                        <div className='flex grow'>
-                            <ComboBox
-                                className='grow'
-                                label='Nacionalidad'
-                                onChange={(e, value) => {setNationality(value as string)}}
-                                options={['Chile', 'Perú']}
-                                defaultValue={'Chile'}
-                            />
-                        </div>
-                        <div className='flex flex-col gap-2'>
-                            <Typography>Seleccionar Ubicación</Typography>
-                            <div className='flex grow justify-center items-center gap-2'>
-                                <Button fullWidth variant='contained' onClick={handleCurrentLocation}>
-                                    Utilizar Mi Ubicación Actual
-                                </Button>
-                                <Button fullWidth variant='contained' color='secondary' onClick={handleSelectLocationMap}>
-                                    Selecccionar en el mapa
-                                </Button>
-                            </div>
-                            <Alert severity={ coords.length != 0 ? 'success' : 'warning' }>{ coords.length != 0 ? 'Ubicación Completada' : 'Necesitas Seleccionar una opción' }</Alert>
-                        </div>
-                    </form>
-                    
-                </DialogContent>
-                <DialogActions>
-                    <Button variant='contained' disabled={createButtonDisable} onClick={handleSubmit}>
-                        Crear Registro
-                    </Button>
-                    <Button variant='contained' color='error' onClick={handleClose}>
-                        Cancelar
-                    </Button>
-                </DialogActions>
-            </BootstrapDialog>
-        </>
+                        <Alert severity={ coords.length != 0 ? 'success' : 'warning' }>{ coords.length != 0 ? 'Ubicación Completada' : 'Necesitas Seleccionar una opción' }</Alert>
+                    </div>
+                </form>
+                
+            </DialogContent>
+            <DialogActions>
+                <Button variant='contained' disabled={createButtonDisable} onClick={handleSubmit}>
+                    Crear Registro
+                </Button>
+                <Button variant='contained' color='error' onClick={handleClose}>
+                    Cancelar
+                </Button>
+            </DialogActions>
+        </BootstrapDialog>
     )    
 };

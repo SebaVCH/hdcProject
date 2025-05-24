@@ -32,3 +32,11 @@ export type CoordDD = {
     X: number
     Y: number
 }
+
+
+export interface Risk {
+    _id ?: string
+    coords : number[]
+    createdAt : string 
+    description : string
+}
