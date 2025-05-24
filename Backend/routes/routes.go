@@ -18,12 +18,16 @@ func SetupRouter() *gin.Engine {
 	notificationService := services.NewNotificationServiceImpl(database.Client.Database("pip").Collection("alertas"), database.Client.Database("pip").Collection("usuarios"))
 	routeService := services.NewRouteServiceImpl(database.Client.Database("pip").Collection("route"))
 	helpingPointService := services.NewHelpPointServiceImpl(database.Client.Database("pip").Collection("helping_points"))
+	peopleHelpedService := services.NewPeopleHelpedServiceImpl(database.Client.Database("pip").Collection("people_helped"))
+	riskService := services.NewRiskServiceImpl(database.Client.Database("pip").Collection("risks"))
 
 	authHandler := handlers.NewAuthHandler(authService)
 	routeHandler := handlers.NewRouteHandler(routeService)
 	userHandler := handlers.NewUserHandler(userService)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	helpingPointHandler := handlers.NewHelpingPointHandler(helpingPointService)
+	peopleHelpedHandler := handlers.NewPeopleHelpedHandler(peopleHelpedService)
+	riskHandler := handlers.NewRiskHandler(riskService)
 
 	r.POST("/register", authHandler.Register)
 	r.POST("/login", authHandler.Login)
@@ -35,6 +39,8 @@ func SetupRouter() *gin.Engine {
 	RouteRouter(protected, routeHandler)
 	NotificationRouter(protected, notificationHandler)
 	HelpingPointRouter(protected, helpingPointHandler)
+	PeopleHelpedRouter(protected, peopleHelpedHandler)
+	RiskRouter(protected, riskHandler)
 
 	return r
 }
@@ -42,6 +48,10 @@ func SetupRouter() *gin.Engine {
 func RouteRouter(router *gin.RouterGroup, routeHandler *handlers.RouteHandler) {
 	route := router.Group("/route")
 	route.GET("", routeHandler.FindAll)
+	route.GET("/:id", routeHandler.FindById)
+	route.POST("", routeHandler.CreateRoute)
+	route.PUT("/:id", routeHandler.UpdateRoute)
+	route.DELETE("/:id", routeHandler.DeleteRoute)
 }
 
 func UserRouter(router *gin.RouterGroup, userHandler *handlers.UserHandler) {
@@ -58,6 +68,22 @@ func NotificationRouter(router *gin.RouterGroup, notificationHandler *handlers.N
 	alert.GET("", notificationHandler.GetNotifications)
 	alert.PUT("/:id", notificationHandler.UpdateNotification)
 	alert.DELETE("/:id", notificationHandler.DeleteNotification)
+}
+
+func PeopleHelpedRouter(router *gin.RouterGroup, peoplehelpedHandler *handlers.PeopleHelpedHandler) {
+	alert := router.Group("/people-helped")
+	alert.POST("", peoplehelpedHandler.CreatePersonHelped)
+	alert.GET("", peoplehelpedHandler.GetAllPeopleHelped)
+	alert.PUT("/:id", peoplehelpedHandler.UpdatePersonHelped)
+	alert.DELETE("/:id", peoplehelpedHandler.DeletePersonHelped)
+}
+
+func RiskRouter(router *gin.RouterGroup, riskHandler *handlers.RiskHandler) {
+	alert := router.Group("/risk")
+	alert.POST("", riskHandler.CreateRisk)
+	alert.GET("", riskHandler.GetAllRisks)
+	alert.PUT("/:id", riskHandler.UpdateRisk)
+	alert.DELETE("/:id", riskHandler.DeleteRisk)
 }
 
 func HelpingPointRouter(router *gin.RouterGroup, helpingPointHandler *handlers.PuntoAyudaHandler) {

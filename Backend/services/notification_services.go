@@ -39,20 +39,22 @@ func (s *NotificationServiceImpl) CreateNotification(notification models.Aviso) 
 		return err
 	}
 
-	cursor, err := s.UserCollection.Find(
-		context.Background(), bson.M{},
-	)
-	if err != nil {
-		return err
-	}
-	defer cursor.Close(context.Background())
-
-	for cursor.Next(context.Background()) {
-		var user models.Usuario
-		if err := cursor.Decode(&user); err != nil {
-			continue
+	if notification.SendEmail {
+		cursor, err := s.UserCollection.Find(
+			context.Background(), bson.M{},
+		)
+		if err != nil {
+			return err
 		}
-		go utils.SendNotificationMail(user, notification)
+		defer cursor.Close(context.Background())
+
+		for cursor.Next(context.Background()) {
+			var user models.Usuario
+			if err := cursor.Decode(&user); err != nil {
+				continue
+			}
+			go utils.SendNotificationMail(user, notification)
+		}
 	}
 
 	return nil

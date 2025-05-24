@@ -41,23 +41,29 @@ func (h *RouteHandler) CreateRoute(c *gin.Context) {
 		return
 	}
 
-	createdRoute, err := h.RouteService.CreateRoute(route)
+	err := h.RouteService.CreateRoute(route)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al crear la ruta: " + err.Error()})
 		return
 	}
 
-	c.IndentedJSON(http.StatusCreated, gin.H{"message": createdRoute})
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": route})
 }
 
 func (h *RouteHandler) UpdateRoute(c *gin.Context) {
-	var route models.Route
-	if err := c.ShouldBindJSON(&route); err != nil {
+	routeID := c.Param("id")
+	if routeID == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de ruta no proporcionado"})
+		return
+	}
+	var updateData map[string]interface{}
+
+	if err := c.ShouldBindJSON(&updateData); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
 		return
 	}
-
-	updatedRoute, err := h.RouteService.UpdateRoute(route)
+	updateData["_id"] = routeID
+	updatedRoute, err := h.RouteService.UpdateRoute(updateData)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al actualizar la ruta: " + err.Error()})
 		return

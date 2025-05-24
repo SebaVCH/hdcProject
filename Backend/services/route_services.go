@@ -11,8 +11,8 @@ import (
 type RouteService interface {
 	FindAll() ([]models.Route, error)
 	FindById(routeId string) (models.Route, error)
-	CreateRoute(route models.Route) (models.Route, error)
-	UpdateRoute(route models.Route) (models.Route, error)
+	CreateRoute(route models.Route) error
+	UpdateRoute(data map[string]interface{}) (models.Route, error)
 	DeleteRoute(routeId string) error
 }
 
@@ -54,30 +54,34 @@ func (r *RouteServiceImpl) FindById(routeId string) (models.Route, error) {
 	return route, nil
 }
 
-func (r *RouteServiceImpl) CreateRoute(route models.Route) (models.Route, error) {
+func (r *RouteServiceImpl) CreateRoute(route models.Route) error {
 	route.ID = bson.NewObjectID()
 	_, err := r.RouteCollection.InsertOne(context.Background(), route)
 	if err != nil {
-		return models.Route{}, err
+		return err
 	}
-	return route, nil
+	return nil
 }
 
-func (r *RouteServiceImpl) UpdateRoute(route models.Route) (models.Route, error) {
-	if route.ID.IsZero() {
-		return models.Route{}, errors.New("ID de ruta no proporcionado")
+func (r *RouteServiceImpl) UpdateRoute(data map[string]interface{}) (models.Route, error) {
+	idStr, ok := data["_id"].(string)
+	if !ok {
+		return models.Route{}, errors.New("ID de ruta no proporcionado o inválido")
 	}
+	objID, err := bson.ObjectIDFromHex(idStr)
+	if err != nil {
+		return models.Route{}, errors.New("ID de ruta inválido")
+	}
+	delete(data, "_id")
 
-	filter := bson.M{"_id": route.ID}
-	update := bson.M{"$set": route}
-
-	_, err := r.RouteCollection.UpdateOne(context.Background(), filter, update)
+	update := bson.M{"$set": data}
+	_, err = r.RouteCollection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
 	if err != nil {
 		return models.Route{}, err
 	}
 
 	var updatedRoute models.Route
-	err = r.RouteCollection.FindOne(context.Background(), filter).Decode(&updatedRoute)
+	err = r.RouteCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&updatedRoute)
 	if err != nil {
 		return models.Route{}, err
 	}

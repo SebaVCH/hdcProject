@@ -14,5 +14,4 @@ type Route struct {
 	HelpPoints  []PuntoAyuda    `bson:"help_points" json:"help_points"`
 	Status      string          `bson:"status" json:"status"`
 	DateCreated time.Time       `bson:"date_created" json:"date_created"`
-	Alert       bson.ObjectID   `bson:"alert" json:"alert"`
 }
