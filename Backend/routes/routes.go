@@ -20,6 +20,8 @@ func SetupRouter() *gin.Engine {
 	helpingPointService := services.NewHelpPointServiceImpl(database.Client.Database("pip").Collection("helping_points"))
 	peopleHelpedService := services.NewPeopleHelpedServiceImpl(database.Client.Database("pip").Collection("people_helped"))
 	riskService := services.NewRiskServiceImpl(database.Client.Database("pip").Collection("risks"))
+	calendarEventService := services.NewCalendarEventServiceImpl(database.Client.Database("pip").Collection("calendar_events"))
+	exportDataService := services.NewExportDataServiceImpl(database.Client.Database("pip").Collection("people_helped"))
 
 	authHandler := handlers.NewAuthHandler(authService)
 	routeHandler := handlers.NewRouteHandler(routeService)
@@ -28,6 +30,8 @@ func SetupRouter() *gin.Engine {
 	helpingPointHandler := handlers.NewHelpingPointHandler(helpingPointService)
 	peopleHelpedHandler := handlers.NewPeopleHelpedHandler(peopleHelpedService)
 	riskHandler := handlers.NewRiskHandler(riskService)
+	calendarEventHandler := handlers.NewCalendarEventHandler(calendarEventService)
+	exportDataHandler := handlers.NewExportDataHandler(exportDataService)
 
 	r.POST("/register", authHandler.Register)
 	r.POST("/login", authHandler.Login)
@@ -41,6 +45,8 @@ func SetupRouter() *gin.Engine {
 	HelpingPointRouter(protected, helpingPointHandler)
 	PeopleHelpedRouter(protected, peopleHelpedHandler)
 	RiskRouter(protected, riskHandler)
+	CalendarEventRouter(protected, calendarEventHandler)
+	ExportDataRouter(protected, exportDataHandler)
 
 	return r
 }
@@ -63,27 +69,27 @@ func UserRouter(router *gin.RouterGroup, userHandler *handlers.UserHandler) {
 }
 
 func NotificationRouter(router *gin.RouterGroup, notificationHandler *handlers.NotificationHandler) {
-	alert := router.Group("/notification")
-	alert.POST("", notificationHandler.CreateNotification)
-	alert.GET("", notificationHandler.GetNotifications)
-	alert.PUT("/:id", notificationHandler.UpdateNotification)
-	alert.DELETE("/:id", notificationHandler.DeleteNotification)
+	notification := router.Group("/notification")
+	notification.POST("", notificationHandler.CreateNotification)
+	notification.GET("", notificationHandler.GetNotifications)
+	notification.PUT("/:id", notificationHandler.UpdateNotification)
+	notification.DELETE("/:id", notificationHandler.DeleteNotification)
 }
 
 func PeopleHelpedRouter(router *gin.RouterGroup, peoplehelpedHandler *handlers.PeopleHelpedHandler) {
-	alert := router.Group("/people-helped")
-	alert.POST("", peoplehelpedHandler.CreatePersonHelped)
-	alert.GET("", peoplehelpedHandler.GetAllPeopleHelped)
-	alert.PUT("/:id", peoplehelpedHandler.UpdatePersonHelped)
-	alert.DELETE("/:id", peoplehelpedHandler.DeletePersonHelped)
+	peoplehelped := router.Group("/people-helped")
+	peoplehelped.POST("", peoplehelpedHandler.CreatePersonHelped)
+	peoplehelped.GET("", peoplehelpedHandler.GetAllPeopleHelped)
+	peoplehelped.PUT("/:id", peoplehelpedHandler.UpdatePersonHelped)
+	peoplehelped.DELETE("/:id", peoplehelpedHandler.DeletePersonHelped)
 }
 
 func RiskRouter(router *gin.RouterGroup, riskHandler *handlers.RiskHandler) {
-	alert := router.Group("/risk")
-	alert.POST("", riskHandler.CreateRisk)
-	alert.GET("", riskHandler.GetAllRisks)
-	alert.PUT("/:id", riskHandler.UpdateRisk)
-	alert.DELETE("/:id", riskHandler.DeleteRisk)
+	risk := router.Group("/risk")
+	risk.POST("", riskHandler.CreateRisk)
+	risk.GET("", riskHandler.GetAllRisks)
+	risk.PUT("/:id", riskHandler.UpdateRisk)
+	risk.DELETE("/:id", riskHandler.DeleteRisk)
 }
 
 func HelpingPointRouter(router *gin.RouterGroup, helpingPointHandler *handlers.PuntoAyudaHandler) {
@@ -92,4 +98,17 @@ func HelpingPointRouter(router *gin.RouterGroup, helpingPointHandler *handlers.P
 	helpingPoint.GET("", helpingPointHandler.GetAllPoints)
 	helpingPoint.PUT("/:id", helpingPointHandler.UpdateHelpingPoint)
 	helpingPoint.DELETE("/:id", helpingPointHandler.DeleteHelpingPoint)
+}
+
+func CalendarEventRouter(router *gin.RouterGroup, calendarEventHandler *handlers.CalendarEventHandler) {
+	calendarEvent := router.Group("/calendar-event")
+	calendarEvent.POST("", calendarEventHandler.CreateCalendarEvent)
+	calendarEvent.GET("", calendarEventHandler.GetAllCalendarEvents)
+	calendarEvent.PUT("/:id", calendarEventHandler.UpdateCalendarEvent)
+	calendarEvent.DELETE("/:id", calendarEventHandler.DeleteCalendarEvent)
+}
+
+func ExportDataRouter(router *gin.RouterGroup, exportDataHandler *handlers.ExportDataHandler) {
+	exportData := router.Group("/export-data")
+	exportData.GET("/people-helped", exportDataHandler.ExportPeopleHelped)
 }
