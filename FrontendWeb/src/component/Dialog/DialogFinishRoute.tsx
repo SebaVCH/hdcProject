@@ -6,10 +6,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Alert, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
+import { RouteAdapter } from '../../api/adapters/RouteAdapter';
+import { TRoute } from '../../api/services/RouteService';
+import CloseDialogButton from '../Button/CloseDialogButton';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -24,17 +27,27 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function DialogFinishRoute({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
    
-    const { routeStatus, setRouteStatus } = useSessionStore()
+    const { setRouteStatus, routeId, setRouteId, accessToken } = useSessionStore()
+    const dataRoute = RouteAdapter.useGetRouteByID( routeId as string, accessToken).data
+    const { mutate, isSuccess, isError, isIdle, isPending } = RouteAdapter.useUpdateRoute(routeId as string, dataRoute, accessToken)
+
+    useEffect(() => {
+        if(isSuccess) {
+            setTimeout(() => {
+                setRouteStatus(false)
+                setRouteId(undefined)
+                handleClose()
+            }, 1000)
+        }
+    }, [isSuccess])
+
+    const onFinishRoute = () => {
+        mutate()
+    }
 
     const handleClose = () => {
         setOpen(false)
     }
-
-
-    const onFinishRoute = () => {
-        setRouteStatus(false)
-    }
-
     
     return (
         <>
@@ -47,30 +60,35 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
                 <DialogTitle className='m-0 p-2' id="finalizar-ruta-titulo">
                     Finalizar Ruta
                 </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={(theme) => ({
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: theme.palette.grey[600],
-                    })}
-                >
-                    <CloseIcon />
-                </IconButton>
+                <CloseDialogButton  handleClose={handleClose}/>
+
                 <DialogContent>
-                    <Typography>
-                        ¿Estás seguro que quieres finalizar la Ruta?
-                    </Typography>
+                    { isIdle ?
+                        <Typography>
+                            ¿Estás seguro que quieres finalizar la Ruta?
+                        </Typography>
+                        :
+                        isPending ? 
+                        <CircularProgress />
+                        :
+                        <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                            {isSuccess ? 'Se Finalizo la ruta éxitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
+                        </Alert>
+                    }
                 </DialogContent>
                     <DialogActions>
-                        <Button variant='contained' color='error' onClick={onFinishRoute}>
-                            Finalizar
-                        </Button>
-                        <Button variant='contained' onClick={handleClose}>
-                            Cancelar
-                        </Button>
+                        { isSuccess ?
+                            <></>
+                            :
+                            <>
+                                <Button disabled={isPending} variant='contained' color='error' onClick={onFinishRoute}>
+                                    Finalizar
+                                </Button>
+                                <Button variant='contained' onClick={handleClose}>
+                                    Cancelar
+                                </Button>
+                            </>
+                        }
                     </DialogActions>
             </BootstrapDialog>
         </>

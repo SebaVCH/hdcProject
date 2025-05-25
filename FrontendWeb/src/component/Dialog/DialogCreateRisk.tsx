@@ -4,12 +4,12 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import { Alert, CircularProgress, TextField, Typography, Zoom } from '@mui/material';
+import { Alert, Typography, Zoom } from '@mui/material';
 import { useEffect, useState } from 'react';
 import getCurrentLocation, { Position } from '../../utils/getCurrentLocation';
 import { Risk } from '../../api/interfaces/IRoute';
 import InputDescription from '../Input/InputDescription';
-import CloseDialogButton from '../Button/CloseButton';
+import CloseDialogButton from '../Button/CloseDialogButton';
 import { LocationMethod } from '../../api/interfaces/Enums';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -28,20 +28,18 @@ export type DialogCreateRiskProps = {
     stateOnSelectLocationMap : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateRisk : [ Risk[], React.Dispatch<React.SetStateAction<Risk[]>>]
     stateLocationMethod : [ LocationMethod, React.Dispatch<React.SetStateAction<LocationMethod>> ]
+    stateDescription : [ string, React.Dispatch<React.SetStateAction<string>> ]
     location : Position
 }
 
 
-export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, location, stateRisk, stateLocationMethod } : DialogCreateRiskProps) {
-
-
-
+export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, location, stateRisk, stateLocationMethod, stateDescription } : DialogCreateRiskProps) {
 
     const [ risks, setRisks ] = stateRisk
     const [ open, setOpen ] = stateOpen
     const [ , setOnSelectLocationMap ] = stateOnSelectLocationMap 
 
-    const [ description, setDescription ] = useState('')
+    const [ description, setDescription ] = stateDescription
     const [ coords, setCoords ] = useState<number[]>([])
     const [ required, setRequired ] = useState(false)
     const [ createButtonDisable, setCreateButtonDisable ] = useState(true)
@@ -86,6 +84,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
         setDescription('')
         setLocationMethod(LocationMethod.None)
         setError(undefined)
+        setCreateButtonDisable(true)
         setCoords([])
     }
 
@@ -149,7 +148,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
                                         { locationMethod === LocationMethod.Current ? 
                                             error ? <ReplayIcon />  : <TaskAltIcon />
                                         : 
-                                            <span>Seleccionar en el mapa</span>
+                                            <span>Obtener Ubicación actual</span>
                                         }
                                     </div>
                                 </Zoom>

@@ -17,6 +17,7 @@ import DialogResumeRoute from "../../component/Dialog/DialogResumeRoute";
 import MapEvents from "../../component/MapEvents";
 import { Risk } from "../../api/interfaces/IRoute";
 import { LocationMethod } from "../../api/interfaces/Enums";
+import { THelpPoint } from "../../api/services/HelpPointService";
 
 
 
@@ -25,7 +26,7 @@ import { LocationMethod } from "../../api/interfaces/Enums";
 export default function Home() {
 
 
-    const { routeStatus } = useSessionStore()
+    const { routeStatus, routeId } = useSessionStore()
     const [ openDialRoute, setOpenDialRoute ] = useState(false)
     const [ onSelectLocationMap, setOnSelectLocationMap ] = useState(false)
 
@@ -35,6 +36,9 @@ export default function Home() {
     const [ openDialogAttended, setOpenDialogAttended] = useState(false) 
     const [ openDialogRisk, setOpenDialogRisk ] = useState(false)
 
+
+    const stateDescriptionRisk = useState('')
+
     const [ locationMethod, setLocationMethod ] = useState<LocationMethod>(LocationMethod.None)
 
 
@@ -43,6 +47,14 @@ export default function Home() {
         description : 'No hay iluminación',
         createdAt : '15-05-2025',
         coords : [-29.952903159, -71.3408491873],
+    }])
+
+    const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([{
+        _id : '123',
+        routeId : routeId ?? '',
+        description : '123',
+        createdAt : '',
+        coords : []
     }])
 
     const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})
@@ -99,6 +111,7 @@ export default function Home() {
                                         stateRisk={[ risks, setRisks ]}
                                         stateLocationMethod={[ locationMethod, setLocationMethod ]}
                                         location={location}
+                                        stateDescription={stateDescriptionRisk}
                                     />
                                     <DialogResumeRoute 
                                         stateOpen={[ openDialogResumeRoute, setOpenDialogResumeRoute ]} 

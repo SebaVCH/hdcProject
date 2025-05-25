@@ -2,8 +2,10 @@ package services
 
 import (
 	"backend/Backend/models"
+	"backend/Backend/utils"
 	"context"
 	"errors"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -11,7 +13,7 @@ import (
 type RouteService interface {
 	FindAll() ([]models.Route, error)
 	FindById(routeId string) (models.Route, error)
-	CreateRoute(route models.Route) error
+	CreateRoute(route *models.Route) error
 	UpdateRoute(data map[string]interface{}) (models.Route, error)
 	DeleteRoute(routeId string) error
 }
@@ -54,8 +56,9 @@ func (r *RouteServiceImpl) FindById(routeId string) (models.Route, error) {
 	return route, nil
 }
 
-func (r *RouteServiceImpl) CreateRoute(route models.Route) error {
+func (r *RouteServiceImpl) CreateRoute(route *models.Route) error {
 	route.ID = bson.NewObjectID()
+	route.InviteCode = utils.NewInviteCode()
 	_, err := r.RouteCollection.InsertOne(context.Background(), route)
 	if err != nil {
 		return err

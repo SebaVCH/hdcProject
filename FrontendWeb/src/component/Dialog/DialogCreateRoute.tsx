@@ -6,11 +6,14 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
+import { TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
-import { NoticeAdapter } from '../../api/adapters/NoticeAdapter';
 import CircularProgress from '@mui/material/CircularProgress';
+import { RouteAdapter } from '../../api/adapters/RouteAdapter';
+import { TRoute } from '../../api/services/RouteService';
+import { RouteStatus } from '../../api/interfaces/Enums';
+import InputDescription from '../Input/InputDescription';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,43 +28,37 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function DialogCreateRoute({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
    
+    const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
+    const [ acept, setAcept ] = useState(false)
+    const [ confirmation, setConfirmation ] = useState(false)
+    const [ route, setRoute ] = useState<TRoute>({
+        _id : '',
+        description : '',
+        routeLeader : '',
+        status : RouteStatus.Active
+    })
+
+    const { data, mutate } = RouteAdapter.usePostRouteMutation(route, accessToken)
+
+
     const handleClose = () => {
         setOpen(false)
     }
-    const { routeStatus, setRouteStatus } = useSessionStore()
-    const [ acept, setAcept ] = useState(false)
-    const [ confirmation, setConfirmation ] = useState(false)
-
-
 
     useEffect(() => {
        setAcept(routeStatus)
        setConfirmation(routeStatus)
     }, [routeStatus])
 
-
-    const DialogContentConfirmation = () => (
-        <>
-            <Typography variant='body1'>
-                Estás a punto de crear una nueva ruta social, en la que podrás hacer: <br /> <br/>
-                - Poder registrar a las personas en situación de calle. <br />
-                - Poder registrar riesgos que existen en algunos sectores. <br /> <br/>
-                    
-                Podrás finalizar la ruta en cualquier momento
-            </Typography>
-            <TextField 
-                variant='standard'
-                label="Ingresa el Título de la Ruta"
-                defaultValue={"Ruta-Fecha"}
-            />
-        </>
-    )
+    const handleDescriptionInput = (e : React.ChangeEvent<HTMLInputElement>) => {
+        setRoute({...route, description : e.target.value})
+    }
 
     const DialogContentReady = () => (
         <>
             <Typography variant='body1'>
                 Listo! <br />
-                Le muestro el código para que las demás personas puedan unirse 
+                A continuación el código para que otras personas puedan unirse
             </Typography>
             <Typography variant='subtitle2'>
                 asd-12d
@@ -69,15 +66,20 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
         </>
     )
 
-    const handleConfirmation = () => {
+    const handleAcept = () => {
         setAcept(true)
-        setRouteStatus(true)
         setTimeout(() => {
-            setConfirmation(true)
+            mutate()
         }, 300)
     }
 
-
+    useEffect(() => {
+        if(data) {
+            setRoute(data)
+            setRouteStatus(true)
+            setRouteId(data._id)
+        }
+    }, [data])
 
     return (
         <>
@@ -104,14 +106,50 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
                 </IconButton>
                 <DialogContent className='flex flex-col gap-5'>
                     {!acept ? 
-                        <DialogContentConfirmation />
+                        <>
+                            <Typography variant='body1'>
+                                Estás a punto de crear una nueva ruta social, en la que podrás hacer: <br /> <br/>
+                                - Poder registrar a las personas en situación de calle. <br />
+                                - Poder registrar riesgos que existen en algunos sectores. <br /> <br/>
+                                    
+                                Podrás finalizar la ruta en cualquier momento
+                            </Typography>
+                            <InputDescription
+                                variant='standard'
+                                required 
+                                label='Descripción de la ruta'
+                                placeholder='Ingresa la descripción'
+                                value={route.description}
+                                maxLength={50}
+                                onChange={handleDescriptionInput}
+                            />
+                            <TextField 
+                                variant='standard'
+                                label="Ingresa el Título de la Ruta"
+                                defaultValue={"Ruta-Fecha"}
+                            />
+                        </>
                     :
-                        !confirmation ? <CircularProgress /> : <DialogContentReady />
+                        !confirmation ? 
+                        
+                        <div className='flex grow items-center justify-center'>
+                            <CircularProgress  />
+                        </div> 
+                        : 
+                            <>
+                                <Typography variant='body1'>
+                                    Listo! <br />
+                                    A continuación el código para que otras personas puedan unirse
+                                </Typography>
+                                <Typography variant='subtitle2'>
+                                    asd-12d
+                                </Typography>
+                            </>
                     }
                 </DialogContent>
                     <DialogActions>
-                        <Button variant='contained' onClick={!confirmation ? handleConfirmation : handleClose}>
-                            Confirmar
+                        <Button variant='contained' onClick={!confirmation ? handleAcept : handleClose}>
+                            {!confirmation ? 'Confirmar' : 'Aceptar'}
                         </Button>
                         { !confirmation ? 
                             <>
