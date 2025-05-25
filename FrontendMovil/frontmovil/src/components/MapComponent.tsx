@@ -12,6 +12,8 @@ type MarkerData = {
 
 type Props = {
   markers?: MarkerData[];
+  riskMarkers?: { latitude: number; longitude: number; description: string }[];
+  onMapPress?: (coord: {latitude: number; longitude: number}) => void;
 };
 
 const defaultMarkers: MarkerData[] = [
@@ -24,7 +26,11 @@ const defaultMarkers: MarkerData[] = [
   },
 ];
 
-export default function MapComponent({ markers = defaultMarkers }: Props) {
+export default function MapComponent({ 
+  markers = defaultMarkers,
+  riskMarkers = [],
+  onMapPress,
+ }: Props) {
   const initialRegion: Region = {
     latitude: -29.9533,
     longitude: -71.3391,
@@ -57,6 +63,10 @@ export default function MapComponent({ markers = defaultMarkers }: Props) {
         scrollEnabled
         showsUserLocation
         showsMyLocationButton
+        onPress={(e) => {
+         if (onMapPress) onMapPress(e.nativeEvent.coordinate);
+        }
+}
       >
         {markers.map((marker) => (
           <React.Fragment key={marker.id}>
@@ -78,6 +88,28 @@ export default function MapComponent({ markers = defaultMarkers }: Props) {
               fillColor="rgba(0, 122, 255, 0.2)"   // relleno
             />
           </React.Fragment>
+        ))}
+        {riskMarkers.map((risk, index) => (
+           <React.Fragment key={`risk-${index}`}>
+              <Marker
+                coordinate={{
+                  latitude: risk.latitude,
+                  longitude: risk.longitude,
+                }}
+                pinColor="red"
+                title="Riesgo"
+                description={risk.description}
+              />
+              <Circle
+                center={{
+                  latitude: risk.latitude,
+                  longitude: risk.longitude,
+                }}
+                radius={80}
+                strokeColor="rgba(255, 0, 0, 0.6)"
+                fillColor="rgba(255, 0, 0, 0.2)"
+              />
+            </React.Fragment>
         ))}
       </MapView>
 
