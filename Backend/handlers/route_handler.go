@@ -41,7 +41,7 @@ func (h *RouteHandler) CreateRoute(c *gin.Context) {
 		return
 	}
 
-	err := h.RouteService.CreateRoute(route)
+	err := h.RouteService.CreateRoute(&route)
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al crear la ruta: " + err.Error()})
 		return

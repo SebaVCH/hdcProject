@@ -23,7 +23,7 @@ export default function InputDescription({ value, onChange, maxLength, ...props}
             multiline
             value={value}
             onChange={handleOnChange}
-            helperText={<p className={value.length >= maxLength ? 'text-red-500' : ''}>{value.length} de {maxLength}</p>}
+            helperText={<span className={(value ? value.length : 0) >= maxLength ? 'text-red-500' : ''}>{value ? value.length : 0} de {maxLength}</span>}
         />
     )
 };

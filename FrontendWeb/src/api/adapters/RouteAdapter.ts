@@ -17,4 +17,17 @@ export class RouteAdapter {
             queryFn: () => (RouteService.FindAllRoute( accessToken ))
         })
     }
+
+    static useGetRouteByID( routeId : string, accessToken ?: string ) {
+        return useQuery({
+            queryKey : ['route'],
+            queryFn : () => (RouteService.FindRouteByID(routeId, accessToken))
+        })
+    }
+
+    static useUpdateRoute( routeId : string, body ?: TRoute, accessToken ?: string ) {
+        return useMutation({
+            mutationFn : () => (RouteService.UpdateRoute(routeId, body, accessToken ))
+        })
+    } 
 }

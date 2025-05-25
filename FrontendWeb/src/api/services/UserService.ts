@@ -63,25 +63,9 @@ export class UserService {
         const isTokenUn = (data?.token == undefined ? true : false)
         return { token: data?.token, error : isTokenUn, errorCode : "DATA_NOT_FOUND", errorMessage: "token is undefined"}
 
-        try {
-            const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/register`, body)
-            const isTokenUn = (data?.token == undefined ? true : false)
-            return { token: data?.token, error : isTokenUn, errorCode : "DATA_NOT_FOUND", errorMessage: "token is undefined"}
-        } catch (err) {
-            const error = err as Error | AxiosError 
-            if(!axios.isAxiosError(error)) return { errorMessage: error.message, error: true }
-
-            const axiosError = err as AxiosError
-            return {
-                errorMessage: (axiosError.request ? 'Cannot connect with the server' : '') + axiosError.message,
-                errorCode: axiosError.code,
-                error: true
-            }
-        }
     }
 
     static async GetProfile(accessToken : string) : Promise<TProfileResponse> {
-        console.log("service")
         try {
             const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/user/profile`, {
                 headers: {
