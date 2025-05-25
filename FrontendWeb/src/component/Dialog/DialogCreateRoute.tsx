@@ -142,7 +142,7 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
                                     A continuación el código para que otras personas puedan unirse
                                 </Typography>
                                 <Typography variant='subtitle2'>
-                                    asd-12d
+                                    {route.inviteCode}
                                 </Typography>
                             </>
                     }
