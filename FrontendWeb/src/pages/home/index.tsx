@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
 import { Backdrop, Card, Divider, Fab, Typography } from "@mui/material";
@@ -15,9 +15,11 @@ import DialogCreateAttended from "../../component/Dialog/DialogCreateAttended";
 import DialogCreateRisk from "../../component/Dialog/DialogCreateRisk";
 import DialogResumeRoute from "../../component/Dialog/DialogResumeRoute";
 import MapEvents from "../../component/MapEvents";
-import { Risk } from "../../api/interfaces/IRoute";
 import { LocationMethod } from "../../api/interfaces/Enums";
+import { RiskAdapter } from "../../api/adapters/RiskAdapter";
 import { THelpPoint } from "../../api/services/HelpPointService";
+import { HelpPointAdapter } from "../../api/adapters/HelpPointAdapter";
+import { TRisk } from "../../api/services/RiskService";
 
 
 
@@ -26,6 +28,7 @@ import { THelpPoint } from "../../api/services/HelpPointService";
 export default function Home() {
 
 
+    const { accessToken } = useSessionStore()
     const { routeStatus, routeId } = useSessionStore()
     const [ openDialRoute, setOpenDialRoute ] = useState(false)
     const [ onSelectLocationMap, setOnSelectLocationMap ] = useState(false)
@@ -42,20 +45,21 @@ export default function Home() {
     const [ locationMethod, setLocationMethod ] = useState<LocationMethod>(LocationMethod.None)
 
 
-    const [ risks, setRisks ] = useState<Risk[]>([{
-        _id : '123',
-        description : 'No hay iluminación',
-        createdAt : '15-05-2025',
-        coords : [-29.952903159, -71.3408491873],
-    }])
+    const [ risks, setRisks ] = useState<TRisk[]>([])
+    const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([])
 
-    const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([{
-        _id : '123',
-        routeId : routeId ?? '',
-        description : '123',
-        createdAt : '',
-        coords : []
-    }])
+    const riskQuery = RiskAdapter.useGetRisks( accessToken )
+    const helpPointQuery = HelpPointAdapter.useGetHelpPoints( accessToken )
+
+    useEffect(() => {
+        if(riskQuery.data) {
+            setRisks(riskQuery.data)
+        }
+        if(helpPointQuery.data) {
+            setHelpPoints(helpPointQuery.data)
+        }
+    }, [riskQuery.data, helpPointQuery.data])
+
 
     const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})
 
@@ -75,6 +79,7 @@ export default function Home() {
             }
             <div className={`relative flex grow flex-col justify-between`}>
                 <Mapa
+                    helpPoints={helpPoints}
                     risks={risks}
                 >
                     <MapEvents 
@@ -103,12 +108,12 @@ export default function Home() {
                                     <DialogCreateAttended 
                                         stateOpen={[openDialogAttended, setOpenDialogAttended]} 
                                         stateOnSelectLocationMap={[ onSelectLocationMap, setOnSelectLocationMap]} 
+                                        stateLocationMethod={[locationMethod, setLocationMethod]}
                                         location={location}
                                     />
                                     <DialogCreateRisk 
                                         stateOpen={[openDialogRisk, setOpenDialogRisk]} 
                                         stateOnSelectLocationMap={[ onSelectLocationMap, setOnSelectLocationMap]}
-                                        stateRisk={[ risks, setRisks ]}
                                         stateLocationMethod={[ locationMethod, setLocationMethod ]}
                                         location={location}
                                         stateDescription={stateDescriptionRisk}
