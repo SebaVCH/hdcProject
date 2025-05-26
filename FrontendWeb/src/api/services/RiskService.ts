@@ -1,3 +1,4 @@
+import { sleep } from "../../utils/sleep"
 import { axiosInstance } from "./axiosInstance"
 
 
@@ -12,7 +13,13 @@ export class RiskService {
 
     private static readonly RESOURCE_NAME = 'risk'
 
-    static async CreateRisk( body : TRisk, token ?: string ) : Promise<TRisk> {
+    static async CreateRisk( body ?: TRisk, token ?: string ) : Promise<TRisk> {
+
+        await sleep(1000) // para pruebas
+
+        if(!body) {
+            throw Error('body must be not null')
+        }
 
         const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, body, {
             headers : {

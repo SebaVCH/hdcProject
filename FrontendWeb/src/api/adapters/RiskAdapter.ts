@@ -4,9 +4,9 @@ import { RiskService, TRisk } from "../services/RiskService";
 
 export class RiskAdapter {
 
-    static usePostRiskMutation( body : TRisk, accessToken ?: string) {
+    static usePostRiskMutation(accessToken ?: string) {
         return useMutation({
-            mutationFn: () => (RiskService.CreateRisk(body, accessToken))
+            mutationFn: (body : TRisk) => (RiskService.CreateRisk(body, accessToken)),
         })
     }
 

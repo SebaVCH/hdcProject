@@ -1,4 +1,5 @@
 
+import { sleep } from "../../utils/sleep"
 import { RouteStatus } from "../interfaces/Enums"
 import { axiosInstance } from "./axiosInstance"
 import { UserService } from "./UserService"
@@ -17,8 +18,6 @@ export type TRoute = {
 export type TCreateRouteResponse = TRoute
 
 export type TFindAllRoutes = TRoute[]
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 
 
