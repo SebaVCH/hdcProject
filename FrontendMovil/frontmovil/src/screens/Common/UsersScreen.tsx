@@ -41,7 +41,7 @@ export default function UsersScreen({ navigation }: Props) {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("📦 Respuesta de /user/:", res.data);
-      setUsers(res.data.users);
+      setUsers(res.data.message);
     } catch (err) {
       console.error('Error al obtener usuarios:', err);
     } finally {
@@ -78,13 +78,16 @@ export default function UsersScreen({ navigation }: Props) {
     fetchUsers();
   }, []);
 
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.userCard}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.email}>{item.email}</Text>
-      <Text style={styles.phone}>{item.phone}</Text>
-    </View>
-  );
+  const renderItem = ({ item }: { item: any }) => {
+    if (!item.name && !item.email && !item.phone) return null;
+    return (
+      <View style={styles.userCard}>
+        <Text style={styles.name}>{item.name || 'Sin nombre'}</Text>
+        <Text style={styles.email}>{item.email || 'Sin correo'}</Text>
+        <Text style={styles.phone}>{item.phone || 'Sin teléfono'}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
