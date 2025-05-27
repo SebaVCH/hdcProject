@@ -20,29 +20,28 @@ type Props = {
 };
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
-const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '192.168.0.8') : rawUrl;
+const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
 
 export default function ProfileScreen({ navigation }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Obtener datos del usuario
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-        console.log("🔑 TOKEN:", token);
         const res = await axios.get(`${backendUrl}/user/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("📦 Datos del perfil recibidos:", res.data);
-        setName(res.data.user.name);
-        setPhone(res.data.user.phone);
+        setName(res.data.message.name);
+        setPhone(res.data.message.phone);
+        setEmail(res.data.message.email);
       } catch (error) {
         console.error('Error al cargar perfil:', error);
         Alert.alert('Error', 'No se pudo cargar tu perfil');
@@ -55,29 +54,31 @@ export default function ProfileScreen({ navigation }: Props) {
   const handleSave = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('accessToken');
+      if (newPassword && newPassword !== confirmPassword) {
+        Alert.alert('Error', 'Las contraseñas no coinciden');
+        return;
+      }
 
-      const updateData: {
-        name: string;
-        phone: string;
-        password?: string;
-      } = {
+      const token = await AsyncStorage.getItem('accessToken');
+      const updateData: any = {
         name,
         phone,
+        email,
       };
 
-      if (password.trim() !== '') {
-        updateData.password = password;
+      if (currentPassword && newPassword && confirmPassword) {
+        updateData.old_password = currentPassword;
+        updateData.new_password = newPassword;
       }
 
       await axios.put(`${backendUrl}/user/update`, updateData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setIsEditing(false);
-      setPassword('');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
       Alert.alert('Éxito', 'Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error al guardar perfil:', error);
@@ -103,6 +104,15 @@ export default function ProfileScreen({ navigation }: Props) {
           editable={isEditing}
         />
 
+        <Text style={styles.label}>Correo:</Text>
+        <TextInput
+          style={[styles.input, !isEditing && styles.readOnly]}
+          value={email}
+          onChangeText={setEmail}
+          editable={isEditing}
+          keyboardType="email-address"
+        />
+
         <Text style={styles.label}>Teléfono:</Text>
         <TextInput
           style={[styles.input, !isEditing && styles.readOnly]}
@@ -114,12 +124,28 @@ export default function ProfileScreen({ navigation }: Props) {
 
         {isEditing && (
           <>
-            <Text style={styles.label}>Nueva Contraseña:</Text>
+            <Text style={styles.label}>Contraseña actual:</Text>
             <TextInput
               style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="(opcional)"
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+              secureTextEntry
+              placeholder="Requerida para cambiar contraseña"
+            />
+
+            <Text style={styles.label}>Nueva contraseña:</Text>
+            <TextInput
+              style={styles.input}
+              value={newPassword}
+              onChangeText={setNewPassword}
+              secureTextEntry
+            />
+
+            <Text style={styles.label}>Confirmar nueva contraseña:</Text>
+            <TextInput
+              style={styles.input}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
               secureTextEntry
             />
           </>
