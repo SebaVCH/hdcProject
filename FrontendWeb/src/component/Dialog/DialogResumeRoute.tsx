@@ -6,8 +6,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Typography } from '@mui/material';
-
+import { Paper, Snackbar, Typography } from '@mui/material';
+import { useState } from 'react';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneIcon from '@mui/icons-material/Done';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -27,10 +29,22 @@ export type DialogResumeRiskProps = {
 export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps) {
 
     const [ open, setOpen ] = stateOpen
+    const [ copySuccess, setCopySuccess ] = useState<undefined | boolean>()
     
 
     const handleClose = () => {
+        setCopySuccess(false)
         setOpen(false)
+    }
+
+    const onClickContentCopy = async () => {
+        try {
+            await  navigator.clipboard.writeText('hola mundo')
+            setCopySuccess(true)
+        } catch(e) {
+            setCopySuccess(false)
+            alert((e as Error).message)
+        }
     }
 
     return (
@@ -61,9 +75,16 @@ export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps)
                         Listo! <br />
                         Le muestro el código para que las demás personas puedan unirse 
                     </Typography>
-                    <Typography variant='subtitle2'>
-                        asd-12d
-                    </Typography>
+                    <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
+                        <Typography>
+                            codigo
+                        </Typography>
+                        <IconButton onClick={onClickContentCopy}>
+                            { copySuccess ? <DoneIcon /> : <ContentCopyIcon />}
+                        </IconButton>
+                    </Paper>
+                    <Snackbar open={copySuccess} message='Copiado en portapapeles'/>
+                    
                 </DialogContent>
                     <DialogActions>
                         <Button variant='contained' onClick={handleClose}>

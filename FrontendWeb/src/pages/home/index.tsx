@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Divider, Fab, Typography } from "@mui/material";
+import { Backdrop, Card, Divider, Fab, IconButton, Paper, Typography } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
-import Mapa from "../../component/Mapa";
 import ListIconHome from "../../component/ListIconHome";
 import NavigationIcon from '@mui/icons-material/Navigation';
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
@@ -14,13 +13,15 @@ import { Position } from "../../utils/getCurrentLocation";
 import DialogCreateAttended from "../../component/Dialog/DialogCreateAttended";
 import DialogCreateRisk from "../../component/Dialog/DialogCreateRisk";
 import DialogResumeRoute from "../../component/Dialog/DialogResumeRoute";
-import MapEvents from "../../component/MapEvents";
 import { LocationMethod } from "../../api/interfaces/Enums";
 import { RiskAdapter } from "../../api/adapters/RiskAdapter";
 import { THelpPoint } from "../../api/services/HelpPointService";
 import { HelpPointAdapter } from "../../api/adapters/HelpPointAdapter";
 import { TRisk } from "../../api/services/RiskService";
-
+import MapEvents from "../../component/Map/MapEvents";
+import Mapa from "../../component/Map/Mapa";
+import ButtonCurrentLocation from "../../component/Map/ButtonCurrentLocation";
+import LocationHandler from "../../component/Map/LocationHandler";
 
 
 
@@ -33,7 +34,6 @@ export default function Home() {
     const [ openDialRoute, setOpenDialRoute ] = useState(false)
     const [ onSelectLocationMap, setOnSelectLocationMap ] = useState(false)
 
-
     const [ openDialogRoute, setOpenDialogRoute ] = useState(false)
     const [ openDialogResumeRoute, setOpenDialogResumeRoute ] = useState(false)
     const [ openDialogAttended, setOpenDialogAttended] = useState(false) 
@@ -41,15 +41,20 @@ export default function Home() {
 
 
     const stateDescriptionRisk = useState('')
-
     const [ locationMethod, setLocationMethod ] = useState<LocationMethod>(LocationMethod.None)
-
 
     const [ risks, setRisks ] = useState<TRisk[]>([])
     const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([])
 
     const riskQuery = RiskAdapter.useGetRisks( accessToken )
     const helpPointQuery = HelpPointAdapter.useGetHelpPoints( accessToken )
+
+
+    const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})
+    const [ currentLocation, setCurrentLocation ] = useState<Position>({latitude : -29.959003986327698, longitude : -71.34176826076656})
+    const [ showLocation, setShowLocation ] = useState(false)
+
+    const [ errorGeolocation, setErrorGeolocation ] = useState<GeolocationPositionError | undefined>()
 
     useEffect(() => {
         if(riskQuery.data) {
@@ -59,9 +64,6 @@ export default function Home() {
             setHelpPoints(helpPointQuery.data)
         }
     }, [riskQuery.data, helpPointQuery.data])
-
-
-    const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})
 
     return (
         <div className="flex flex-grow">
@@ -79,16 +81,23 @@ export default function Home() {
             }
             <div className={`relative flex grow flex-col justify-between`}>
                 <Mapa
+                    stateCurrentLocation={[currentLocation, setCurrentLocation]}
                     helpPoints={helpPoints}
                     risks={risks}
                 >
                     <MapEvents 
                         setLocation={setLocation}
-                        setOnSelectLocationMap={setOnSelectLocationMap}
+                        stateOnSelectLocationMap={[onSelectLocationMap, setOnSelectLocationMap]}
                         stateDialogAttended={[openDialogAttended, setOpenDialogAttended]}
                         stateDialogRisk={[openDialogRisk, setOpenDialogRisk]}
                     />
+                    <LocationHandler 
+                        stateShowLocation={[showLocation, setShowLocation]}
+                        stateCurrentLocation={[currentLocation, setCurrentLocation]}                        
+                    />
                 </Mapa>
+                <ButtonCurrentLocation stateShowLocation={[ showLocation, setShowLocation ]} stateErrorGeolocation={[errorGeolocation, setErrorGeolocation]}/>
+
                 { !onSelectLocationMap ?
                     <>
                         <Backdrop open={openDialRoute}/>
@@ -129,19 +138,9 @@ export default function Home() {
                     :
                     <Card
                         sx={{
-                            position: "absolute",
-                            top: "10%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            bgcolor: "rgba(46, 46, 46, 0.9)",
-                            px: 3,
-                            py: 2,
-                            borderRadius: 2,
-                            boxShadow: 3,
-                            zIndex: 1000, 
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
+                            position: "absolute", top: "10%", left: "50%", transform: "translate(-50%, -50%)",
+                            bgcolor: "rgba(46, 46, 46, 0.9)", px: 3, py: 2, borderRadius: 2, boxShadow: 3,
+                            zIndex: 1000, display: "flex", alignItems: "center", gap: 1,
                         }}
                         >
                         <Typography color="white" variant="h6" fontWeight={500}>
