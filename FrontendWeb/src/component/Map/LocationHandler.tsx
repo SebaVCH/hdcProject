@@ -16,7 +16,7 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
     const [ showLocation, setShowLocation ] = stateShowLocation
     const [ currentLocation, setCurrentLocation ] = stateCurrentLocation
     const [ watchId, setWatchId ] = useState<number | undefined>(undefined) 
-    const [ isZooming, _] = useZoom()
+    const [ isZooming, ] = useZoom()
 
     useEffect(() => {
 
