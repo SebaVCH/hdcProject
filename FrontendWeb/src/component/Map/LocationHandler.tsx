@@ -15,7 +15,6 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
     const map = useMap()
     const [ showLocation, setShowLocation ] = stateShowLocation
     const [ currentLocation, setCurrentLocation ] = stateCurrentLocation
-    const [ watchId, setWatchId ] = useState<number | undefined>(undefined) 
     const [ isZooming, ] = useZoom()
 
     useEffect(() => {
@@ -30,14 +29,11 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
             enableHighAccuracy : true,
             timeout : 10000
         })
-        setWatchId(id)
 
         return () => {
-            if(watchId) {
-                navigator.geolocation.clearWatch(watchId)
-            }
+            navigator.geolocation.clearWatch(id)
         }
-    }, [watchId])
+    }, [])
 
 
     useEffect(() => {
