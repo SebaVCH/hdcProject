@@ -1,4 +1,4 @@
-import { Button, Divider, IconButton, InputBase, Paper, Typography } from "@mui/material";
+import { Button, Divider, IconButton, InputBase, Paper, Tooltip, Typography } from "@mui/material";
 import { IUser } from "../../../api/interfaces/IUser";
 import CustomDrawer from "../../../component/CustomDrawer";
 import TableUser from "../../../component/TableUser";
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { UserAdapter } from "../../../api/adapters/UserAdapter";
 import useSessionStore from "../../../stores/useSessionStore";
 import DialogCreateUser from "../../../component/Dialog/DialogCreateUser";
-import { THelpPoint } from "../../../api/services/HelpPointService";
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 
 export default function Usuarios() {
@@ -30,8 +30,24 @@ export default function Usuarios() {
         }
     }, [data])
 
+
     const [ prefix, setPrefix ] = useState<string>('')   
     const [ open, setOpen ] = useState(false) 
+
+    const handleExport = async () => {
+        fetch(`${import.meta.env.VITE_URL_BACKEND}/export-data/people-helped`, {
+            headers: {
+                'Authorization' : `Bearer ${accessToken}`
+            }
+        })
+        .then((response) => response.blob())
+        .then((blob) => {
+            var _url = window.URL.createObjectURL(blob)
+            window.open(_url, "_blank")?.focus()
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
 
 
     return (
@@ -68,6 +84,13 @@ export default function Usuarios() {
                         <Button variant="contained" onClick={()=>{setOpen(true)}}>
                             Agregar Usuario
                         </Button>
+
+                        <Tooltip title={'exportar datos'}>
+                            <Button color='info' variant="contained" onClick={handleExport}>
+                                <FileDownloadIcon fontSize="large" />
+                            </Button>    
+                        </Tooltip>
+  
                         <DialogCreateUser open={open} setOpen={setOpen} />
                     </div>
                     { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}

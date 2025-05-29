@@ -1,12 +1,12 @@
 import L, { svg } from "leaflet";
-import { useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
-import { useLeafletContext } from '@react-leaflet/core'
-import { Position } from "../utils/getCurrentLocation";
-import { TRisk } from "../api/services/RiskService";
-import { THelpPoint } from "../api/services/HelpPointService";
-import { Divider } from "@mui/material";
-
+import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
+import { Divider, radioClasses, Zoom } from "@mui/material";
+import { format } from 'date-fns';
+import { THelpPoint } from "../../api/services/HelpPointService";
+import { TRisk } from "../../api/services/RiskService";
+import { Position } from "../../utils/getCurrentLocation";
+import { useEffect } from "react";
+import ZoomHandler from "./ZoomHandler";
 
 var greenIcon = new L.Icon({
     iconUrl: 'marker-icon-2x-green.png',
@@ -37,28 +37,35 @@ var alertIcon = new L.Icon({
 
 
 type MapaProps = {
+    stateCurrentLocation : [ Position, React.Dispatch<React.SetStateAction<Position>> ]
     helpPoints : THelpPoint[]
     risks : TRisk[]
     children : React.ReactNode
 } 
 
 
-export default function Mapa({ risks, helpPoints, children } : MapaProps) {
+export default function Mapa({ stateCurrentLocation, risks, helpPoints, children } : MapaProps) {
 
+    const [ currentLocation,  ] = stateCurrentLocation
+    
     return (
         <>
             <MapContainer 
-                center={[-29.959003986327698, -71.34176826076656]} 
-                zoom={17} 
+                center={ [currentLocation.latitude, currentLocation.longitude] } 
+                zoom={ 30 } 
                 scrollWheelZoom={true} 
                 className="h-full w-full z-0"
                 zoomControl={false}
+                preferCanvas
             >
                 <ZoomControl position="bottomleft" />
                 <TileLayer
                     attribution="Google Maps"
                     url="https://www.google.cn/maps/vt?lyrs=m@189&gl=cn&x={x}&y={y}&z={z}"
                 />
+                
+                <ZoomHandler />
+
                 {helpPoints.map((helpPoint, index) => (
                     <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)}>
                         <Popup>
@@ -72,10 +79,15 @@ export default function Mapa({ risks, helpPoints, children } : MapaProps) {
                         </Popup>
                     </Marker>
                 ))}
+
                 {risks.map((risk, index) => (
                     <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
                         <Popup >
-                        <b>{risk.description}</b> <br /> {risk.createdAt}
+                            <div className="flex flex-col items-center justify-center gap-2">
+                                <b>{risk.description}</b>
+                                <Divider className="w-full" variant="middle"/>
+                                <b>Fecha: {format(new Date(risk.createdAt), 'dd-MM-yyyy')}</b>
+                            </div>
                         </Popup>
                     </Marker>
                 ))}

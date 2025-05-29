@@ -7,7 +7,6 @@ import DialogActions from '@mui/material/DialogActions';
 import { Alert, CircularProgress, Typography, Zoom } from '@mui/material';
 import { useEffect, useState } from 'react';
 import getCurrentLocation, { Position } from '../../utils/getCurrentLocation';
-import { Risk } from '../../api/interfaces/IRoute';
 import InputDescription from '../Input/InputDescription';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { LocationMethod } from '../../api/interfaces/Enums';
