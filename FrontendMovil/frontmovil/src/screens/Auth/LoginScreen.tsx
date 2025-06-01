@@ -1,3 +1,4 @@
+import jwt_decode from 'jwt-decode';
 import React, { useState } from 'react';
 import {
   View,
@@ -49,24 +50,27 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    setLoading(true);
-    const tokens = await authenticate(email, password);
-    setLoading(false);
+  setLoading(true);
+  const tokens = await authenticate(email,password);
+  setLoading(false);
 
-    if (tokens?.accessToken) {
-      try {
-        await AsyncStorage.setItem('accessToken', tokens.accessToken);
-        console.log("🔐 Token guardado en AsyncStorage");
-        setEmail('');
-        setPassword('');
-        navigation.navigate('Home');
-      } catch (err) {
-        Alert.alert('Error', 'No se pudo guardar la sesión');
-      }
-    } else {
-      Alert.alert('Error de autenticación', 'Correo o contraseña incorrectos');
+  if (tokens?.accessToken) {
+    try {
+      const decoded: any = jwt_decode(tokens.accessToken); // 👈 decodifica el JWT
+      const userId = decoded.user_id;
+
+      await AsyncStorage.setItem('accessToken', tokens.accessToken);
+      await AsyncStorage.setItem('userId', userId);
+
+      console.log("✅ ID del usuario decodificado:", userId);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.error('Error al guardar datos en AsyncStorage', error);
     }
-  };
+  } else {
+    Alert.alert('Error', 'Credenciales inválidas');
+  }
+};
 
   return (
     <View style={styles.container}>

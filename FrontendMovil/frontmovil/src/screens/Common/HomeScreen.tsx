@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import Constants from 'expo-constants';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStack';
 import MapComponent from '../../components/MapComponent';
+import { useFocusEffect } from '@react-navigation/native';
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
 const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
@@ -46,7 +47,6 @@ export default function HomeScreen({ navigation }: Props) {
   const toggleMenu = () => {
     const toValue = menuVisible ? -screenWidth : 0;
     setMenuVisible(!menuVisible);
-
     Animated.timing(slideAnim, {
       toValue,
       duration: 300,
@@ -61,10 +61,8 @@ export default function HomeScreen({ navigation }: Props) {
       const res = await axios.get(`${backendUrl}/notification`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const alertsArray = res.data.alerts || [];
       const userName = await AsyncStorage.getItem('userName');
-
       const formatted = alertsArray.map((a: any) => `${userName || 'Usuario'}: ${a.description}`);
       setAlertLog(formatted.reverse());
     } catch (err) {
@@ -73,30 +71,29 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const fetchRisks = async () => {
-  try {
-    const token = await AsyncStorage.getItem('accessToken');
-    const res = await axios.get(`${backendUrl}/risk`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const res = await axios.get(`${backendUrl}/risk`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const risksArray = Array.isArray(res.data.message) ? res.data.message : [];
+      const formatted = risksArray.map((r: any) => ({
+        latitude: r.coords[0],
+        longitude: r.coords[1],
+        description: r.description || 'Riesgo sin descripción',
+      }));
+      setRiskMarkers(formatted);
+    } catch (err) {
+      console.error('Error al obtener riesgos:', err);
+    }
+  };
 
-    const risksArray = Array.isArray(res.data.message) ? res.data.message : [];
-
-    const formatted = risksArray.map((r: any) => ({
-      latitude: r.coords[0],
-      longitude: r.coords[1],
-      description: r.description || 'Riesgo sin descripción',
-    }));
-
-    setRiskMarkers(formatted);
-  } catch (err) {
-    console.error('Error al obtener riesgos:', err);
-  }
-};
-
-  useEffect(() => {
-    fetchAlerts();
-    fetchRisks();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAlerts();
+      fetchRisks();
+    }, [])
+  );
 
   const handleSendAlert = async () => {
     if (alertText.trim().length < 5) {
@@ -107,18 +104,13 @@ export default function HomeScreen({ navigation }: Props) {
       const token = await AsyncStorage.getItem('accessToken');
       const userId = await AsyncStorage.getItem('userId');
       const userName = await AsyncStorage.getItem('userName');
-
-      await axios.post(
-        `${backendUrl}/notification`,
-        { 
-          description: alertText,
-          author_id: userId,
-          send_email: false },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      await axios.post(`${backendUrl}/notification`, {
+        description: alertText,
+        author_id: userId,
+        send_email: false,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setAlertLog((prev) => [`${userName || 'Usuario'}: ${alertText}`, ...prev]);
       setAlertText('');
       setAlertModalVisible(false);
@@ -130,8 +122,9 @@ export default function HomeScreen({ navigation }: Props) {
 
   const menuOptions = [
     { label: 'Perfil', route: 'Profile' },
-    { label: 'Actividades', route: 'Activities' },
-    { label: 'Planificar', route: 'Plan' },
+    { label: 'Eventos', route: 'Event' },
+    { label: 'Rutas', route: 'Route' },
+    { label: 'Historial', route: 'History' },
     { label: 'Usuarios', route: 'Users' },
   ];
 
@@ -147,30 +140,23 @@ export default function HomeScreen({ navigation }: Props) {
   };
 
   const handleMapPress = async (coord: { latitude: number; longitude: number }) => {
-  if (!riskMode) return;
-  setRiskMode(false);
-  setRiskMarkers((prev) => [...prev, {...coord, description: riskDescription}]);
-
-  try {
-    const token = await AsyncStorage.getItem('accessToken');
-
-    await axios.post(
-      `${backendUrl}/risk`,
-      {
+    if (!riskMode) return;
+    setRiskMode(false);
+    setRiskMarkers((prev) => [...prev, { ...coord, description: riskDescription }]);
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      await axios.post(`${backendUrl}/risk`, {
         coords: [coord.latitude, coord.longitude],
         description: riskDescription,
-      },
-      {
+      }, {
         headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    RNAlert.alert('Riesgo añadido correctamente');
-    setRiskDescription(''); 
-  } catch (err) {
-    console.error(err);
-    RNAlert.alert('Error', 'No se pudo guardar el riesgo');
-  }
+      });
+      RNAlert.alert('Riesgo añadido correctamente');
+      setRiskDescription('');
+    } catch (err) {
+      console.error(err);
+      RNAlert.alert('Error', 'No se pudo guardar el riesgo');
+    }
   };
 
   return (
@@ -185,9 +171,7 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.menuItemText}>{option.label}</Text>
           </TouchableOpacity>
         ))}
-
         <View style={styles.separator} />
-
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
           <Text style={[styles.menuItemText, { color: 'red' }]}>Cerrar sesión</Text>
         </TouchableOpacity>
@@ -197,17 +181,15 @@ export default function HomeScreen({ navigation }: Props) {
         <Icon name="bars" size={24} color="#000" />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.alertToggleButton}
-        onPress={() => setAlertModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.alertToggleButton} onPress={() => setAlertModalVisible(true)}>
         <Text style={styles.alertToggleButtonText}>Abrir Avisos</Text>
       </TouchableOpacity>
 
       <View style={styles.mapWrapper}>
-        <MapComponent 
-        onMapPress={handleMapPress}
-        riskMarkers={riskMarkers}
+        <MapComponent
+          key={riskMarkers.map(r => `${r.latitude}-${r.longitude}`).join(',')}
+          onMapPress={handleMapPress}
+          riskMarkers={riskMarkers}
         />
         <TouchableOpacity style={styles.expandButton} onPress={() => setMapFullScreen(true)}>
           <Icon name="arrows-alt" size={20} color="#fff" />
@@ -217,20 +199,19 @@ export default function HomeScreen({ navigation }: Props) {
       <TouchableOpacity style={styles.addMarkerButton} onPress={() => setRiskModalVisible(true)}>
         <Icon name="plus" size={20} color="#fff" />
       </TouchableOpacity>
-      
+
       <Modal visible={riskModalVisible} transparent animationType="fade">
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: 'white', borderRadius: 10, padding: 20, width: '85%' }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Añadir riesgo</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Añadir riesgo</Text>
             <Text style={{ marginBottom: 5 }}>Descripción:</Text>
             <TextInput
-              style={{ borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 10, marginBottom: 15 }}
+              style={styles.alertInput}
               placeholder="Describe brevemente el riesgo..."
               value={riskDescription}
               onChangeText={setRiskDescription}
               multiline
             />
-
             <TouchableOpacity
               onPress={() => {
                 if (riskDescription.trim().length < 5) {
@@ -240,43 +221,38 @@ export default function HomeScreen({ navigation }: Props) {
                 setRiskMode(true);
                 setRiskModalVisible(false);
               }}
-              style={{ padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 10 }}
+              style={styles.sendButton}
             >
-              <Text style={{ color: 'white', textAlign: 'center' }}>Seleccionar ubicación en el mapa</Text>
+              <Text style={styles.sendButtonText}>Seleccionar ubicación en el mapa</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setRiskModalVisible(false)} style={{ padding: 10 }}>
-              <Text style={{ textAlign: 'center', color: 'red' }}>Cancelar</Text>
+            <TouchableOpacity onPress={() => setRiskModalVisible(false)} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
       <Modal visible={mapFullScreen} animationType="fade">
-        <TouchableOpacity
-          style={styles.fullscreenCloseButton}
-          onPress={() => setMapFullScreen(false)}
-        >
+        <TouchableOpacity style={styles.fullscreenCloseButton} onPress={() => setMapFullScreen(false)}>
           <Icon name="close" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.fullscreenMap}>
-          <MapComponent 
-          onMapPress={handleMapPress}
-          riskMarkers={riskMarkers}
-           />
+          <MapComponent
+            key={riskMarkers.map(r => `${r.latitude}-${r.longitude}`).join(',')}
+            onMapPress={handleMapPress}
+            riskMarkers={riskMarkers}
+          />
         </View>
       </Modal>
 
       <Modal visible={alertModalVisible} animationType="slide">
-        <View style={styles.alertModalContainer}>
+        <ScrollView contentContainerStyle={styles.alertModalContainer}>
           <Text style={styles.alertTitle}>Avisos</Text>
-
-          <ScrollView style={styles.alertLog}>
+          <View style={styles.alertLog}>
             {alertLog.map((msg, i) => (
               <Text key={i} style={styles.alertMsg}>{msg}</Text>
             ))}
-          </ScrollView>
-
+          </View>
           <TextInput
             style={styles.alertInput}
             placeholder="Escribe un aviso importante..."
@@ -285,23 +261,17 @@ export default function HomeScreen({ navigation }: Props) {
             value={alertText}
             onChangeText={setAlertText}
           />
-
           <TouchableOpacity style={styles.sendButton} onPress={handleSendAlert}>
             <Text style={styles.sendButtonText}>Enviar</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => setAlertModalVisible(false)}
-          >
+          <TouchableOpacity style={styles.cancelButton} onPress={() => setAlertModalVisible(false)}>
             <Text style={styles.cancelButtonText}>Cerrar</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </Modal>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -354,6 +324,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+    textAlign: 'center',
   },
   cancelButton: {
     marginTop: 10,
@@ -438,4 +409,21 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     zIndex: 5,
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalBox: {
+  backgroundColor: '#fff',
+  borderRadius: 10,
+  padding: 20,
+  width: '85%',
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
 });

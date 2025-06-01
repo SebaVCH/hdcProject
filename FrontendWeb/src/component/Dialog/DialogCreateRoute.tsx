@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { TextField, Typography } from '@mui/material';
+import { Paper, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -14,6 +14,8 @@ import { RouteAdapter } from '../../api/adapters/RouteAdapter';
 import { TRoute } from '../../api/services/RouteService';
 import { RouteStatus } from '../../api/interfaces/Enums';
 import InputDescription from '../Input/InputDescription';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneIcon from '@mui/icons-material/Done';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -37,6 +39,7 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
         routeLeader : '',
         status : RouteStatus.Active
     })
+    const [ copySuccess, setCopySuccess ] = useState<boolean | undefined>()
 
     const { data, mutate } = RouteAdapter.usePostRouteMutation(route, accessToken)
 
@@ -54,18 +57,6 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
         setRoute({...route, description : e.target.value})
     }
 
-    const DialogContentReady = () => (
-        <>
-            <Typography variant='body1'>
-                Listo! <br />
-                A continuación el código para que otras personas puedan unirse
-            </Typography>
-            <Typography variant='subtitle2'>
-                asd-12d
-            </Typography>
-        </>
-    )
-
     const handleAcept = () => {
         setAcept(true)
         setTimeout(() => {
@@ -80,6 +71,17 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
             setRouteId(data._id)
         }
     }, [data])
+
+
+    const onClickContentCopy = async () => {
+        try {
+            await  navigator.clipboard.writeText(route.inviteCode as string)
+            setCopySuccess(true)
+        } catch(e) {
+            setCopySuccess(false)
+            alert((e as Error).message)
+        }
+    }
 
     return (
         <>
@@ -141,9 +143,15 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
                                     Listo! <br />
                                     A continuación el código para que otras personas puedan unirse
                                 </Typography>
-                                <Typography variant='subtitle2'>
-                                    asd-12d
-                                </Typography>
+                                <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
+                                    <Typography>
+                                        {route.inviteCode}
+                                    </Typography>
+                                    <IconButton onClick={onClickContentCopy}>
+                                        { copySuccess ? <DoneIcon /> : <ContentCopyIcon />}
+                                    </IconButton>
+                                </Paper>
+                                <Snackbar open={copySuccess} message='Copiado en portapapeles'/>
                             </>
                     }
                 </DialogContent>
