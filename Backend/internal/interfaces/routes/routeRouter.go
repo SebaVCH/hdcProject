@@ -1,0 +1,24 @@
+package routes
+
+import (
+	"backend/Backend/internal/infrastructure/database"
+	"backend/Backend/internal/interfaces/controller"
+	"backend/Backend/internal/interfaces/middleware"
+	"backend/Backend/internal/repository"
+	"backend/Backend/internal/usecase"
+	"github.com/gin-gonic/gin"
+)
+
+func SetupRouteRouter(r *gin.Engine) {
+	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("routes"))
+	routeUseCase := usecase.NewRouteUseCase(routeRepo)
+	routeController := controller.NewRouteController(routeUseCase)
+
+	protected := r.Group("/route")
+	protected.Use(middleware.AuthMiddleware())
+	protected.GET("", routeController.FindAll)
+	protected.GET("/:id", routeController.FindByID)
+	protected.POST("", routeController.CreateRoute)
+	protected.PUT("/:id", routeController.UpdateRoute)
+	protected.DELETE("/:id", routeController.DeleteRoute)
+}
