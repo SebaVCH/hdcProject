@@ -35,6 +35,7 @@ export default function RouteScreen() {
       const userId = await AsyncStorage.getItem('userId');
     
       console.log('🔐 userId:', userId);
+      
       const teamEmails = team
         .split(',')
         .map(email => email.trim())
