@@ -23,7 +23,7 @@ export default function MensajesFijados() {
     }, [data])
 
     return (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-3/5 items-start gap-2 rounded bg-white z-10">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 w-3/5 items-start gap-2 rounded bg-white">
             <Accordion>
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}

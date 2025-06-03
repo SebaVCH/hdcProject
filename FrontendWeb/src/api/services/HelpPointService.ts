@@ -17,6 +17,7 @@ export type THelpPoint = {
     createdAt ?: string 
     coords : number[]
     helpedPerson ?: ThelpedPerson
+    disabled ?: boolean
 }
 
 
@@ -28,7 +29,7 @@ export class HelpPointService {
     static async CreateHelpPoint( helpPoint : THelpPoint, token ?: string ) : Promise<THelpPoint> {
 
         const body : any = {
-            route_id : helpPoint._id,
+            route_id : helpPoint.routeId,
             coords : helpPoint.coords,
             people_helped : {
                 name : helpPoint.helpedPerson?.name,
@@ -40,8 +41,7 @@ export class HelpPointService {
         }
         await sleep(1000) // test
 
-        const { data } =  await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`,
-            {...body, route_id : body.routeId}, {
+        const { data } =  await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, body, {
             headers : {
                 Authorization : `Bearer ${token}`
             }
@@ -64,10 +64,11 @@ export class HelpPointService {
         })
         return (data?.message as any[]).map((value, _) => ({
             _id : value?._id,
-            routeId : value?.routeId,
+            routeId : value?.route_id,
             createdAt : value?.date_register,
             coords : value?.coords,
-            helpedPerson : value?.people_helped
+            helpedPerson : value?.people_helped,
+            disabled : false
         }))
     }
 
