@@ -10,4 +10,6 @@ type Usuario struct {
 	Phone           string        `bson:"phone" json:"phone"`
 	CompletedRoutes int           `bson:"completed_routes" json:"completed_routes"`
 	ListRoutes      []Route       `bson:"list_routes" json:"list_routes"`
+	Role            string        `bson:"role" json:"role"`
+	Institution     string        `bson:"institution" json:"institution"`
 }

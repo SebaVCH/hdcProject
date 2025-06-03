@@ -18,6 +18,7 @@ func SetupUserRouter(r *gin.Engine) {
 	protected := r.Group("/user")
 	protected.Use(middleware.AuthMiddleware())
 	protected.GET("/profile", userController.GetUserProfile)
+	//protected.GET("/", middleware.RoleMiddleware("admin"), userController.GetAllUsers)
 	protected.GET("/", userController.GetAllUsers)
 	protected.GET("/:id", userController.GetUserByID)
 	protected.PUT("/update", userController.UpdateUserInfo)

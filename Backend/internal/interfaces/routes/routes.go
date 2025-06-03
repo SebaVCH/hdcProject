@@ -1,13 +1,13 @@
 package routes
 
 import (
-	middleware2 "backend/Backend/internal/interfaces/middleware"
+	"backend/Backend/internal/interfaces/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(middleware2.CORSMiddleware())
+	r.Use(middleware.CORSMiddleware())
 	SetupAuthRouter(r)
 	SetupUserRouter(r)
 	SetupRouteRouter(r)

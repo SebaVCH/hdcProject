@@ -7,6 +7,7 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type RouteRepository interface {
@@ -15,6 +16,8 @@ type RouteRepository interface {
 	CreateRoute(route *domain.Route) error
 	UpdateRoute(data map[string]interface{}) (domain.Route, error)
 	DeleteRoute(routeId string) error
+	FinishRoute(id string) error
+	JoinRoute(code string, userID string) (domain.Route, error)
 }
 
 type routeRepository struct {
@@ -58,6 +61,9 @@ func (r *routeRepository) FindByID(routeId string) (domain.Route, error) {
 func (r *routeRepository) CreateRoute(route *domain.Route) error {
 	route.ID = bson.NewObjectID()
 	route.InviteCode = utils.NewInviteCode()
+	if route.Team == nil {
+		route.Team = []bson.ObjectID{}
+	}
 	_, err := r.RouteCollection.InsertOne(context.Background(), route)
 	if err != nil {
 		return err
@@ -98,4 +104,55 @@ func (r *routeRepository) DeleteRoute(routeId string) error {
 
 	_, err = r.RouteCollection.DeleteOne(context.Background(), bson.M{"_id": objID})
 	return err
+}
+
+func (r *routeRepository) FinishRoute(id string) error {
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("ID de ruta inválido")
+	}
+
+	update := bson.M{"$set": bson.M{"status": "Finalizada", "date_finished": time.Now()}}
+	_, err = r.RouteCollection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *routeRepository) JoinRoute(code string, userID string) (domain.Route, error) {
+	var route domain.Route
+	err := r.RouteCollection.FindOne(context.Background(), bson.M{"invite_code": code}).Decode(&route)
+	if err != nil {
+		return domain.Route{}, errors.New("Ruta no encontrada")
+	}
+
+	if route.Status == "Finalizada" {
+		return domain.Route{}, errors.New("No puedes unirte a una ruta finalizada")
+	}
+
+	for _, member := range route.Team {
+		if member.Hex() == userID {
+			return domain.Route{}, errors.New("Ya eres parte de esta ruta")
+		}
+	}
+
+	userObjID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return domain.Route{}, errors.New("ID de usuario inválido")
+	}
+
+	update := bson.M{"$push": bson.M{"team": userObjID}}
+	_, err = r.RouteCollection.UpdateOne(context.Background(), bson.M{"_id": route.ID}, update)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	err = r.RouteCollection.FindOne(context.Background(), bson.M{"_id": route.ID}).Decode(&route)
+	if err != nil {
+		return domain.Route{}, err
+	}
+
+	return route, nil
 }

@@ -8,6 +8,7 @@ import (
 
 type Route struct {
 	ID           bson.ObjectID   `bson:"_id,omitempty" json:"_id,omitempty"`
+	Title        string          `bson:"title" json:"title"`
 	Description  string          `bson:"description" json:"description"`
 	RouteLeader  bson.ObjectID   `bson:"route_leader" json:"route_leader"`
 	InviteCode   string          `bson:"invite_code" json:"invite_code"`

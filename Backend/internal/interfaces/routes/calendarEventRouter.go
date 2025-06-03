@@ -10,7 +10,7 @@ import (
 )
 
 func SetupCalendarEventRouter(r *gin.Engine) {
-	calendarEventRepo := repository.NewCalendarEventRepository(database.Client.Database("pip").Collection("calendarEvents"))
+	calendarEventRepo := repository.NewCalendarEventRepository(database.Client.Database("pip").Collection("calendar_events"))
 	calendarEventUseCase := usecase.NewCalendarEventUseCase(calendarEventRepo)
 	calendarEventController := controller.NewCalendarEventController(calendarEventUseCase)
 

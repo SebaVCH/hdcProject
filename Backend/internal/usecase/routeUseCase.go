@@ -4,6 +4,7 @@ import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -13,6 +14,8 @@ type RouteUseCase interface {
 	CreateRoute(c *gin.Context)
 	UpdateRoute(c *gin.Context)
 	DeleteRoute(c *gin.Context)
+	FinishRoute(c *gin.Context)
+	JoinRoute(c *gin.Context)
 }
 
 type routeUseCase struct {
@@ -89,4 +92,54 @@ func (r routeUseCase) DeleteRoute(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Ruta eliminada correctamente"})
+}
+
+func (r routeUseCase) FinishRoute(c *gin.Context) {
+	routeID := c.Param("id")
+	if routeID == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de ruta no proporcionado"})
+		return
+	}
+
+	err := r.routeRepository.FinishRoute(routeID)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al finalizar la ruta: " + err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Ruta finalizada correctamente"})
+}
+
+func (r routeUseCase) JoinRoute(c *gin.Context) {
+	inviteCode := c.Param("code")
+	if inviteCode == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Código de invitación no proporcionado"})
+		return
+	}
+
+	claims, exists := c.Get("user")
+	if !exists {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	mapClaims, ok := claims.(jwt.MapClaims)
+	if !ok {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	userID, ok := mapClaims["user_id"].(string)
+	if !ok || userID == "" {
+		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "Usuario no autenticado"})
+		return
+	}
+
+	route, err := r.routeRepository.JoinRoute(inviteCode, userID)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al unirse a la ruta: " + err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": route})
 }

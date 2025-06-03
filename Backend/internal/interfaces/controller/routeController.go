@@ -34,3 +34,11 @@ func (r *routeController) UpdateRoute(c *gin.Context) {
 func (r *routeController) DeleteRoute(c *gin.Context) {
 	r.routeUseCase.DeleteRoute(c)
 }
+
+func (r *routeController) FinishRoute(c *gin.Context) {
+	r.routeUseCase.FinishRoute(c)
+}
+
+func (r *routeController) JoinRoute(c *gin.Context) {
+	r.routeUseCase.JoinRoute(c)
+}

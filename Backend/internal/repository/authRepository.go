@@ -33,7 +33,7 @@ func (a *authRepository) Login(email, password string) (string, error) {
 		return "", errors.New("error al iniciar sesión")
 	}
 
-	token, err := utils.GenerateToken(user.ID.Hex())
+	token, err := utils.GenerateToken(user.ID.Hex(), user.Role)
 	if err != nil {
 		return "", err
 	}
@@ -57,6 +57,7 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 	user.Password = hashedPassword
 	user.CompletedRoutes = 0
 	user.ListRoutes = []domain.Route{}
+	user.Role = "voluntario"
 
 	res, err := a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
 	if err != nil {
@@ -65,7 +66,7 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 
 	usuarioID := res.InsertedID.(bson.ObjectID)
 
-	token, err := utils.GenerateToken(usuarioID.Hex())
+	token, err := utils.GenerateToken(usuarioID.Hex(), "voluntario")
 	if err != nil {
 		return "", err
 	}

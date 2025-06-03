@@ -10,7 +10,7 @@ import (
 )
 
 func SetupRouteRouter(r *gin.Engine) {
-	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("routes"))
+	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("route"))
 	routeUseCase := usecase.NewRouteUseCase(routeRepo)
 	routeController := controller.NewRouteController(routeUseCase)
 
@@ -21,4 +21,6 @@ func SetupRouteRouter(r *gin.Engine) {
 	protected.POST("", routeController.CreateRoute)
 	protected.PUT("/:id", routeController.UpdateRoute)
 	protected.DELETE("/:id", routeController.DeleteRoute)
+	protected.PATCH("/:id", routeController.FinishRoute)
+	protected.POST("/join/:code", routeController.JoinRoute)
 }
