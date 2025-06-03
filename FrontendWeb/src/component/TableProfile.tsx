@@ -6,15 +6,24 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 
-export default function TableProfile({ user, setUser } : { user : TProfileResponse, setUser : (arg0: TProfileResponse) => void }) {
+type TableProfileProps = {
+     stateUser : [TProfileResponse , React.Dispatch<React.SetStateAction<TProfileResponse | undefined>> ]
+     stateHasChanges : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
+} 
+
+export default function TableProfile({ stateUser, stateHasChanges } : TableProfileProps ) {
 
      const [ open, setOpen ] = useState(false)
+     const [ user, setUser ] = stateUser
+     const [ , setHasChange ] = stateHasChanges
 
      const onChangeName = (name : string) => {
+          setHasChange(true)
           setUser({ ...user, name }) 
      }
 
      const onChangePhone = (phone : string) => {
+          setHasChange(true)
           setUser({ ...user, phone })
      }
 
@@ -32,10 +41,13 @@ export default function TableProfile({ user, setUser } : { user : TProfileRespon
                               fullWidth
                               label="Nombre"
                               id="outlined-required"
-                              value={user.name == '' ? 'Ingresa tu nombre' : user.name}
+                              placeholder="Ingresa tu Nombre"
+                              color={user.name == '' ? 'warning' : 'primary'}
+                              value={user.name}
                               size="small"
                               onChange={(event) => {onChangeName(event.target.value)}}
                               onFocus={(e) => {e.target.select()}}
+                              focused={user.name == ''}
                          />
                          <TextField 
                               fullWidth
@@ -43,10 +55,13 @@ export default function TableProfile({ user, setUser } : { user : TProfileRespon
                               variant="standard"
                               label="Teléfono"
                               id="outlined-required"
-                              value={user.phone == '' ?  "Ingresa tu número de teléfono" : user.phone  }
+                              placeholder="Ingresa tu Número de Teléfono"
+                              color={user.phone == '' ? 'warning' : 'primary'}
+                              value={user.phone}
                               size="small"
                               onChange={((event) => (onChangePhone(event.target.value)))}
                               onFocus={(e) => (e.target.select())}
+                              focused={user.phone == ''}
                          />
                          <TextField 
                               fullWidth

@@ -13,6 +13,8 @@ export type TRoute = {
     status : string 
     createdAt ?: string
     inviteCode ?: string 
+    completedAt ?: string
+    title ?: string
 }
 
 export type TCreateRouteResponse = TRoute
@@ -70,13 +72,15 @@ export class RouteService {
                 Authorization : `Bearer ${token}`
             }
         })
-
-        return (data?.routes as any[]).map((value, _) => ({
+        console.log("gola", data)
+        return (data?.message as any[]).map((value, _) => ({
             _id : value?._id,
             description : value?.description,
             routeLeader : value?.route_leader,
             status : value?.status,
-            inviteCode : data?.message?.invite_code
+            inviteCode : value?.invite_code,
+            completedAt : (value?.completedAt),
+            title : value?.title,
         }))
     } 
 

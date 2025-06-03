@@ -22,6 +22,8 @@ import MapEvents from "../../component/Map/MapEvents";
 import Mapa from "../../component/Map/Mapa";
 import ButtonCurrentLocation from "../../component/Map/ButtonCurrentLocation";
 import LocationHandler from "../../component/Map/LocationHandler";
+import SpeedDialCreateRoute from "../../component/Button/SpeedDialCreateRoute";
+import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
 
 
 
@@ -56,6 +58,11 @@ export default function Home() {
 
     const [ errorGeolocation, setErrorGeolocation ] = useState<GeolocationPositionError | undefined>()
 
+
+    const [ openSpeedCreateRoute, setOpenSpeedCreateRoute ] = useState(false)
+    const stateOpenCreateRoute = useState(false)
+    const stateOpenJoinRoute = useState(false)
+
     useEffect(() => {
         if(riskQuery.data) {
             setRisks(riskQuery.data)
@@ -68,7 +75,7 @@ export default function Home() {
     return (
         <div className="flex flex-grow">
             { !onSelectLocationMap ?
-                <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-30">
+                <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-10">
                     <CustomDrawer DrawerList={DrawerList}/>
                     <Divider variant="middle"/>
                     <ListIconHome />
@@ -100,13 +107,23 @@ export default function Home() {
 
                 { !onSelectLocationMap ?
                     <>
-                        <Backdrop open={openDialRoute}/>
+                        <Backdrop open={openDialRoute} className="z-10"/>
+                        <Backdrop open={openSpeedCreateRoute} className="z-10"/>
                         { routeStatus ? <ButtonFinalizarRuta /> : <MensajesFijados />}
-                        <div className="absolute bottom-16 right-16 scale-120">
+                        <div className="absolute bottom-16 right-16 scale-120 z-20">
                             {!routeStatus ? 
+                                <SpeedDialCreateRoute
+                                    stateOpen={[openSpeedCreateRoute, setOpenSpeedCreateRoute]}
+                                    stateOpenCreateRoute={[openDialogRoute, setOpenDialogRoute]}
+                                    stateOpenJoinRoute={stateOpenJoinRoute}
+                                >
+                                    <DialogCreateRoute open={openDialogRoute} setOpen={setOpenDialogRoute} />
+                                    <DialogJoinRoute stateOpen={stateOpenJoinRoute} />
+                                </SpeedDialCreateRoute>
+                                /*  
                                 <Fab color="secondary" onClick={() => {setOpenDialogRoute(true)}}>
                                     <NavigationIcon />
-                                </Fab> 
+                                </Fab>  */
                                 :
                                 <SpeedDialRoute 
                                     stateOpen={[ openDialRoute, setOpenDialRoute ]}
@@ -132,7 +149,7 @@ export default function Home() {
                                     />
                                 </SpeedDialRoute>
                             }
-                            <DialogCreateRoute open={openDialogRoute} setOpen={setOpenDialogRoute} />
+                            
                         </div>
                     </>
                     :

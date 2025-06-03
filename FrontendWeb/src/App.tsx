@@ -13,6 +13,7 @@ import { ThemeProvider } from '@emotion/react'
 import { createTheme } from '@mui/material/styles'
 import Schedule from './pages/schedule'
 import { ZoomProvider } from './context/ZoomContext'
+import RouteHistory from './pages/history'
 
 const queryClient = new QueryClient()
 
@@ -43,6 +44,7 @@ function App() {
               <Route path='/profile' element={<Profile />} />
               <Route path='/schedule' element={<Schedule />} />
               <Route path='/admin/usuarios' element={<Usuarios />} />
+              <Route path='/history' element={<RouteHistory />} />
           </Routes>
         </QueryClientProvider>
       </ThemeProvider>
