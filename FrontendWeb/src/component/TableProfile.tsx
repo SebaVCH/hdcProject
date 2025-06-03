@@ -2,8 +2,11 @@ import { Button, Divider, IconButton, InputAdornment, Paper, TextField, Typograp
 import { TProfileResponse } from "../api/services/UserService";
 import { useState } from "react";
 import DialogChangePassword from "./Dialog/DialogChangePassword";
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import RouteIcon from '@mui/icons-material/Route';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 
 type TableProfileProps = {
@@ -96,47 +99,62 @@ export default function TableProfile({ stateUser, stateHasChanges } : TableProfi
                     <Typography variant="h6">
                          Resumen de tu Actividad
                     </Typography>
-                    <Paper elevation={2} className="flex items-start justify-start px-3 py-4 flex-col gap-4 border border-neutral-300">
+                    <Paper elevation={2} className="flex items-start justify-start py-4 flex-col gap-4 border border-neutral-300">
                          <div className="flex grow w-full flex-row gap-1 px-5 justify-between items-center">
-                              <Typography variant='button' color='textSecondary'>
-                                   Última ruta realizada
-                              </Typography>
+                              <div className="flex gap-2">
+                                   <EventAvailableIcon color="action" />
+                                   <Typography variant='button' color='textSecondary'>
+                                        Última ruta realizada
+                                   </Typography>
+                              </div>
                               <Typography variant="body1" color='info'>
                                    20-05-2025
                               </Typography>
                          </div>
                          <Divider  className="w-full" /> 
                          <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <Typography variant='button' color='textSecondary'>
-                                   Cantidad de Rutas Completadas
-                              </Typography>
+                              <div className="flex gap-2">
+                                   <RouteIcon color='secondary' />
+                                   <Typography variant='button' color='textSecondary'>
+                                        Cantidad de Rutas Completadas
+                                   </Typography>
+                              </div>
                               <Typography variant="body1" color='info'>
                                    20
                               </Typography>
                          </div>
                          <Divider className="w-full" />    
                          <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <Typography variant='button' color='textSecondary'>
-                                   Cantidad de Registros Completados
-                              </Typography>
+                              <div className="flex gap-2">
+                                   <QuestionAnswerIcon color="info" />
+                                   <Typography variant='button' color='textSecondary'>
+                                        Cantidad de Registros Completados
+                                   </Typography>
+                              </div>
                               <Typography variant="body1" color='info'>
                                    2
                               </Typography>
                          </div>
                          <Divider className="w-full" />  
                          <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <Typography variant='button' color='textSecondary'>
-                                   Cantidad de Riesgos Completados
-                              </Typography>
+                              <div className="flex gap-2">
+                                   <CrisisAlertIcon color="warning" />
+                                   <Typography variant='button' color='textSecondary'>
+                                        Cantidad de Riesgos Completados
+                                   </Typography>
+                              </div>
                               <Typography variant="body1" color='info'>
                                    10
                               </Typography>
                          </div> 
                          <Divider className="w-full" />  
                          <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <Typography variant='button' color='textSecondary'>
-                                   Fecha Creación de la cuenta
-                              </Typography>
+                              <div className="flex gap-2">
+                                   <HowToRegIcon color="success" />
+                                   <Typography variant='button' color='textSecondary'>
+                                        Fecha Creación de la cuenta
+                                   </Typography>
+                              </div>
                               <Typography variant="body1" color='info'>
                                    20-03-2025
                               </Typography>

@@ -1,4 +1,4 @@
-import { Button, ClickAwayListener, Divider, Fade } from "@mui/material"
+import { Button, CircularProgress, ClickAwayListener, Divider, Fade } from "@mui/material"
 import CustomDrawer from "../../component/CustomDrawer"
 import TableProfile from "../../component/TableProfile"
 import { UserAdapter } from "../../api/adapters/UserAdapter"
@@ -73,6 +73,8 @@ export default function Profile() {
                                     {
                                     mutation.isIdle ? 
                                         "Guardar Cambios" : 
+                                    mutation.isPending ? 
+                                        <Fade in={true}><CircularProgress size={25} color="success"/></Fade> :
                                     mutation.isSuccess ? 
                                         <Fade in={true}><DoneIcon /></Fade> :
                                     mutation.isError ?
