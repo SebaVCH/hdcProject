@@ -14,6 +14,4 @@ type Route struct {
 	Team        []bson.ObjectID `bson:"team" json:"team"`
 	Status      string          `bson:"status" json:"status"`
 	DateCreated time.Time       `bson:"date_created" json:"date_created"`
-	CompletedAt string          `bson:"completedAt" json:"completedAt"`
-	Title       string          `bson:"title" json:"title"`
 }
