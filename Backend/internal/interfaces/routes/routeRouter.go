@@ -10,7 +10,7 @@ import (
 )
 
 func SetupRouteRouter(r *gin.Engine) {
-	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("routes"))
+	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("route"))
 	routeUseCase := usecase.NewRouteUseCase(routeRepo)
 	routeController := controller.NewRouteController(routeUseCase)
 
