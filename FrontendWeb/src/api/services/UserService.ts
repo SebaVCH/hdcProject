@@ -2,6 +2,7 @@
 import axios, { Axios, AxiosError } from "axios"
 import { axiosInstance } from "./axiosInstance"
 import { IUser } from "../interfaces/IUser"
+import { sleep } from "../../utils/sleep"
 
 
 export type TLoginResponse = {
@@ -88,6 +89,9 @@ export class UserService {
     }
 
     static async UpdateProfile(user : TProfileRequest, accessToken : string) : Promise<TProfileUpdateResponse> {
+
+
+        await sleep(1000)
         
         const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/user/update`, user, {
             headers: {

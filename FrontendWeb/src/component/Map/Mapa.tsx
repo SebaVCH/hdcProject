@@ -1,11 +1,11 @@
-import L, { svg } from "leaflet";
-import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
+import L, { LatLngExpression, svg } from "leaflet";
+import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
 import { Divider, radioClasses, Zoom } from "@mui/material";
 import { format } from 'date-fns';
 import { THelpPoint } from "../../api/services/HelpPointService";
 import { TRisk } from "../../api/services/RiskService";
 import { Position } from "../../utils/getCurrentLocation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ZoomHandler from "./ZoomHandler";
 
 var greenIcon = new L.Icon({
@@ -40,13 +40,33 @@ type MapaProps = {
     stateCurrentLocation : [ Position, React.Dispatch<React.SetStateAction<Position>> ]
     helpPoints : THelpPoint[]
     risks : TRisk[]
-    children : React.ReactNode
+    children ?: React.ReactNode
+    enableTraceLine ?: boolean
 } 
 
 
-export default function Mapa({ stateCurrentLocation, risks, helpPoints, children } : MapaProps) {
+export default function Mapa({ stateCurrentLocation, risks, helpPoints, children, enableTraceLine } : MapaProps) {
 
     const [ currentLocation,  ] = stateCurrentLocation
+    const [ mapTracedLineRoute, setMapTracedLineRoute ] = useState<Map<string, LatLngExpression[]>>(new Map<string, LatLngExpression[]>())
+
+
+    useEffect(() => {
+
+        if(enableTraceLine) {
+            const map = helpPoints.reduce<Map<string, LatLngExpression[]>>((acc : Map<string, LatLngExpression[]>, hp) => {
+                if(hp.disabled) return acc 
+
+                if(!acc.has(hp.routeId)) {
+                    acc.set(hp.routeId, [])
+                }
+                acc.set(hp.routeId, [...(acc.get(hp.routeId) as LatLngExpression[]), [hp.coords[0], hp.coords[1]] ])
+                return acc
+            }, new Map<string, LatLngExpression[]>())
+            setMapTracedLineRoute(map)
+        } 
+    }, [enableTraceLine, helpPoints])
+
     
     return (
         <>
@@ -67,6 +87,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                 <ZoomHandler />
 
                 {helpPoints.map((helpPoint, index) => (
+                    helpPoint.disabled ? null : 
                     <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)}>
                         <Popup>
                             <div className="flex flex-col items-center justify-center gap-2">
@@ -80,9 +101,21 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                     </Marker>
                 ))}
 
+                { Array.from(mapTracedLineRoute.entries()).map(([routeId, coords ], index) => (
+                    <Polyline 
+                        pathOptions={{
+                            color : '#800022',
+                            opacity : 0.5,
+                            weight : 3
+
+                        }} 
+                        positions={coords}
+                    />
+                ))}
+
                 {risks.map((risk, index) => (
                     <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
-                        <Popup >
+                        <Popup>
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <b>{risk.description}</b>
                                 <Divider className="w-full" variant="middle"/>

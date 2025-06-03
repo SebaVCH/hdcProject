@@ -36,7 +36,7 @@ export default function ListIconHome() {
     return(
         <div className="flex flex-col py-5 gap-7 justify-start items-center">
             <Tooltip title="Perfil"><IconButton onClick={onClickProfile}><AccountBoxIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
-            <Tooltip title="Historial"><IconButton><HistoryIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
+            <Tooltip title="Historial"><IconButton onClick={onClickHistory}><HistoryIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
             <Tooltip title="Agendar ruta"><IconButton onClick={onClickSchedule}><EventIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
             <Tooltip title="Enviar aviso"><IconButton onClick={handleClickOpen}><CampaignIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
             <Tooltip title="Gestionar Usuarios"><IconButton onClick={onClickUsers}><PeopleAltIcon htmlColor='gray' fontSize='large'/></IconButton></Tooltip>
