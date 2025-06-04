@@ -28,7 +28,7 @@ export default function Profile() {
     const { accessToken } = useSessionStore()
     const { data, isLoading, isSuccess } = UserAdapter.useGetProfile(accessToken)
     const [ user, setUser ] = useState<TProfileResponse>()
-    const mutation = UserAdapter.useUpdateProfile(user as TProfileRequest, accessToken as string)
+    const mutation = UserAdapter.useUpdateProfile( accessToken as string)
     const [ hasChange, setHasChange ] = useState(false)
 
     const [ resumenActividad, setResumenActividad ] = useState<TResumenActividad>({})
@@ -41,7 +41,7 @@ export default function Profile() {
             const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
             setResumenActividad({...resumenActividad, 
                 amountCompletedRoutes : routes.length, 
-                lastRouteDate : format(new Date(routes[0].completedAt as string), "d 'de' MMMM 'de' yyyy ", { locale: es})
+                lastRouteDate : routes.length != 0 ? format(new Date(routes[0].completedAt as string), "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
             })
         } 
 
@@ -56,7 +56,7 @@ export default function Profile() {
     const onSubmitChanges = () => {
         if(mutation.isSuccess)
             return 
-        mutation.mutate()
+        mutation.mutate(user as TProfileRequest)
     }
 
     const handleClickAway = () => {

@@ -47,9 +47,9 @@ export class UserAdapter {
         })
     }
 
-    static useUpdateProfile(user : TProfileRequest, accessToken : string) {
+    static useUpdateProfile(accessToken : string) {
         return useMutation({
-            mutationFn: () => (UserService.UpdateProfile(user, accessToken)),
+            mutationFn: (user : TProfileRequest) => (UserService.UpdateProfile(user, accessToken)),
 
         })
     }
