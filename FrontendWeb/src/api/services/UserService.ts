@@ -29,11 +29,16 @@ export type TProfileResponse = {
     phone : string 
     completedRoutes : string 
     listRoutes : string[]
-    password ?: string
 }
 
 
-export type TProfileRequest = TProfileResponse 
+export type TProfileRequest = TProfileResponse | TUpdatePassword
+
+export type TUpdatePassword = {
+    newPassword ?: string
+    confirmNewPassword ?: string
+    currentPassword ?: string
+}
 
 export type TProfileUpdateResponse = TProfileResponse
 
@@ -79,8 +84,7 @@ export class UserService {
                 email: data?.message?.email,
                 phone: data?.message?.phone,
                 completedRoutes: data?.message?.completedRoutes,
-                listRoutes: data?.message?.listRoutes,
-                password: data?.message?.password
+                listRoutes: data?.message?.listRoutes
             };
         } catch (error: any) {
             console.log(error)

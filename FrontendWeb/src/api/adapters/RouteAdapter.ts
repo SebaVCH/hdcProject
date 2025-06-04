@@ -11,17 +11,19 @@ export class RouteAdapter {
         })
     }
 
-    static useGetRoutes( accessToken ?: string )  {
+    static useGetRoutes( accessToken ?: string, enabled ?: boolean )  {
         return useQuery({
             queryKey: ['routes'],
-            queryFn: () => (RouteService.FindAllRoute( accessToken ))
+            queryFn: () => (RouteService.FindAllRoute( accessToken )),
+            enabled : enabled
         })
     }
 
-    static useGetRouteByID( routeId : string, accessToken ?: string ) {
+    static useGetRouteByID( routeId : string, accessToken ?: string, enabled ?: boolean ) {
         return useQuery({
             queryKey : ['route'],
-            queryFn : () => (RouteService.FindRouteByID(routeId, accessToken))
+            queryFn : () => (RouteService.FindRouteByID(routeId, accessToken)),
+            enabled : enabled
         })
     }
 
@@ -30,4 +32,14 @@ export class RouteAdapter {
             mutationFn : () => (RouteService.UpdateRoute(routeId, body, accessToken ))
         })
     } 
+
+    static useGetRouteByUserID(userId ?: string, accessToken ?: string, enabled ?: boolean) {
+        return useQuery({
+            queryKey : ['routeByUserID', userId],
+            queryFn : () => (RouteService.GetRoutesByUserId(userId as string, accessToken )),
+            enabled : enabled ?? false
+            
+        })
+    }
+
 }

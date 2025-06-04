@@ -1,31 +1,51 @@
 import { Button, CircularProgress, ClickAwayListener, Divider, Fade } from "@mui/material"
 import CustomDrawer from "../../component/CustomDrawer"
-import TableProfile from "../../component/TableProfile"
 import { UserAdapter } from "../../api/adapters/UserAdapter"
 import useSessionStore from "../../stores/useSessionStore"
 import { TProfileRequest, TProfileResponse } from "../../api/services/UserService"
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
 import ListIconHome from "../../component/ListIconHome"
 import DrawerList from "../../component/DrawerList"
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
+import TableProfile from "./TableProfile"
+import { RouteAdapter } from "../../api/adapters/RouteAdapter"
+import compareSort from "../../utils/compareDate"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
+
+
+export type TResumenActividad = {
+    lastRouteDate ?: string 
+    amountCompletedRoutes ?: number 
+    amountCompletedRegister ?: number 
+    amountRiskDone ?: number 
+    registerDate ?: string  
+}
 
 export default function Profile() {
 
-    const navigate = useNavigate()
     const { accessToken } = useSessionStore()
     const { data, isLoading, isSuccess } = UserAdapter.useGetProfile(accessToken)
     const [ user, setUser ] = useState<TProfileResponse>()
-    const mutation = UserAdapter.useUpdateProfile(user as TProfileRequest, accessToken as string)
+    const mutation = UserAdapter.useUpdateProfile( accessToken as string)
     const [ hasChange, setHasChange ] = useState(false)
 
+    const [ resumenActividad, setResumenActividad ] = useState<TResumenActividad>({})
 
-    useEffect(() => {
-        if(!accessToken) {
-            navigate('/login')
-        }
-    }, [])
+
+    const useQueryRoutesByUser = RouteAdapter.useGetRouteByUserID(user?._id, accessToken, true)
+
+    useEffect(() => { // Calcular total rutas completadas & última fecha ruta
+        if(useQueryRoutesByUser.data && user?._id) {
+            const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
+            setResumenActividad({...resumenActividad, 
+                amountCompletedRoutes : routes.length, 
+                lastRouteDate : routes.length != 0 ? format(new Date(routes[0].completedAt as string), "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
+            })
+        } 
+
+    }, [useQueryRoutesByUser.data, user?._id])
 
     useEffect(() => {
         if(data) {
@@ -36,7 +56,7 @@ export default function Profile() {
     const onSubmitChanges = () => {
         if(mutation.isSuccess)
             return 
-        mutation.mutate()
+        mutation.mutate(user as TProfileRequest)
     }
 
     const handleClickAway = () => {
@@ -88,7 +108,10 @@ export default function Profile() {
                             }
                         </div>
                         <Divider className="my-4 w-full" />
-                        { isLoading || !isSuccess || !user ? <p>Cargando...</p>  : <TableProfile stateHasChanges={[hasChange, setHasChange]} stateUser={[user, setUser]}/> }
+                        { isLoading || !isSuccess || !user ? 
+                        <p>Cargando...</p>  
+                        : 
+                        <TableProfile stateResumenActividad={[resumenActividad, setResumenActividad]} stateHasChanges={[hasChange, setHasChange]} stateUser={[user, setUser]}/> }
                     </div>
                 </div>
             </ClickAwayListener>

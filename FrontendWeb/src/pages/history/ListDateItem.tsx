@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ListItemButton, ListItemText, Collapse, List, Divider } from "@mui/material"
+import { ListItemButton, ListItemText, Collapse, List, Divider, ListItemButtonProps } from "@mui/material"
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { TRoute } from "../../api/services/RouteService";
@@ -16,14 +16,22 @@ type ListRouteItemProps = {
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocation : [ number[], React.Dispatch<React.SetStateAction<number[]>> ] 
     onlyUser : boolean
-}
+} & ListItemButtonProps
 
-export default function ListDateItem({ date, defaultOpen = false, routes, stateHelpPoints, stateLocation, stateShowLocation, onlyUser } : ListRouteItemProps) {
+export default function ListDateItem({ date, defaultOpen = false, routes, stateHelpPoints, stateLocation, stateShowLocation, onlyUser, onClick, ...props } : ListRouteItemProps) {
     
     const [ open, setOpen ] = useState(defaultOpen)
-    const [ , setHelpPoints ] = stateHelpPoints
+    const [ helpPoints , setHelpPoints ] = stateHelpPoints
 
-    const handleClick = () => {
+    const [ selectedIndex, setSelectedIndex ] = useState(0)
+    const handleClickSelected = (_ : React.MouseEvent<HTMLDivElement, MouseEvent>, index : number) => {
+        setSelectedIndex(index === selectedIndex ? -1 : index)
+    }
+
+    const handleClick = (e :React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if(onClick) {
+            onClick(e)
+        }
         setOpen(prev => !prev)
     }
 
@@ -38,7 +46,7 @@ export default function ListDateItem({ date, defaultOpen = false, routes, stateH
 
     return ( 
         <>
-            <ListItemButton onClick={handleClick}>
+            <ListItemButton onClick={handleClick} {...props} selected={open}>
                 <ListItemText primary={date} />
                 {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </ListItemButton>
@@ -51,7 +59,10 @@ export default function ListDateItem({ date, defaultOpen = false, routes, stateH
                             stateShowLocation={stateShowLocation} 
                             stateHelpPoints={stateHelpPoints} 
                             route={route} 
-                            key={i}/>
+                            key={i}
+                            
+
+                        />
                     ))}
                 </List>
             </Collapse>

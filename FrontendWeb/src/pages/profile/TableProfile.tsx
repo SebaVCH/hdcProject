@@ -1,23 +1,26 @@
 import { Button, Divider, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
-import { TProfileResponse } from "../api/services/UserService";
 import { useState } from "react";
-import DialogChangePassword from "./Dialog/DialogChangePassword";
+import { TProfileResponse } from "../../api/services/UserService";
+import DialogChangePassword from "../../component/Dialog/DialogChangePassword";
+import { TResumenActividad } from ".";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import RouteIcon from '@mui/icons-material/Route';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
-
+import ResumeItem from "./ResumeItem";
 
 type TableProfileProps = {
+     stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
      stateUser : [TProfileResponse , React.Dispatch<React.SetStateAction<TProfileResponse | undefined>> ]
      stateHasChanges : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
 } 
 
-export default function TableProfile({ stateUser, stateHasChanges } : TableProfileProps ) {
+export default function TableProfile({ stateUser, stateHasChanges, stateResumenActividad } : TableProfileProps ) {
 
      const [ open, setOpen ] = useState(false)
      const [ user, setUser ] = stateUser
+     const [ resumen, setResumen ] = stateResumenActividad
      const [ , setHasChange ] = stateHasChanges
 
      const onChangeName = (name : string) => {
@@ -100,65 +103,35 @@ export default function TableProfile({ stateUser, stateHasChanges } : TableProfi
                          Resumen de tu Actividad
                     </Typography>
                     <Paper elevation={2} className="flex items-start justify-start py-4 flex-col gap-4 border border-neutral-300">
-                         <div className="flex grow w-full flex-row gap-1 px-5 justify-between items-center">
-                              <div className="flex gap-2">
-                                   <EventAvailableIcon color="action" />
-                                   <Typography variant='button' color='textSecondary'>
-                                        Última ruta realizada
-                                   </Typography>
-                              </div>
-                              <Typography variant="body1" color='info'>
-                                   20-05-2025
-                              </Typography>
-                         </div>
+                         <ResumeItem 
+                              icon={<EventAvailableIcon color="action" />} 
+                              activityDescription={<Typography variant="button" color="textSecondary"> última Ruta realizada</Typography>}
+                              activityValue={<Typography variant="button" color="info">{resumen.lastRouteDate}</Typography>}
+                         />
+                         <Divider className="w-full" />
+                         <ResumeItem
+                              icon={<RouteIcon color='secondary' />}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Rutas Completadas</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>{resumen.amountCompletedRoutes}</Typography>}
+                         />
                          <Divider  className="w-full" /> 
-                         <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <div className="flex gap-2">
-                                   <RouteIcon color='secondary' />
-                                   <Typography variant='button' color='textSecondary'>
-                                        Cantidad de Rutas Completadas
-                                   </Typography>
-                              </div>
-                              <Typography variant="body1" color='info'>
-                                   20
-                              </Typography>
-                         </div>
+                         <ResumeItem
+                              icon={<QuestionAnswerIcon color="info" />}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Registros Completados</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>2</Typography>}
+                         />
                          <Divider className="w-full" />    
-                         <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <div className="flex gap-2">
-                                   <QuestionAnswerIcon color="info" />
-                                   <Typography variant='button' color='textSecondary'>
-                                        Cantidad de Registros Completados
-                                   </Typography>
-                              </div>
-                              <Typography variant="body1" color='info'>
-                                   2
-                              </Typography>
-                         </div>
-                         <Divider className="w-full" />  
-                         <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <div className="flex gap-2">
-                                   <CrisisAlertIcon color="warning" />
-                                   <Typography variant='button' color='textSecondary'>
-                                        Cantidad de Riesgos Completados
-                                   </Typography>
-                              </div>
-                              <Typography variant="body1" color='info'>
-                                   10
-                              </Typography>
-                         </div> 
-                         <Divider className="w-full" />  
-                         <div className="flex grow w-full flex-row gap-3 px-5 justify-between items-center">
-                              <div className="flex gap-2">
-                                   <HowToRegIcon color="success" />
-                                   <Typography variant='button' color='textSecondary'>
-                                        Fecha Creación de la cuenta
-                                   </Typography>
-                              </div>
-                              <Typography variant="body1" color='info'>
-                                   20-03-2025
-                              </Typography>
-                         </div>                                                    
+                         <ResumeItem
+                              icon={<CrisisAlertIcon color="warning" />}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Completados</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>10</Typography>}
+                         />
+                         <Divider className="w-full" />   
+                         <ResumeItem
+                              icon={<HowToRegIcon color="success" />}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Fecha Creación de la cuenta</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>20-03-2025</Typography>}
+                         />                                              
                     </Paper>
                     
                </div>

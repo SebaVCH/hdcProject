@@ -14,6 +14,7 @@ import { createTheme } from '@mui/material/styles'
 import Schedule from './pages/schedule'
 import { ZoomProvider } from './context/ZoomContext'
 import RouteHistory from './pages/history'
+import { HelpPointUpdateProvider } from './context/HelpPointUpdateContext'
 
 const queryClient = new QueryClient()
 
@@ -44,7 +45,12 @@ function App() {
               <Route path='/profile' element={<Profile />} />
               <Route path='/schedule' element={<Schedule />} />
               <Route path='/admin/usuarios' element={<Usuarios />} />
-              <Route path='/history' element={<RouteHistory />} />
+              <Route path='/history' element={
+                <HelpPointUpdateProvider>
+                  <RouteHistory />
+                </HelpPointUpdateProvider>
+                } 
+              />
           </Routes>
         </QueryClientProvider>
       </ThemeProvider>
