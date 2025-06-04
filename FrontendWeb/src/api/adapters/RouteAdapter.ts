@@ -33,11 +33,11 @@ export class RouteAdapter {
         })
     } 
 
-    static useGetRouteByUserID(userId ?: string, accessToken ?: string) {
+    static useGetRouteByUserID(userId ?: string, accessToken ?: string, enabled ?: boolean) {
         return useQuery({
             queryKey : ['routeByUserID', userId],
             queryFn : () => (RouteService.GetRoutesByUserId(userId as string, accessToken )),
-            enabled : false
+            enabled : enabled ?? false
             
         })
     }

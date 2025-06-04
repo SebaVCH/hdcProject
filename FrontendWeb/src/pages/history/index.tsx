@@ -16,20 +16,7 @@ import { endOfWeek, format, startOfWeek } from "date-fns";
 import { es } from 'date-fns/locale';
 import { UserAdapter } from "../../api/adapters/UserAdapter";
 import DialogUpdateAtended from "../../component/Dialog/DialogUpdateAttended";
-
-
-function compareSort(a : TRoute, b : TRoute) {
-    if(!a.completedAt || !b.completedAt) {
-        return 0
-    }
-    if(a.completedAt == b.completedAt) {
-        return 0
-    } else if(a.completedAt < b.completedAt) {
-        return -1
-    } else {
-        return 1
-    }
-}
+import compareSort from "../../utils/compareDate";
 
 
 function getFormatDate(a : Date, opt : string) {
