@@ -4,14 +4,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { Alert, Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Alert,  Typography } from '@mui/material';
+import { useEffect } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
 import { RouteAdapter } from '../../api/adapters/RouteAdapter';
-import { TRoute } from '../../api/services/RouteService';
 import CloseDialogButton from '../Button/CloseDialogButton';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({

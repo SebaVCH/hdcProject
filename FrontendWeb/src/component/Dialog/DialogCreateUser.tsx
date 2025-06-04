@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControl, FormControlLabel, FormHelperText, Input, InputLabel, isMuiElement, Snackbar, TextField, Typography } from '@mui/material';
+import { FormControl, Input, InputLabel, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { UserAdapter } from '../../api/adapters/UserAdapter';
 import { isValidEmail } from '../../utils/verifyInput';

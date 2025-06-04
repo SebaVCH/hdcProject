@@ -1,4 +1,4 @@
-import { Autocomplete, AutocompleteChangeDetails, AutocompleteChangeReason, AutocompleteProps, TextField } from "@mui/material";
+import { Autocomplete, AutocompleteProps, TextField } from "@mui/material";
 
 interface ComboBoxProps extends Omit<AutocompleteProps<string, false | true, false | true, false | true>, 'renderInput'> {
   label: string;

@@ -1,13 +1,13 @@
-import { Checkbox, Collapse, Divider, FormControl, FormControlLabel, FormGroup, InputLabel, List, ListItemButton, ListItemText, ListSubheader, Select, Typography } from "@mui/material";
+import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListSubheader, Typography } from "@mui/material";
 import { TRoute } from "../../api/services/RouteService";
 import ListDateItem from "./ListDateItem";
 import { THelpPoint } from "../../api/services/HelpPointService";
-import { useEffect, useState } from "react";
 import ComboBox from "../../component/Button/ComboBox";
 
 
 
 type ListHistoryProps = {
+    stateOnlyUser : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
     stateRoutes : [ Map<string, TRoute[]>, React.Dispatch<React.SetStateAction<Map<string, TRoute[]>>> ]
     stateHelpPoints : [ THelpPoint[], React.Dispatch<React.SetStateAction<THelpPoint[]>> ] 
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
@@ -15,11 +15,12 @@ type ListHistoryProps = {
     stateOPFecha : [ string, React.Dispatch<React.SetStateAction<string>> ]
 }
 
-export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLocation, stateLocation, stateOPFecha } : ListHistoryProps) {
+export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLocation, stateLocation, stateOPFecha, stateOnlyUser } : ListHistoryProps) {
 
-    const [ routes, setRoutes ] = stateRoutes
+    const [ routes,  ] = stateRoutes
     const [ opFecha, setOPFecha ] = stateOPFecha
-    const [ onlyUser, setOnlyUser ] = useState(false)
+    const [ onlyUser, setOnlyUser ] = stateOnlyUser
+
 
     return (
         <List 
@@ -44,7 +45,7 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
                                     label={"Agrupar por"} 
                                     options={['Día', 'Semana', 'Mes']} 
                                     value={opFecha} 
-                                    onChange={(e, value) => {setOPFecha(value as string)}}
+                                    onChange={(_, value) => {setOPFecha(value as string)}}
                                     />
                                     <FormControlLabel                                
                                         value={onlyUser}
@@ -60,15 +61,24 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
             }
         >
             { Array.from(routes.entries()).map(([date, routes ], index) => (
-                <ListDateItem 
-                  onlyUser={onlyUser}
-                  stateLocation={stateLocation} 
-                  stateShowLocation={stateShowLocation} 
-                  stateHelpPoints={stateHelpPoints} 
-                  routes={routes} 
-                  date={date} 
-                  key={date} 
-                  defaultOpen={index == 0} 
+                <ListDateItem
+                    onlyUser={onlyUser}
+                    stateLocation={stateLocation} 
+                    stateShowLocation={stateShowLocation} 
+                    stateHelpPoints={stateHelpPoints} 
+                    routes={routes} 
+                    date={date} 
+                    key={date} 
+                    defaultOpen={index == 0} 
+                    sx={{
+                        '&.Mui-selected': {
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                        },
+                        '&.Mui-selected:hover': {
+                        backgroundColor: 'primary.dark',
+                        },
+                    }}
                 />
             ))}
         </List>

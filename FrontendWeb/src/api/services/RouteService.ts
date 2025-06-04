@@ -15,6 +15,7 @@ export type TRoute = {
     inviteCode ?: string 
     completedAt ?: string
     title ?: string
+    team ?: string[]
 }
 
 export type TCreateRouteResponse = TRoute
@@ -61,7 +62,7 @@ export class RouteService {
             routeLeader : data?.message?.route_leader,
             status : data?.message?.status,
             createdAt : data?.message?.date_created,
-            inviteCode : data?.message?.invite_code
+            inviteCode : data?.message?.invite_code,
         }
     }
 
@@ -72,15 +73,15 @@ export class RouteService {
                 Authorization : `Bearer ${token}`
             }
         })
-        console.log("gola", data)
         return (data?.message as any[]).map((value, _) => ({
             _id : value?._id,
             description : value?.description,
             routeLeader : value?.route_leader,
             status : value?.status,
             inviteCode : value?.invite_code,
-            completedAt : (value?.completedAt),
+            completedAt : (value?.date_finished),
             title : value?.title,
+            team : value?.team ?? []
         }))
     } 
 
@@ -109,6 +110,19 @@ export class RouteService {
             createdAt : data?.message?.date_created,
             inviteCode : data?.message?.invite_code
         }
+    }
+
+    static async GetRoutesByUserId( userId : string, token ?: string) : Promise<TRoute[]>{
+
+        const routes = await RouteService.FindAllRoute(token)
+
+        return routes.reduce<TRoute[]>((call : TRoute[], route) => {
+
+            if(route.routeLeader === userId || (route.team as string[]).includes(userId) ) {
+                call.push(route)
+            }
+            return call
+        }, [])
     }
 
 

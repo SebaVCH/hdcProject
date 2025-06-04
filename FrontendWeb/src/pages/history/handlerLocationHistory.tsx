@@ -15,7 +15,7 @@ export default function HandlerLocationHistory({ stateLocation, stateShowLocatio
     
     const map = useMap()
     const [ showLocation, setShowLocation ] = stateShowLocation
-    const [ location, setLocation ] = stateLocation
+    const [ location, _ ] = stateLocation
 
     useEffect(() => {
         if(showLocation) {

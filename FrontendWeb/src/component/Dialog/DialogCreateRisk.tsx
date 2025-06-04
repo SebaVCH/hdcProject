@@ -13,7 +13,6 @@ import { LocationMethod } from '../../api/interfaces/Enums';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { RiskAdapter } from '../../api/adapters/RiskAdapter';
-import { TRisk } from '../../api/services/RiskService';
 import useSessionStore from '../../stores/useSessionStore';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({

@@ -1,6 +1,6 @@
 import L, { LatLngExpression, svg } from "leaflet";
 import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { Divider, radioClasses, Zoom } from "@mui/material";
+import { Divider, radioClasses, TextField, Zoom } from "@mui/material";
 import { format } from 'date-fns';
 import { THelpPoint } from "../../api/services/HelpPointService";
 import { TRisk } from "../../api/services/RiskService";
@@ -88,8 +88,8 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
                 {helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 
-                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)}>
-                        <Popup>
+                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} draggable >
+                        <Popup >
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <b>Edad: {helpPoint.helpedPerson?.age === -1 ? 'N/A' : helpPoint.helpedPerson?.age}</b>
                                 <Divider className="w-full"  variant='middle'/>
@@ -103,6 +103,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
                 { Array.from(mapTracedLineRoute.entries()).map(([routeId, coords ], index) => (
                     <Polyline 
+                        key={index}
                         pathOptions={{
                             color : '#800022',
                             opacity : 0.5,

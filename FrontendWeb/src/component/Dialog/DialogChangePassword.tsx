@@ -6,8 +6,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControlLabel, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { TextField } from '@mui/material';
+import { useState } from 'react';
 import { UserAdapter } from '../../api/adapters/UserAdapter';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({

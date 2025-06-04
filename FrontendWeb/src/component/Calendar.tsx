@@ -3,8 +3,8 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useEffect, useState } from 'react'
-import { CalendarApi, DateSelectArg, EventInput } from '@fullcalendar/core'
-import { Card, Input, Button, TextField } from '@mui/material'
+import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
+import { Card, Button, TextField } from '@mui/material'
 import ComboBox from './Button/ComboBox'
 
 
