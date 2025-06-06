@@ -88,7 +88,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
                 {helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 
-                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} draggable >
+                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
                         <Popup >
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <b>Edad: {helpPoint.helpedPerson?.age === -1 ? 'N/A' : helpPoint.helpedPerson?.age}</b>

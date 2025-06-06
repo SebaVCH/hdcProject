@@ -1,7 +1,6 @@
 import { Paper, IconButton } from "@mui/material";
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
 import GpsOffIcon from '@mui/icons-material/GpsOff';
-import { useEffect } from "react";
 
 type CurrentLocationProps = {
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]

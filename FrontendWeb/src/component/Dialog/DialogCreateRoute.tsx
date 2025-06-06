@@ -16,6 +16,8 @@ import { RouteStatus } from '../../api/interfaces/Enums';
 import InputDescription from '../Input/InputDescription';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
+import CloseDialogButton from '../Button/CloseDialogButton';
+import { isSunday } from 'date-fns';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -26,10 +28,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
+type DialogCreateRouteProps = {
+    stateOpen : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
+}
 
-export default function DialogCreateRoute({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
-   
+export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps) {
+
+    const [ open, setOpen ] = stateOpen
     const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
     const [ acept, setAcept ] = useState(false)
     const [ confirmation, setConfirmation ] = useState(false)
@@ -45,13 +51,12 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
 
 
     const handleClose = () => {
+        if(confirmation) {
+            setRouteStatus(true)
+        }
         setOpen(false)
     }
 
-    useEffect(() => {
-       setAcept(routeStatus)
-       setConfirmation(routeStatus)
-    }, [routeStatus])
 
     const handleDescriptionInput = (e : React.ChangeEvent<HTMLInputElement>) => {
         setRoute({...route, description : e.target.value})
@@ -67,7 +72,8 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
     useEffect(() => {
         if(data) {
             setRoute(data)
-            setRouteStatus(true)
+            setAcept(true)
+            setConfirmation(true)
             setRouteId(data._id)
         }
     }, [data])
@@ -94,18 +100,8 @@ export default function DialogCreateRoute({ open, setOpen } : { open : boolean, 
                 <DialogTitle className='m-0 p-2' id="ruta-titulo">
                     Crear Una Ruta
                 </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={(theme) => ({
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: theme.palette.grey[600],
-                    })}
-                >
-                    <CloseIcon />
-                </IconButton>
+                <CloseDialogButton handleClose={handleClose} />
+                
                 <DialogContent className='flex flex-col gap-5'>
                     {!acept ? 
                         <>

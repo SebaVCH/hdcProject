@@ -114,10 +114,10 @@ export default function Home() {
                             {!routeStatus ? 
                                 <SpeedDialCreateRoute
                                     stateOpen={[openSpeedCreateRoute, setOpenSpeedCreateRoute]}
-                                    stateOpenCreateRoute={[openDialogRoute, setOpenDialogRoute]}
+                                    stateOpenCreateRoute={stateOpenCreateRoute}
                                     stateOpenJoinRoute={stateOpenJoinRoute}
                                 >
-                                    <DialogCreateRoute open={openDialogRoute} setOpen={setOpenDialogRoute} />
+                                    <DialogCreateRoute stateOpen={stateOpenCreateRoute} />
                                     <DialogJoinRoute stateOpen={stateOpenJoinRoute} />
                                 </SpeedDialCreateRoute>
                                 /*  

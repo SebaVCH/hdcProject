@@ -42,4 +42,16 @@ export class RouteAdapter {
         })
     }
 
+    static useJoinRouteMutation( accessToken ?: string) {
+        return useMutation({
+            mutationFn : (inviteCode : string) => (RouteService.JoinRoute(inviteCode, accessToken)) 
+        })
+    }
+
+    static useFinishRouteMutation( accessToken ?: string ) {
+        return useMutation({
+            mutationFn : (routeId : string) => (RouteService.FinishRoute(routeId, accessToken))
+        })
+    }
+
 }
