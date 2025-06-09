@@ -10,7 +10,7 @@ export type TRoute = {
     _id : string
     description  : string 
     routeLeader : string 
-    status : string 
+    status : RouteStatus 
     createdAt ?: string
     inviteCode ?: string 
     completedAt ?: string

@@ -43,7 +43,13 @@ export default function Usuarios() {
         .then((response) => response.blob())
         .then((blob) => {
             var _url = window.URL.createObjectURL(blob)
-            window.open(_url, "_blank")?.focus()
+            const a = document.createElement('a');
+            a.href = _url;
+            a.download = 'personas_ayudadas.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(_url);
         }).catch((err) => {
             console.log(err)
         })

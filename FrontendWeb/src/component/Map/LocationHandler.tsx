@@ -1,29 +1,36 @@
-import { useEffect, useState } from "react"
-import { Circle, CircleMarker, LayerGroup, Marker, useMap } from "react-leaflet"
+import { useEffect } from "react"
+import { Circle, LayerGroup, Marker, useMap } from "react-leaflet"
 import { Position } from "../../utils/getCurrentLocation"
 import { useZoom } from "../../context/ZoomContext"
+import useSessionStore from "../../stores/useSessionStore"
 
 
 
 type LocationHandlerProps = {
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateCurrentLocation : [ Position, React.Dispatch<React.SetStateAction<Position>> ]
+    stateErrorGeolocation : [GeolocationPositionError | undefined, React.Dispatch<React.SetStateAction<GeolocationPositionError | undefined>>]
 }
 
-export default function LocationHandler({ stateShowLocation, stateCurrentLocation } : LocationHandlerProps)  {
+export default function LocationHandler({ stateShowLocation, stateCurrentLocation, stateErrorGeolocation } : LocationHandlerProps)  {
+
 
     const map = useMap()
+    const [ , setErrorGeolocation ] = stateErrorGeolocation
+    const { enableGPS, setEnableGPS } = useSessionStore()
     const [ showLocation, setShowLocation ] = stateShowLocation
     const [ currentLocation, setCurrentLocation ] = stateCurrentLocation
     const [ isZooming, ] = useZoom()
 
     useEffect(() => {
+        
+        if(!enableGPS) return 
 
         const handleSuccess = ( position : GeolocationPosition) => {
             setCurrentLocation({latitude : position.coords.latitude, longitude : position.coords.longitude})
         }
         const handleError = ( error : GeolocationPositionError) => {
-            alert(error.message)
+            setErrorGeolocation(error)
         }
         const id = navigator.geolocation.watchPosition( handleSuccess, handleError, {
             enableHighAccuracy : true,
@@ -33,23 +40,28 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
         return () => {
             navigator.geolocation.clearWatch(id)
         }
-    }, [])
+    }, [enableGPS])
 
 
     useEffect(() => {
-        if(showLocation) {
+        if(showLocation && currentLocation.latitude) {
             map.flyTo([currentLocation.latitude, currentLocation.longitude], 17, {
                 duration: 1,
             })
-            setShowLocation(false)
         }
-    }, [showLocation])
+    }, [showLocation, currentLocation])
 
 
     return (
-        <LayerGroup >
-            <Marker position={[currentLocation.latitude, currentLocation.longitude]} zIndexOffset={100} />
-            { isZooming ? <></> : <Circle center={[currentLocation.latitude, currentLocation.longitude]} radius={30} /> }
-        </LayerGroup>
+        <>
+            { enableGPS ? 
+                <LayerGroup>
+                    <Marker position={[currentLocation.latitude, currentLocation.longitude]} zIndexOffset={100} />
+                    { isZooming ? <></> : <Circle center={[currentLocation.latitude, currentLocation.longitude]} radius={30} /> }
+                </LayerGroup>
+                : 
+                null
+            }
+        </>
     )
 };

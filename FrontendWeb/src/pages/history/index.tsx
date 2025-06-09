@@ -17,6 +17,7 @@ import { es } from 'date-fns/locale';
 import { UserAdapter } from "../../api/adapters/UserAdapter";
 import DialogUpdateAtended from "../../component/Dialog/DialogUpdateAttended";
 import compareSort from "../../utils/compareDate";
+import { RouteStatus } from "../../api/interfaces/Enums";
 
 
 function getFormatDate(a : Date, opt : string) {
@@ -77,7 +78,7 @@ export default function RouteHistory() {
     useEffect(() => {
 
         const map = routes.reduce<Map<string, TRoute[]>>((acc : Map<string, TRoute[]>, route) => {
-            if(!route.completedAt || route.status != 'completed') return acc 
+            if(!route.completedAt || route.status != RouteStatus.Completed) return acc 
             const format = getFormatDate(new Date(route.completedAt), opFecha)
             if(!acc.has(format)) {
                 acc.set(format, [])

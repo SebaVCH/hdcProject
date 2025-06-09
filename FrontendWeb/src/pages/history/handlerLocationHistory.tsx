@@ -25,7 +25,6 @@ export default function HandlerLocationHistory({ stateLocation, stateShowLocatio
             setShowLocation(false)
         }
     }, [showLocation])
-
-
+    
     return null
 };

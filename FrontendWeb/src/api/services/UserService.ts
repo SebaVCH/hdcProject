@@ -29,6 +29,7 @@ export type TProfileResponse = {
     phone : string 
     completedRoutes : string 
     listRoutes : string[]
+    role ?: string
 }
 
 
@@ -84,7 +85,8 @@ export class UserService {
                 email: data?.message?.email,
                 phone: data?.message?.phone,
                 completedRoutes: data?.message?.completedRoutes,
-                listRoutes: data?.message?.listRoutes
+                listRoutes: data?.message?.listRoutes,
+                role : data?.message?.role
             };
         } catch (error: any) {
             console.log(error)

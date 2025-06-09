@@ -71,7 +71,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
     return (
         <>
             <MapContainer 
-                center={ [currentLocation.latitude, currentLocation.longitude] } 
+                center={ [currentLocation.latitude || -29.959003986327698, currentLocation.longitude || -71.34176826076656] } 
                 zoom={ 30 } 
                 scrollWheelZoom={true} 
                 className="h-full w-full z-0"
@@ -107,8 +107,8 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                         pathOptions={{
                             color : '#800022',
                             opacity : 0.5,
-                            weight : 3
-
+                            weight : 3,
+                            dashArray: '5, 10'
                         }} 
                         positions={coords}
                     />

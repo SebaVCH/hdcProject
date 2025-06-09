@@ -7,5 +7,10 @@ export enum LocationMethod {
 
 export enum RouteStatus {
     Active = 'on progress',
-    Completed = 'completed'
+    Completed = 'Finalizada'
+}
+
+export enum Role {
+    volunteer = 'voluntario',
+    admin = 'admin'
 }
