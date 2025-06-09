@@ -10,7 +10,10 @@ import (
 )
 
 func SetupPeopleHelpedRouter(r *gin.Engine) {
-	peopleHelpedRepo := repository.NewPeopleHelpedRepository(database.Client.Database("pip").Collection("people_helped"))
+	peopleHelpedRepo := repository.NewPeopleHelpedRepository(
+		database.Client.Database("pip").Collection("helping_points"),
+		database.Client.Database("pip").Collection("people_helped"),
+	)
 	peopleHelpedUseCase := usecase.NewPeopleHelpedUseCase(peopleHelpedRepo)
 	peopleHelpedController := controller.NewPeopleHelpedController(peopleHelpedUseCase)
 

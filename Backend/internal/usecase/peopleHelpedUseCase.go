@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -27,7 +28,7 @@ func NewPeopleHelpedUseCase(peopleHelpedRepository repository.PeopleHelpedReposi
 func (p peopleHelpedUseCase) GetAllPeopleHelped(c *gin.Context) {
 	peopleHelped, err := p.peopleHelpedRepository.GetPeopleHelped()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener personas ayudadas: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener personas ayudadas"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": peopleHelped})
@@ -36,12 +37,12 @@ func (p peopleHelpedUseCase) GetAllPeopleHelped(c *gin.Context) {
 func (p peopleHelpedUseCase) CreatePersonHelped(c *gin.Context) {
 	var person domain.PersonaAyudada
 	if err := c.ShouldBindJSON(&person); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
 	err := p.peopleHelpedRepository.CreatePersonHelped(person)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear la persona ayudada: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear la persona ayudada"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": person})
@@ -51,7 +52,7 @@ func (p peopleHelpedUseCase) DeletePersonHelped(c *gin.Context) {
 	id := c.Param("id")
 	err := p.peopleHelpedRepository.DeletePersonHelped(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar la persona ayudada: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar la persona ayudada"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Persona ayudada eliminada correctamente"})
@@ -66,13 +67,18 @@ func (p peopleHelpedUseCase) UpdatePersonHelped(c *gin.Context) {
 
 	var updateData map[string]interface{}
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	if !utils.SanitizeStringFields(c, updateData) {
+		return
+	}
+
 	updateData["_id"] = personID
 	updatedPerson, err := p.peopleHelpedRepository.UpdatePersonHelped(updateData)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la persona ayudada: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la persona ayudada"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedPerson})

@@ -15,6 +15,7 @@ type NotificationRepository interface {
 	DeleteNotification(notificationID string) error
 	UpdateNotification(data map[string]interface{}) (domain.Aviso, error)
 	GetNotifications() ([]domain.Aviso, error)
+	FindByIDAndUserID(id string, userID string) error
 }
 
 type notificationRepository struct {
@@ -110,4 +111,22 @@ func (n *notificationRepository) GetNotifications() ([]domain.Aviso, error) {
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
+}
+
+func (n *notificationRepository) FindByIDAndUserID(id string, userID string) error {
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("ID de evento de calendario inválido")
+	}
+
+	var aviso domain.Aviso
+	filter := bson.M{"_id": objID, "author_id": userID}
+	err = n.NotificationsCollection.FindOne(context.Background(), filter).Decode(&aviso)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("evento no encontrado o no autorizado")
+		}
+		return err
+	}
+	return nil
 }

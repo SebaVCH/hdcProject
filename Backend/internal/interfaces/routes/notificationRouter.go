@@ -20,5 +20,5 @@ func SetupNotificationRouter(r *gin.Engine) {
 	protected.POST("", notificationController.CreateNotification)
 	protected.GET("", notificationController.GetNotifications)
 	protected.PUT("/:id", notificationController.UpdateNotification)
-	protected.DELETE("/:id", notificationController.DeleteNotification)
+	protected.DELETE("/:id", middleware.RoleMiddleware("admin"), notificationController.DeleteNotification) // admin
 }

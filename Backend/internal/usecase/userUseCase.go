@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -51,14 +52,33 @@ func (u userUseCase) UpdateUserInfo(c *gin.Context) {
 
 	var updateData map[string]interface{}
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
+	}
+
+	for key, value := range updateData {
+		strVal, ok := value.(string)
+		if ok {
+			switch key {
+			case "phone":
+				if !utils.IsValidPhone(strVal) {
+					c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Teléfono inválido"})
+					return
+				}
+			default:
+				if !utils.IsValidString(strVal) {
+					c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Hay caracteres inválidos"})
+					return
+				}
+			}
+			updateData[key] = strVal
+		}
 	}
 
 	updatedUser, err := u.userRepository.UpdateUserInfo(user.ID, updateData)
 
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar usuario: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar usuario"})
 		return
 	}
 
@@ -68,7 +88,7 @@ func (u userUseCase) UpdateUserInfo(c *gin.Context) {
 func (u userUseCase) GetAllUsers(c *gin.Context) {
 	users, err := u.userRepository.GetAllUsers()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener usuarios: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener usuarios"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": users})

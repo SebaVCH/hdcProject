@@ -18,6 +18,6 @@ func SetupCalendarEventRouter(r *gin.Engine) {
 	protected.Use(middleware.AuthMiddleware())
 	protected.POST("", calendarEventController.CreateCalendarEvent)
 	protected.GET("", calendarEventController.GetAllCalendarEvents)
-	protected.PUT("/:id", calendarEventController.UpdateCalendarEvent)
-	protected.DELETE("/:id", calendarEventController.DeleteCalendarEvent)
+	protected.PUT("/:id", calendarEventController.UpdateCalendarEvent)    // solo de uno mismo
+	protected.DELETE("/:id", calendarEventController.DeleteCalendarEvent) // solo de uno mismo
 }

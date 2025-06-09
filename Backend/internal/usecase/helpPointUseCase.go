@@ -3,7 +3,9 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -27,7 +29,7 @@ func NewHelpingPointUseCase(helpingPointRepository repository.HelpPointRepositor
 func (h helpingPointUseCase) GetAllPoints(c *gin.Context) {
 	helpPoints, err := h.helpingPointRepository.GetAllPoints()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener puntos de ayuda: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener puntos de ayuda"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": helpPoints})
@@ -35,14 +37,20 @@ func (h helpingPointUseCase) GetAllPoints(c *gin.Context) {
 
 func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 	var helpPoint domain.PuntoAyuda
+
 	if err := c.ShouldBindJSON(&helpPoint); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	if !utils.IsValidString(helpPoint.PeopleHelped.Gender) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Género inválido"})
 		return
 	}
 
 	err := h.helpingPointRepository.CreateHelpingPoint(helpPoint)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear punto de ayuda: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear punto de ayuda"})
 		return
 	}
 
@@ -56,15 +64,29 @@ func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 		return
 	}
 
-	var updateData map[string]interface{}
-	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+
+	if err := h.helpingPointRepository.FindByIDAndUserID(helpingPointID, userID); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
+
+	var updateData map[string]interface{}
+	if err := c.ShouldBindJSON(&updateData); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	if !utils.SanitizeStringFields(c, updateData) {
+		return
+	}
+
 	updateData["_id"] = helpingPointID
 	updatedHelpingPoint, err := h.helpingPointRepository.UpdateHelpingPoint(updateData)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar el punto de ayuda: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar el punto de ayuda"})
 		return
 	}
 
@@ -72,15 +94,24 @@ func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 }
 
 func (h helpingPointUseCase) DeleteHelpingPoint(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	helpingPointID := c.Param("helpingPointID")
+	if helpingPointID == "" {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de punto de ayuda no proporcionado"})
 		return
 	}
 
-	err := h.helpingPointRepository.DeleteHelpingPoint(id)
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+
+	if err := h.helpingPointRepository.FindByIDAndUserID(helpingPointID, userID); err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	err := h.helpingPointRepository.DeleteHelpingPoint(helpingPointID)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar punto de ayuda: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar punto de ayuda"})
 		return
 	}
 

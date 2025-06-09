@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -29,7 +30,7 @@ func NewRouteUseCase(repo repository.RouteRepository) RouteUseCase {
 func (r routeUseCase) FindAll(c *gin.Context) {
 	routes, err := r.routeRepository.FindAll()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener rutas: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener rutas"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": routes})
@@ -48,13 +49,18 @@ func (r routeUseCase) FindByID(c *gin.Context) {
 func (r routeUseCase) CreateRoute(c *gin.Context) {
 	var route domain.Route
 	if err := c.ShouldBindJSON(&route); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	if !utils.IsValidString(route.Title) || !utils.IsValidString(route.Description) || !utils.IsValidString(route.InviteCode) || !utils.IsValidString(route.Status) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
 
 	err := r.routeRepository.CreateRoute(&route)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear la ruta: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear la ruta"})
 		return
 	}
 
@@ -70,13 +76,18 @@ func (r routeUseCase) UpdateRoute(c *gin.Context) {
 	var updateData map[string]interface{}
 
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	if !utils.SanitizeStringFields(c, updateData) {
+		return
+	}
+
 	updateData["_id"] = routeID
 	updatedRoute, err := r.routeRepository.UpdateRoute(updateData)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la ruta: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la ruta"})
 		return
 	}
 
@@ -87,7 +98,7 @@ func (r routeUseCase) DeleteRoute(c *gin.Context) {
 	id := c.Param("id")
 	err := r.routeRepository.DeleteRoute(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar la ruta: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar la ruta"})
 		return
 	}
 
@@ -103,7 +114,7 @@ func (r routeUseCase) FinishRoute(c *gin.Context) {
 
 	err := r.routeRepository.FinishRoute(routeID)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al finalizar la ruta: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al finalizar la ruta"})
 		return
 	}
 
@@ -137,7 +148,7 @@ func (r routeUseCase) JoinRoute(c *gin.Context) {
 
 	route, err := r.routeRepository.JoinRoute(inviteCode, userID)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al unirse a la ruta: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al unirse a la ruta"})
 		return
 	}
 

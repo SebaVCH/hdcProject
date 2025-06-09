@@ -3,6 +3,7 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -27,7 +28,7 @@ func NewRiskUseCase(riskRepository repository.RiskRepository) RiskUseCase {
 func (r riskUseCase) GetAllRisks(c *gin.Context) {
 	risks, err := r.riskRepository.GetRisks()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener riesgos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener riesgos"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": risks})
@@ -36,12 +37,18 @@ func (r riskUseCase) GetAllRisks(c *gin.Context) {
 func (r riskUseCase) CreateRisk(c *gin.Context) {
 	var risk domain.Riesgo
 	if err := c.ShouldBindJSON(&risk); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	if !utils.IsValidString(risk.Description) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Descripción con caracteres inválidos"})
+		return
+	}
+
 	err := r.riskRepository.CreateRisk(risk)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear el riesgo: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear el riesgo"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": risk})
@@ -51,7 +58,7 @@ func (r riskUseCase) DeleteRisk(c *gin.Context) {
 	id := c.Param("id")
 	err := r.riskRepository.DeleteRisk(id)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar el riesgo: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar el riesgo"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Riesgo eliminado correctamente"})
@@ -66,13 +73,18 @@ func (r riskUseCase) UpdateRisk(c *gin.Context) {
 
 	var updateData map[string]interface{}
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	if !utils.SanitizeStringFields(c, updateData) {
+		return
+	}
+
 	updateData["_id"] = riskID
 	updatedRisk, err := r.riskRepository.UpdateRisk(updateData)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar el riesgo: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar el riesgo"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedRisk})

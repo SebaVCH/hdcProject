@@ -13,6 +13,7 @@ type CalendarEventRepository interface {
 	CreateCalendarEvent(event domain.EventoCalendario) error
 	DeleteCalendarEvent(id string) error
 	UpdateCalendarEvent(updateData map[string]interface{}) (domain.EventoCalendario, error)
+	FindByIDAndUserID(id string, userID string) error
 }
 
 type calendarEventRepository struct {
@@ -86,4 +87,22 @@ func (c calendarEventRepository) UpdateCalendarEvent(updateData map[string]inter
 		return domain.EventoCalendario{}, err
 	}
 	return updatedEvent, nil
+}
+
+func (c calendarEventRepository) FindByIDAndUserID(id string, userID string) error {
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("ID de evento de calendario inválido")
+	}
+
+	var event domain.EventoCalendario
+	filter := bson.M{"_id": objID, "author_id": userID}
+	err = c.CalendarEventCollection.FindOne(context.Background(), filter).Decode(&event)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("evento no encontrado o no autorizado")
+		}
+		return err
+	}
+	return nil
 }

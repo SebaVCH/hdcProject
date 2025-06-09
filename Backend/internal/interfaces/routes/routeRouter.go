@@ -19,8 +19,8 @@ func SetupRouteRouter(r *gin.Engine) {
 	protected.GET("", routeController.FindAll)
 	protected.GET("/:id", routeController.FindByID)
 	protected.POST("", routeController.CreateRoute)
-	protected.PUT("/:id", routeController.UpdateRoute)
-	protected.DELETE("/:id", routeController.DeleteRoute)
+	protected.PUT("/:id", middleware.RoleMiddleware("admin"), routeController.UpdateRoute)
+	protected.DELETE("/:id", middleware.RoleMiddleware("admin"), routeController.DeleteRoute)
 	protected.PATCH("/:id", routeController.FinishRoute)
 	protected.POST("/join/:code", routeController.JoinRoute)
 }

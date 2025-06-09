@@ -6,6 +6,7 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type HelpPointRepository interface {
@@ -13,6 +14,7 @@ type HelpPointRepository interface {
 	CreateHelpingPoint(helpPoint domain.PuntoAyuda) error
 	UpdateHelpingPoint(data map[string]interface{}) (domain.PuntoAyuda, error)
 	DeleteHelpingPoint(id string) error
+	FindByIDAndUserID(id string, userID string) error
 }
 
 type helpPointRepository struct {
@@ -29,11 +31,14 @@ func NewHelpPointRepository(helpPointCollection *mongo.Collection, peopleHelpedC
 
 func (h *helpPointRepository) CreateHelpingPoint(helpPoint domain.PuntoAyuda) error {
 	helpPoint.ID = bson.NewObjectID()
+	helpPoint.DateRegister = time.Now()
 	_, err := h.HelpPointCollection.InsertOne(context.Background(), helpPoint)
 	if err != nil {
 		return err
 	}
 	personHelped := helpPoint.PeopleHelped
+	personHelped.DateRegister = time.Now()
+	personHelped.ID = bson.NewObjectID()
 	_, err = h.PeopleHelpedCollections.InsertOne(context.Background(), personHelped)
 	if err != nil {
 		return err
@@ -91,4 +96,22 @@ func (h *helpPointRepository) GetAllPoints() ([]domain.PuntoAyuda, error) {
 		helpPoints = append(helpPoints, helpPoint)
 	}
 	return helpPoints, nil
+}
+
+func (h *helpPointRepository) FindByIDAndUserID(id string, userID string) error {
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return errors.New("ID de punto de ayuda inválido")
+	}
+
+	var puntoAyuda domain.PuntoAyuda
+	filter := bson.M{"_id": objID, "author_id": userID}
+	err = h.HelpPointCollection.FindOne(context.Background(), filter).Decode(&puntoAyuda)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("Punto no encontrado o no autorizado")
+		}
+		return err
+	}
+	return nil
 }

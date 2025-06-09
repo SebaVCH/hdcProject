@@ -17,17 +17,19 @@ type PeopleHelpedRepository interface {
 }
 
 type peopleHelpedRepository struct {
-	PeopleHelpedCollection *mongo.Collection
+	HelpPointCollection     *mongo.Collection
+	PeopleHelpedCollections *mongo.Collection
 }
 
-func NewPeopleHelpedRepository(collection *mongo.Collection) PeopleHelpedRepository {
+func NewPeopleHelpedRepository(helpPointCollection *mongo.Collection, peopleHelpedCollection *mongo.Collection) PeopleHelpedRepository {
 	return &peopleHelpedRepository{
-		PeopleHelpedCollection: collection,
+		HelpPointCollection:     helpPointCollection,
+		PeopleHelpedCollections: peopleHelpedCollection,
 	}
 }
 
 func (ph *peopleHelpedRepository) GetPeopleHelped() ([]domain.PersonaAyudada, error) {
-	cursor, err := ph.PeopleHelpedCollection.Find(context.Background(), bson.M{})
+	cursor, err := ph.PeopleHelpedCollections.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,7 @@ func (ph *peopleHelpedRepository) GetPeopleHelped() ([]domain.PersonaAyudada, er
 func (ph *peopleHelpedRepository) CreatePersonHelped(person domain.PersonaAyudada) error {
 	person.ID = bson.NewObjectID()
 	person.DateRegister = time.Now()
-	_, err := ph.PeopleHelpedCollection.InsertOne(context.Background(), person)
+	_, err := ph.PeopleHelpedCollections.InsertOne(context.Background(), person)
 	return err
 }
 
@@ -56,7 +58,7 @@ func (ph *peopleHelpedRepository) DeletePersonHelped(id string) error {
 	if err != nil {
 		return errors.New("ID de persona ayudada inválido")
 	}
-	_, err = ph.PeopleHelpedCollection.DeleteOne(context.Background(), bson.M{"_id": objID})
+	_, err = ph.PeopleHelpedCollections.DeleteOne(context.Background(), bson.M{"_id": objID})
 	return err
 }
 
@@ -72,15 +74,25 @@ func (ph *peopleHelpedRepository) UpdatePersonHelped(updateData map[string]inter
 	delete(updateData, "_id")
 
 	update := bson.M{"$set": updateData}
-	_, err = ph.PeopleHelpedCollection.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
+	_, err = ph.PeopleHelpedCollections.UpdateOne(context.Background(), bson.M{"_id": objID}, update)
 	if err != nil {
 		return domain.PersonaAyudada{}, err
 	}
 
 	var updatedPerson domain.PersonaAyudada
-	err = ph.PeopleHelpedCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&updatedPerson)
+	err = ph.PeopleHelpedCollections.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&updatedPerson)
 	if err != nil {
 		return domain.PersonaAyudada{}, err
 	}
+
+	_, err = ph.HelpPointCollection.UpdateOne(
+		context.Background(),
+		bson.M{"peopleHelped._id": objID},
+		bson.M{"$set": bson.M{"peopleHelped.$": updatedPerson}},
+	)
+	if err != nil {
+		return domain.PersonaAyudada{}, err
+	}
+
 	return updatedPerson, nil
 }

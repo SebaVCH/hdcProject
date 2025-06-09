@@ -12,4 +12,5 @@ type PuntoAyuda struct {
 	Coords       []float64      `bson:"coords" json:"coords"`
 	DateRegister time.Time      `bson:"date_register" json:"date_register"`
 	PeopleHelped PersonaAyudada `bson:"people_helped" json:"people_helped"`
+	AuthorID     bson.ObjectID  `bson:"author_id" json:"author_id"`
 }

@@ -25,7 +25,7 @@ func NewExportDataUseCase(exportDataRepository repository.ExportDataRepository) 
 func (ed exportDataUseCase) ExportPeopleHelped(c *gin.Context) {
 	peopleHelped, err := ed.exportDataRepository.GetPeopleHelpedData()
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener datos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener datos"})
 		return
 	}
 
@@ -53,6 +53,6 @@ func (ed exportDataUseCase) ExportPeopleHelped(c *gin.Context) {
 	c.Header("Content-Disposition", "attachment; filename=people_helped.xlsx")
 	c.Header("Content-Transfer-Encoding", "binary")
 	if err := f.Write(c.Writer); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al generar el archivo Excel: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error al generar el archivo Excel"})
 	}
 }

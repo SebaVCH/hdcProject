@@ -3,7 +3,9 @@ package usecase
 import (
 	"backend/Backend/internal/domain"
 	"backend/Backend/internal/repository"
+	"backend/Backend/internal/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
 
@@ -31,9 +33,14 @@ func (n notificationUseCase) CreateNotification(c *gin.Context) {
 		return
 	}
 
+	if !utils.IsValidString(notification.Description) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Descripción con caracteres inválidos"})
+		return
+	}
+
 	err := n.notificationRepository.CreateNotification(notification)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear aviso: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear aviso"})
 		return
 	}
 
@@ -49,7 +56,7 @@ func (n notificationUseCase) DeleteNotification(c *gin.Context) {
 
 	err := n.notificationRepository.DeleteNotification(notificationID)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar aviso: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al eliminar aviso"})
 		return
 	}
 
@@ -63,15 +70,32 @@ func (n notificationUseCase) UpdateNotification(c *gin.Context) {
 		return
 	}
 
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+	userRole := userClaims["user_role"].(string)
+
+	if userRole != "admin" {
+		if err := n.notificationRepository.FindByIDAndUserID(notificationID, userID); err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+	}
+
 	var updateData map[string]interface{}
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
+
+	if !utils.SanitizeStringFields(c, updateData) {
+		return
+	}
+
 	updateData["_id"] = notificationID
 	updatedNotification, err := n.notificationRepository.UpdateNotification(updateData)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la aviso: " + err.Error()})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al actualizar la aviso"})
 		return
 	}
 
@@ -81,7 +105,7 @@ func (n notificationUseCase) UpdateNotification(c *gin.Context) {
 func (n notificationUseCase) GetNotifications(c *gin.Context) {
 	notifications, err := n.notificationRepository.GetNotifications()
 	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso: " + err.Error()})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso"})
 		return
 	}
 

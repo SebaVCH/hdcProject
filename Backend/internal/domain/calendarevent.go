@@ -10,4 +10,5 @@ type EventoCalendario struct {
 	Title       string        `bson:"title" json:"title"`
 	Description string        `bson:"description" json:"description"`
 	DateStart   time.Time     `bson:"date_start" json:"date_start"`
+	AuthorID    bson.ObjectID `bson:"author_id" json:"author_id"`
 }
