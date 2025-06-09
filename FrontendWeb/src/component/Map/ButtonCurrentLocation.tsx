@@ -13,7 +13,7 @@ type CurrentLocationProps = {
 
 export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeolocation} : CurrentLocationProps) {
 
-    const { enableGPS, setEnableGPS } = useSessionStore()
+    const { enableGPS, setEnableGPS, countRetryGPS, setCountRetryGPS } = useSessionStore()
     const [ , setShowLocation ] = stateShowLocation
     const [ errorGeolocation, _] = stateErrorGeolocation
 
@@ -37,6 +37,10 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
         setTimeout(() => setShowLocation(false), 300) 
     }
 
+    const handleRetryGPS = () => {
+        setCountRetryGPS(countRetryGPS + 1)
+    }
+
     const [ open, setOpen ] = useState(!enableGPS)
     
 
@@ -48,8 +52,10 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         <Alert 
                         severity={ errorGeolocation ? 'warning' : 'info'}
                         color={ errorGeolocation ? 'warning' : 'info'} 
-                        className="absolute bottom-full my-2 w-45 lg:w-80 text-xs lg:text-2xl"
+                        className={`absolute bottom-full text-center my-2 w-40 ${ errorGeolocation ? "lg:w-65" : "lg:w-60"}`}
                         sx={{
+                            padding: 0,
+                            fontSize : 'small',
                             overflow: 'visible',
                             border: `1px solid ${errorGeolocation ? "#FFA726" : "#2c78db"}`, // #FFA726
                             '&:before': {
@@ -68,14 +74,21 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         slotProps={{
                             icon: {
                                 sx : {
+                                    marginX : 1,
                                     alignSelf : 'center'
+                                }
+                            },
+                            action : {
+                                sx : {
+                                    marginRight : 0,
+                                    padding : 0,
                                 }
                             }
                         }}
                         action={
                             <IconButton
                                 sx={{
-                                    alignSelf : 'start'
+                                    alignSelf : 'start',
                                 }}
                                 aria-label="close"
                                 color="inherit"
@@ -91,11 +104,15 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         { !errorGeolocation ?
                             'Revisa tu ubicación actual!' 
                             :
-                            'Error: ' + errorGeolocation.message
+                            'Error: ' + errorGeolocation.message + `N° retry : ${countRetryGPS}`
                         }
                         </Alert>
                     </Fade>
-                    <IconButton size="small" onClick={handleClick} color={errorGeolocation ? 'error' : 'primary'}>
+                    <IconButton 
+                        size="small" 
+                        onClick={errorGeolocation ? handleRetryGPS : handleClick} 
+                        color={errorGeolocation ? 'error' : 'primary'}
+                    >
                         { !enableGPS || errorGeolocation ? <GpsOffIcon color="error" fontSize="small" />  : <GpsFixedIcon fontSize="small"/>}
                     </IconButton>
                 </div>

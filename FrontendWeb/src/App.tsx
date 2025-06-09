@@ -28,13 +28,14 @@ const customQuery = createTheme({
 
 function App() {
 
-  const { clearSession, setEnableGPS } = useSessionStore()
+  const { clearSession, setEnableGPS, setCountRetryGPS } = useSessionStore()
   const navigate = useNavigate()
 
   useEffect(() => {
 
     return () => {
       setEnableGPS(false)
+      setCountRetryGPS(0)
     }
   }, [])
 

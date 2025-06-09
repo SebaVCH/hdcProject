@@ -4,12 +4,14 @@ import { createJSONStorage, devtools, persist } from "zustand/middleware"
 
 
 type TSessionState = {
+    countRetryGPS : number
     accessToken?: string 
     enableGPS : boolean
     username?: string 
     role?: string 
     routeId ?: string
     routeStatus : boolean
+    setCountRetryGPS : (countRetryGPS : number) => void
     setEnableGPS : (enableGPS : boolean) => void
     setUsername: (username : string) => void 
     setRouteStatus : (status : boolean) => void
@@ -24,12 +26,14 @@ const useSessionStore = create<TSessionState>()(
     devtools(
         persist(
             (set) => ({
+                countRetryGPS : 0,
                 enableGPS : false,
                 accessToken: undefined,
                 username: undefined,
                 role: undefined,
                 routeStatus: false,
                 routeId : undefined,
+                setCountRetryGPS : (countRetryGPS : number) => set(() => ({ countRetryGPS })),
                 setEnableGPS : ( enableGPS : boolean) => set(() => ({ enableGPS })),
                 setRouteStatus : (routeStatus : boolean) => set(() => ({ routeStatus })),
                 setUsername: (username : string) => set(() => ({ username })),

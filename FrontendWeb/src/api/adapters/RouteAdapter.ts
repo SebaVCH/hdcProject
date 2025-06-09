@@ -23,7 +23,7 @@ export class RouteAdapter {
         return useQuery({
             queryKey : ['route'],
             queryFn : () => (RouteService.FindRouteByID(routeId, accessToken)),
-            enabled : enabled
+            enabled : enabled ?? true
         })
     }
 

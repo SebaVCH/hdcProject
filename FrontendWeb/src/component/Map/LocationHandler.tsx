@@ -16,18 +16,19 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
 
 
     const map = useMap()
-    const [ , setErrorGeolocation ] = stateErrorGeolocation
-    const { enableGPS, setEnableGPS } = useSessionStore()
+    const [ errorGeolocation, setErrorGeolocation ] = stateErrorGeolocation
+    const { enableGPS, countRetryGPS } = useSessionStore()
     const [ showLocation, setShowLocation ] = stateShowLocation
     const [ currentLocation, setCurrentLocation ] = stateCurrentLocation
     const [ isZooming, ] = useZoom()
 
     useEffect(() => {
-        
+                
         if(!enableGPS) return 
 
         const handleSuccess = ( position : GeolocationPosition) => {
             setCurrentLocation({latitude : position.coords.latitude, longitude : position.coords.longitude})
+            setErrorGeolocation(undefined)
         }
         const handleError = ( error : GeolocationPositionError) => {
             setErrorGeolocation(error)
@@ -40,7 +41,7 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
         return () => {
             navigator.geolocation.clearWatch(id)
         }
-    }, [enableGPS])
+    }, [enableGPS, countRetryGPS])
 
 
     useEffect(() => {
@@ -54,7 +55,7 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
 
     return (
         <>
-            { enableGPS ? 
+            { enableGPS && !errorGeolocation ? 
                 <LayerGroup>
                     <Marker position={[currentLocation.latitude, currentLocation.longitude]} zIndexOffset={100} />
                     { isZooming ? <></> : <Circle center={[currentLocation.latitude, currentLocation.longitude]} radius={30} /> }
