@@ -12,12 +12,12 @@ func IsValidEmail(email string) bool {
 }
 
 func IsValidString(str string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9\s\-\_\.\,\@]*$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9\s\-\_\.\,\@]+$`)
 	return re.MatchString(str)
 }
 
 func IsValidPhone(phone string) bool {
-	re := regexp.MustCompile(`^\+?[0-9\s\-\(\)]+$`)
+	re := regexp.MustCompile(`^\+{0,1}[0-9]+$`)
 	return re.MatchString(phone)
 }
 
