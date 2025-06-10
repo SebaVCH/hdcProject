@@ -23,9 +23,9 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
     const [ isZooming, ] = useZoom()
 
     useEffect(() => {
-                
-        if(!enableGPS) return 
 
+        if(!enableGPS) return 
+        
         const handleSuccess = ( position : GeolocationPosition) => {
             setCurrentLocation({latitude : position.coords.latitude, longitude : position.coords.longitude})
             setErrorGeolocation(undefined)
@@ -35,7 +35,6 @@ export default function LocationHandler({ stateShowLocation, stateCurrentLocatio
         }
         const id = navigator.geolocation.watchPosition( handleSuccess, handleError, {
             enableHighAccuracy : true,
-            timeout : 10000
         })
 
         return () => {

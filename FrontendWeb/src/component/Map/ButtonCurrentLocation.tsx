@@ -48,7 +48,7 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
         <>
             <Paper className="absolute bottom-20 left-3">
                 <div className="relative inline-block">
-                    <Fade in={open}>
+                    <Fade in={open} style={{ transitionDelay : '1000ms'}}>
                         <Alert 
                         severity={ errorGeolocation ? 'warning' : 'info'}
                         color={ errorGeolocation ? 'warning' : 'info'} 
