@@ -112,9 +112,14 @@ export default function Home() {
 
                 { !onSelectLocationMap ?
                     <>
+                        <MensajesFijados />
                         <Backdrop open={openDialRoute} className="z-10"/>
                         <Backdrop open={openSpeedCreateRoute} className="z-10"/>
-                        { routeStatus ? <ButtonFinalizarRuta /> : <MensajesFijados />}
+                        { routeStatus ? 
+                            <ButtonFinalizarRuta /> 
+                            : 
+                            null
+                        }
                         <div className="absolute bottom-16 right-16 scale-120 z-20">
                             {!routeStatus ? 
                                 <SpeedDialCreateRoute

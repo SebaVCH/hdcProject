@@ -51,8 +51,6 @@ export default function RouteHistory() {
     const useQueryHP= HelpPointAdapter.useGetHelpPoints(accessToken)
 
 
-    
-
     useEffect(() => {
         if(useQueryHP.isSuccess) {
             setHelpPoints(useQueryHP.data.map((hp) => {hp.disabled = true; return hp;}))

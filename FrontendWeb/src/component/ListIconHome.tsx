@@ -9,6 +9,8 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DialogSendNotice from './Dialog/DialogSendNotice';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../api/interfaces/Enums';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+
 
 export default function ListIconHome() {
 
@@ -42,7 +44,6 @@ export default function ListIconHome() {
             <Tooltip title="Historial"><IconButton onClick={onClickHistory}><HistoryIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
             <Tooltip title="Agendar ruta"><IconButton onClick={onClickSchedule}><EventIcon htmlColor="gray" fontSize="large"/></IconButton></Tooltip>
             <Tooltip title="Enviar aviso"><IconButton onClick={handleClickOpen}><CampaignIcon htmlColor="gray" fontSize="large" /></IconButton></Tooltip>
-            
             { role === Role.admin  ?
 
                 <Tooltip title="Gestionar Usuarios">
@@ -54,6 +55,7 @@ export default function ListIconHome() {
                 <>
                 </>
             }
+            {/*<Tooltip title="Notificaciones"><IconButton><NotificationsIcon htmlColor='black ' fontSize="large"/></IconButton></Tooltip>*/}
 
             <DialogSendNotice open={open} setOpen={setOpen} />
         </div>

@@ -1,3 +1,5 @@
+import compareSort, { compareSortNotices } from "../../utils/compareDate"
+import { sleep } from "../../utils/sleep"
 import { axiosInstance } from "./axiosInstance"
 import { UserService } from "./UserService"
 
@@ -33,15 +35,30 @@ export class NoticeService {
             }
         }) 
 
+        await sleep(1)
 
-        return Promise.all((data?.message as any[]).map(async (value, _) => ({
-            _id : value?._id,
-            type : value?.type,
-            description : value?.description,
-            createdAt : value?.created_at,
-            authorId : value?.author_id,
-            authorName : (await UserService.FindUserById(value?.author_id, accessToken)).name
-        })))
+        const notices =  await Promise.all((data?.message as any[]).map(async (value, _) => {
+            
+            let name = 'Usuario Eliminado'
+
+            try {
+                name = (await UserService.FindUserById(value?.author_id, accessToken)).name
+            } catch(e) {
+                console.log(e)
+            }
+            
+            return ({
+                _id : value?._id,
+                type : value?.type,
+                description : value?.description,
+                createdAt : value?.created_at,
+                authorId : value?.author_id,
+                authorName : name,
+            })
+        }))
+
+        return notices.sort(compareSortNotices)
+
     }
 
     static async PostNotice( body : TNoticeRequest, accessToken ?: string ) : Promise<TNoticeResponse> {
@@ -55,7 +72,7 @@ export class NoticeService {
             _id : data?.Aviso?._id,
             description : data?.Aviso?.description,
             createdAt : data?.Aviso?.created_at,
-            authorId : data?.Aviso?.author_id
+            authorId : data?.Aviso?.author_id,
         }
     }
 
@@ -83,7 +100,7 @@ export class NoticeService {
             _id : data?.message?._id,
             description : data?.message?.description,
             createdAt : data?.message?.created_at,
-            authorId : data?.message?.author_id
+            authorId : data?.message?.author_id,
         }
     } 
 

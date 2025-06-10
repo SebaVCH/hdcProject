@@ -88,7 +88,7 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         action={
                             <IconButton
                                 sx={{
-                                    alignSelf : 'start',
+                                    alignSelf : 'center',
                                 }}
                                 aria-label="close"
                                 color="inherit"
