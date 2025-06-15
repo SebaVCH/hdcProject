@@ -23,7 +23,7 @@ export class RouteAdapter {
         return useQuery({
             queryKey : ['route'],
             queryFn : () => (RouteService.FindRouteByID(routeId, accessToken)),
-            enabled : enabled
+            enabled : enabled ?? true
         })
     }
 
@@ -39,6 +39,18 @@ export class RouteAdapter {
             queryFn : () => (RouteService.GetRoutesByUserId(userId as string, accessToken )),
             enabled : enabled ?? false
             
+        })
+    }
+
+    static useJoinRouteMutation( accessToken ?: string) {
+        return useMutation({
+            mutationFn : (inviteCode : string) => (RouteService.JoinRoute(inviteCode, accessToken)) 
+        })
+    }
+
+    static useFinishRouteMutation( accessToken ?: string ) {
+        return useMutation({
+            mutationFn : (routeId : string) => (RouteService.FinishRoute(routeId, accessToken))
         })
     }
 

@@ -66,7 +66,7 @@ export default function DrawerList() {
                 </div>
             </Button>
             <div className="flex grow items-end w-full">
-                <Button fullWidth color="warning" >
+                <Button fullWidth color="warning" onClick={onClickCerrarSesion} >
                     <div className="flex w-full justify-start px-5 gap-1 items-center">
                         <LogoutIcon fontSize="small" />
                         <Typography>Cerrar Sesión</Typography>

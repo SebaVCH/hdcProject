@@ -26,7 +26,7 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
    
     const { setRouteStatus, routeId, setRouteId, accessToken } = useSessionStore()
     const dataRoute = RouteAdapter.useGetRouteByID( routeId as string, accessToken).data
-    const { mutate, isSuccess, isError, isIdle, isPending } = RouteAdapter.useUpdateRoute(routeId as string, dataRoute, accessToken)
+    const { mutate, isSuccess, isError, isIdle, isPending } = RouteAdapter.useFinishRouteMutation(accessToken)
 
     useEffect(() => {
         if(isSuccess) {
@@ -39,7 +39,9 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
     }, [isSuccess])
 
     const onFinishRoute = () => {
-        mutate()
+        if(routeId) {
+            mutate(routeId)
+        }
     }
 
     const handleClose = () => {

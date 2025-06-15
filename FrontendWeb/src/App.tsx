@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import Home from './pages/home'
 import Login from './pages/login'
@@ -15,6 +15,7 @@ import Schedule from './pages/schedule'
 import { ZoomProvider } from './context/ZoomContext'
 import RouteHistory from './pages/history'
 import { HelpPointUpdateProvider } from './context/HelpPointUpdateContext'
+import { AuthProvider } from './context/AuthContext'
 
 const queryClient = new QueryClient()
 
@@ -27,34 +28,43 @@ const customQuery = createTheme({
 
 function App() {
 
-  const { clearSession } = useSessionStore()
-
+  const { clearSession, setEnableGPS, setCountRetryGPS } = useSessionStore()
   const navigate = useNavigate()
+
+  useEffect(() => {
+
+    return () => {
+      setEnableGPS(false)
+      setCountRetryGPS(0)
+    }
+  }, [])
 
   useEffect(()=> {
     interceptorResponse(navigate, clearSession)
   }, [navigate])
  
   return (
-    <ZoomProvider>
-      <ThemeProvider theme={customQuery}>
-        <QueryClientProvider client={queryClient}>
-          <Routes>
-              <Route path='/' element={<Home/>} />
-              <Route path='/login' element={<Login />} />
-              <Route path='/profile' element={<Profile />} />
-              <Route path='/schedule' element={<Schedule />} />
-              <Route path='/admin/usuarios' element={<Usuarios />} />
-              <Route path='/history' element={
-                <HelpPointUpdateProvider>
-                  <RouteHistory />
-                </HelpPointUpdateProvider>
-                } 
-              />
-          </Routes>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </ZoomProvider>
+  <QueryClientProvider client={queryClient}>    
+      <AuthProvider>
+        <ZoomProvider>
+          <ThemeProvider theme={customQuery}>
+              <Routes>
+                  <Route path='/' element={<Home/>} />
+                  <Route path='/login' element={<Login />} />
+                  <Route path='/profile' element={<Profile />} />
+                  <Route path='/schedule' element={<Schedule />} />
+                  <Route path='/admin/usuarios' element={<Usuarios />} />
+                  <Route path='/history' element={
+                    <HelpPointUpdateProvider>
+                      <RouteHistory />
+                    </HelpPointUpdateProvider>
+                    } 
+                  />
+              </Routes>
+          </ThemeProvider>
+        </ZoomProvider>
+      </AuthProvider>
+  </QueryClientProvider>
   )
 }
 
