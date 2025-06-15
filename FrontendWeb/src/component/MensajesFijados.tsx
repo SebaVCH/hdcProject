@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip } from "@mui/material";
-
+import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip, Badge } from "@mui/material";
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import useSessionStore from "../stores/useSessionStore";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
@@ -12,14 +12,14 @@ import { es } from "date-fns/locale";
 export default function MensajesFijados() {
 
     const { accessToken } = useSessionStore()
-    const [anchorEl, setAnchorEl] = useState(null)
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const handleClick = (event : any) => {
         setAnchorEl(event.currentTarget)
     }
     const handleClose = () => {
         setAnchorEl(null)
     }
-    const open = Boolean(anchorEl);
+    const open = Boolean(anchorEl)
     const id = open ? "notification-popover" : undefined
 
     const { isSuccess, isError, isPending, data } = NoticeAdapter.useGetNotices(accessToken)
@@ -35,9 +35,11 @@ export default function MensajesFijados() {
     return (
         <div className="absolute top-8 right-8">
             <Paper className="relative inline-block" sx={{ borderRadius : 9}}>
-                <IconButton onClick={handleClick}>
-                    <NotificationsIcon sx={{ color : '#000000'}} fontSize="large"/>
-                </IconButton>
+                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular">
+                    <IconButton onClick={handleClick}>
+                        { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize="large"/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize="large"/>}
+                    </IconButton>
+                </Badge> 
             </Paper>
             <Popover
                 id={id}

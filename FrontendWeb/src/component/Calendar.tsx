@@ -3,35 +3,159 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useEffect, useState } from 'react'
-import { CalendarApi, DateSelectArg } from '@fullcalendar/core'
-import { Card, Button, TextField } from '@mui/material'
-import ComboBox from './Button/ComboBox'
-
-
-
-const timeSlots = Array.from(new Array(24 * 2)).map(
-  (_, index) =>
-    `${index < 20 ? '0' : ''}${Math.floor(index / 2)}:${
-      index % 2 === 0 ? '00' : '30'
-    }`,
-);
+import { DateSelectArg, EventClickArg, EventSourceInput } from '@fullcalendar/core'
+import { Button, Divider, IconButton, Popover, Tooltip, Typography } from '@mui/material'
+import esLocale from '@fullcalendar/core/locales/es';
+import { isSingleDaySelection } from '../utils/calendar'
+import DialogCreateEventCalendar from './Dialog/DialogCreateEventCalendar'
+import { CalendarAdapter } from '../api/adapters/CalendarAdapter'
+import useSessionStore from '../stores/useSessionStore'
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+import { EventImpl } from '@fullcalendar/core/internal'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export default function Calendar() {
 
-    const [calendarAPI, setCalendarAPI] = useState<CalendarApi | null>(null);
-    const [selectInfo, setSelectInfo] = useState<DateSelectArg | null>(null); // Almacena toda la info de selección
-    const [title, setTitle] = useState('');
-    const [open, setOpen] = useState(false);
-    const [startTime, setStartTime] = useState<string>();
-    const [endTime, setEndTime] = useState<string>();
-    const [listEndTime, setListEndTime] = useState<string[]>([]);
+    const { accessToken } = useSessionStore()
+    const [selectInfo, setSelectInfo] = useState<DateSelectArg | null>(null)
+
+    const [open, setOpen] = useState(false)
 
     const handleDateSelect = (selectInfo: DateSelectArg) => {
-        setSelectInfo(selectInfo); // Guardamos toda la información de selección
-        setCalendarAPI(selectInfo.view.calendar);
-        setOpen(true);
+        setSelectInfo(selectInfo)
+        setOpen(true)
     };
 
+    const { isError, isPending, isSuccess, data, error} = CalendarAdapter.useGetEventCalendar(accessToken)
+    
+    
+    const [ eventClicked, setEventClicked ] = useState<EventImpl | undefined>(undefined)
+    const [ anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+    const openPopover = Boolean(anchorEl)
+    const id =  openPopover ? 'view-event-popover' : undefined
+
+    const handleCloseEventView = () => {
+        setAnchorEl(null)
+        setEventClicked(undefined)
+    }
+
+
+    useEffect(() => {
+        if(isSuccess) {
+            console.log("aca en calendar: ", data)
+        }
+    }, [data])
+
+    const handleEventClick = (clickInfo : EventClickArg) => {
+        setAnchorEl(clickInfo.el)
+        setEventClicked(clickInfo.event)
+    };
+
+    return (
+        <div className='flex flex-col flex-nowwrap justify-center items-start gap-5'>
+            <div className='px-10'>
+                <FullCalendar 
+                    plugins={[ dayGridPlugin, timeGridPlugin, interactionPlugin ]}
+                    headerToolbar={{
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth'
+                    }}
+                    initialView="dayGridMonth"
+                    firstDay={1}
+                    height="auto" 
+                    contentHeight="auto"
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    unselectAuto
+                    locale={esLocale}
+                    events={data?.map((event, index) => ({
+                        id : event._id,
+                        date : new Date(event.dateStart),
+                        title : event.title,
+                        allDay : true,
+
+                    }))}
+                    select={handleDateSelect}
+                    selectable={true}
+                    selectAllow={isSingleDaySelection}
+                    displayEventTime={false}
+                    eventClick={handleEventClick}
+                />
+            </div>
+            <div className='flex w-full justify-start items-start px-10'>
+                <Button variant='contained'>
+                    Sincronizar Con Google Calendar
+                </Button>
+            </div>
+            <DialogCreateEventCalendar stateOpen={[open, setOpen]} stateSelectInfo={[selectInfo, setSelectInfo]}  />
+            <Popover
+                id={id}
+                open={openPopover}
+                anchorEl={anchorEl}
+                onClose={handleCloseEventView}
+                anchorOrigin={{ vertical: "center", horizontal: "right" }}
+                transformOrigin={{ vertical: "center", horizontal: "left" }}
+                marginThreshold={16}
+                slotProps={{
+                    paper: {
+                        elevation : 6,
+                        sx : {
+                            borderRadius : 10,
+                            bgcolor : '#f0f4f9',
+                            marginTop: 1,
+                            width : 400,
+                            minHeight : 200,
+                            maxHeight : 500 ,
+                            overflowY: 'auto'
+                        }
+                    },
+                }}
+            >
+                <div className="flex flex-row justify-end items-center py-3 px-5">
+                    <div className='flex flex-row gap-5'>
+                        <div className='flex flex-row gap-1'>
+                            <Tooltip title={'Eliminar Evento'}>
+                                <IconButton>
+                                    <EditIcon htmlColor="black" fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title={'Editar Evento'}>
+                                <IconButton>
+                                    <DeleteIcon htmlColor="black" fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                        <Tooltip title={'Cerrar'}>
+                            <IconButton onClick={handleCloseEventView}>
+                                <CloseIcon htmlColor="black" fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+
+                    </div>
+                </div>
+                <div className='flex flex-col py-5 px-8 gap-2'>
+                    <Typography variant='h6'>
+                        {eventClicked?.title}
+                    </Typography>
+                    <Typography>
+                        {   eventClicked?.start ? 
+                            format(eventClicked.start, "EEEE, dd 'de' MMMM", { locale : es})
+                            :
+                            null
+                        }
+                    </Typography>
+                </div>
+            </Popover>
+        </div>
+    )  
+};
+
+
+/* 
     const handleSubmitEvent = () => {
         if(!selectInfo) return
         if(!startTime) return 
@@ -49,126 +173,4 @@ export default function Calendar() {
         selectInfo.view.calendar.unselect();
         handleClose();
     }
-
-    const handleClose = () => {
-        setOpen(false);
-        setTitle('');
-        setStartTime(undefined);
-        setEndTime(undefined);
-        if (selectInfo) {
-            selectInfo.view.calendar.unselect();
-        }
-    }
-
-    const getEndTime = (indexStart : number) => (
-        timeSlots.filter((_, index) => ( index > indexStart ))
-    )
-
-    useEffect(() => {
-        if(startTime) {
-            const index = timeSlots.indexOf(startTime)
-            setListEndTime(getEndTime(index))
-            setEndTime(timeSlots[index + 1])
-        }
-    }, [startTime])
-
-    return (
-        <div className='flex flex-col flex-nowwrap justify-center items-start gap-5'>
-            <div className='px-10'>
-                <FullCalendar 
-                    plugins={[ dayGridPlugin, timeGridPlugin, interactionPlugin ]}
-                    headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth'
-                    }}
-                    initialView="dayGridMonth"
-                    firstDay={1}
-                    height="auto" 
-                    contentHeight="auto"
-                    selectable={true}
-                    selectMirror={true}
-                    dayMaxEvents={true}
-                    unselectAuto
-                    
-                    // initialEvents={dateEvents} // alternatively, use the `events` setting to fetch from a feed
-                    select={handleDateSelect}
-                />
-            </div>
-            <div className='flex w-full justify-start items-start px-10'>
-                <Button variant='contained'>
-                    Sincronizar Con Google Calendar
-                </Button>
-            </div>
-            { open ? 
-                <div className='w-full max-w-6xl px-10'>
-                    <Card className="transition-all transition-discrete flex flex-row gap-6 p-8 shadow-md rounded-2xl" style={{backgroundColor: "#fafafa"}}>
-                        <div className="flex grow-2 flex-col gap-2">
-                            <label htmlFor="titulo" className="text-sm font-medium text-gray-700">
-                                Título
-                            </label>
-                            <TextField
-                                id="titulo"
-                                type="titulo"
-                                placeholder="Agrega un título"
-                                value={title}
-                                onChange={(e) => {setTitle(e.target.value)}}
-                            />
-                        </div>
-                        <div className="flex flex-col w-75 gap-2">
-                            <label htmlFor="horario" className="text-sm font-medium text-gray-700">
-                                Horario
-                            </label>
-                            <div className='flex flex-row gap-4 justify-center items-center'>
-                                <ComboBox  onChange={(e, value) => {setStartTime(value as string)}} label='Empieza' options={timeSlots} />
-                                <p>-</p>
-                                <ComboBox  onChange={(e, value) => {setEndTime(value as string)}} disabled={startTime == undefined} label='Termina' options={listEndTime as string[]}/>
-                            </div>
-                        </div>
-                        <div className='flex justify-end items-end'>
-                            <Button type="submit" onClick={handleSubmitEvent}>
-                                Ingresar
-                            </Button>
-                        </div>
-                    </Card>
-                </div>
-                : 
-                <></>
-            }
-        </div>
-    )
-
-    
-};
-
-
-
-
-/**
- *
-
-
-    const [ dateEvents, setDateEvents ] = useState<EventInput[]>([
-        {
-        id: '123',
-        title: 'Reunión importante',
-        start: '2025-05-20T10:30:00',
-        end: '2025-05-20T12:00:00',
-        allDay: false,
-        url: 'https://example.com/meeting',
-        backgroundColor: '#3b82f6',
-        textColor: '#ffffff',
-        borderColor: '#1d4ed8',
-        classNames: ['important-meeting'],
-        extendedProps: {
-            location: 'Sala de conferencias A',
-            organizer: 'Juan Pérez',
-            description: 'Revisión del proyecto X con el equipo'
-        },
-        editable: true,
-        overlap: false,
-        display: 'auto'
-        }
-    ])
-
- */
+*/

@@ -135,7 +135,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                          <Divider className="w-full" />    
                          <ResumeItem
                               icon={<CrisisAlertIcon color="warning" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Completados</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Notificados</Typography>}
                               activityValue={<Typography variant="body1" color='info'>10</Typography>}
                          />
                          <Divider className="w-full" />   

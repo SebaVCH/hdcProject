@@ -84,7 +84,7 @@ export default function Home() {
                     <Divider variant="middle"/>
                     <ListIconHome />
                     <div className="flex grow justify-center items-end py-4">
-                        <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
+                        <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={48} height={48}/></a>
                     </div>
                 </div>
                 :
