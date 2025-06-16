@@ -10,7 +10,7 @@ export type TRoute = {
     _id : string
     description  : string 
     routeLeader : string 
-    status : string 
+    status : RouteStatus 
     createdAt ?: string
     inviteCode ?: string 
     completedAt ?: string
@@ -21,6 +21,7 @@ export type TRoute = {
 export type TCreateRouteResponse = TRoute
 
 export type TFindAllRoutes = TRoute[]
+
 
 
 
@@ -123,6 +124,34 @@ export class RouteService {
             }
             return call
         }, [])
+    }
+
+    static async JoinRoute( inviteCode : string, accessToken ?: string ) : Promise<TRoute> {
+
+        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/route/join/${inviteCode}`, {}, {
+            headers: {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+
+        return {
+            _id : data?.message?._id,
+            description : data?.message?.description,
+            routeLeader : data?.message?.route_leader,
+            status : data?.message?.status,
+            createdAt : data?.message?.date_created,
+            inviteCode : data?.message?.invite_code,
+        }
+        
+    }
+
+    static async FinishRoute( routeId : string, accessToken ?: string) : Promise<string> {
+        const { data } = await axiosInstance.patch(`${import.meta.env.VITE_URL_BACKEND}/route/${routeId}`, {}, {
+            headers : {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        return data?.message
     }
 
 

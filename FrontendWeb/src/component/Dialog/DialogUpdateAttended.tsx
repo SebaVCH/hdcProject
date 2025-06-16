@@ -10,7 +10,6 @@ import { useEffect, useState } from 'react';
 import { HelpPointAdapter } from '../../api/adapters/HelpPointAdapter';
 import useSessionStore from '../../stores/useSessionStore';
 import CloseDialogButton from '../Button/CloseDialogButton';
-import { ThelpedPerson } from '../../api/services/HelpPointService';
 import { useHelpPointUpdateDialog } from '../../context/HelpPointUpdateContext';
 
 
@@ -24,51 +23,35 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 
-
-
 export default function DialogUpdateAtended() {
 
-    const [ helpPoint, setHelpPoint ] = useHelpPointUpdateDialog() 
-    const [ helpedPerson, setHelpedPerson ] = useState<ThelpedPerson>(helpPoint?.helpedPerson ?? {
-        name : 'Sin Especificar',
-        age : 0,
-        gender : 'Sin Especificar',
-        city : 'Sin Especificar',
-        nationality : 'Sin Especificar'
-    }) 
+    const [ helpPoint, setHelpPoint ] = useHelpPointUpdateDialog() /*Context Provider */
+
+
+    const [ name, setName ] = useState('')
+    const [ age, setAge ] = useState(0)
+    const [ gender, setGender ] = useState('')
+    const [ city, setCity ] = useState('')
+    const [ nationality, setNationality ] = useState('') 
+
+
     const { accessToken } = useSessionStore()
-    const [ createButtonDisable, setCreateButtonDisable ] = useState(true)
-    const [ error, setError ] = useState<string | undefined>()
     const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = HelpPointAdapter.useUpdateHelpPointMutation( accessToken )
 
 
     useEffect(() => {
-        if(helpPoint){
-            setHelpedPerson(helpPoint.helpedPerson ?? {
-                name : 'Sin Especificar',
-                age : 0,
-                gender : 'Sin Especificar',
-                city : 'Sin Especificar',
-                nationality : 'Sin Especificar'
-            })
-            console.log(helpPoint)
+        console.log(helpPoint)
+        if(helpPoint?.helpedPerson) {
+            setName(helpPoint.helpedPerson.name ?? '')
+            setAge(helpPoint.helpedPerson.age ?? 0)
+            setGender(helpPoint.helpedPerson.gender ?? '')
+            setCity(helpPoint.helpedPerson.city ?? '')
+            setNationality(helpPoint.helpedPerson.nationality ?? '')
         }
     }, [helpPoint])
 
-    useEffect(() => {
-        console.log(helpedPerson)
-    }, [helpedPerson])
-
-
     const clearStates = () => {
         reset()
-        setHelpedPerson({        
-            name : 'Sin Especificar',
-            age : 0,
-            gender : 'Sin Especificar',
-            city : 'Sin Especificar',
-            nationality : 'Sin Especificar'
-        })
     }
 
     const handleClose = () => {
@@ -76,11 +59,16 @@ export default function DialogUpdateAtended() {
         setHelpPoint(undefined)
     }
 
-
     const handleSubmit = () => {
         if(!helpPoint) return
 
-        mutate({...helpPoint, helpedPerson : helpedPerson})
+        mutate({...helpPoint, helpedPerson : {
+            name,
+            age,
+            gender,
+            city,
+            nationality
+        }})
     }
 
     useEffect(() => {
@@ -113,26 +101,25 @@ export default function DialogUpdateAtended() {
             <CloseDialogButton handleClose={handleClose} />
 
             <DialogContent>
-                { isIdle ?
-                    <form className='flex flex-col gap-10 p-2'>
+                {   helpPoint?.helpedPerson === undefined ?
+                    <CircularProgress />
+                    :
+                    isIdle ?
+                    <div onSubmit={handleSubmit} className='flex flex-col gap-10 p-2'>
                         <div className='flex grow flex-row gap-5'>
                             <TextField
                                 fullWidth
                                 id="name" 
                                 variant='standard'
-                                value={helpedPerson?.name ?? null}
                                 label='Nombre '
                                 slotProps={{
                                     inputLabel: {
                                     shrink: true,
                                     },
                                 }}  
+                                value={name}
                                 onChange={(e) => {
-                                    if(!helpedPerson) return
-                                    setHelpedPerson({
-                                        ...helpedPerson,
-                                        name : e.target.value
-                                    })
+                                    setName(e.target.value)
                                 }}  
                                 onFocus={(event) => {
                                     event.target.select();
@@ -143,17 +130,14 @@ export default function DialogUpdateAtended() {
                                 variant='standard'
                                 label='edad'
                                 type='number'
-                                value={helpedPerson?.age ?? null}
+                                value={age}
                                 slotProps={{
                                     inputLabel: {
                                         shrink: true,
                                     }
                                 }}
                                 onChange={(e) => {
-                                    setHelpedPerson({
-                                        ...helpedPerson,
-                                        age : Number(e.target.value)
-                                    })
+                                    setAge(Number(e.target.value))
                                 }}
                             />
                         </div>
@@ -162,13 +146,10 @@ export default function DialogUpdateAtended() {
                                 className='grow'
                                 label={'Género'} 
                                 onChange={(e, value) => {
-                                    setHelpedPerson({
-                                        ...helpedPerson,
-                                        gender : value as string
-                                    })
+                                    setGender(value as string)
                                 }}
                                 options={['Hombre', 'Mujer', 'Sin Especificar']}   
-                                value={helpedPerson?.gender ?? null}                      
+                                value={gender}                      
                             />  
                         </div>
                         <div className='flex grow'>
@@ -177,12 +158,9 @@ export default function DialogUpdateAtended() {
                                 label={'Ciudad de Origen'} 
                                 options={['Santiago', 'La Serena', 'Coquimbo']}             
                                 onChange={(e, value) => {
-                                    setHelpedPerson({
-                                        ...helpedPerson,
-                                        city : value as string
-                                    })
+                                    setCity(value as string)
                                 }}     
-                                value={helpedPerson?.city ?? null}       
+                                value={city}       
                             />
                         </div>
                         <div className='flex grow'>
@@ -191,16 +169,12 @@ export default function DialogUpdateAtended() {
                                 label='Nacionalidad'
                                 options={['Chile', 'Perú']}
                                 onChange={(e, value) => {
-                                    setHelpedPerson({
-                                        ...helpedPerson,
-                                        nationality : value as string
-                                    })
+                                    setNationality(value as string)
                                 }}
-                                value={helpedPerson?.nationality ?? null}
-                                
+                                value={nationality}
                             />
                         </div>
-                    </form>
+                    </div>
                     :
                     isPending ? 
                     <div className='flex grow items-center justify-center'>
@@ -219,7 +193,7 @@ export default function DialogUpdateAtended() {
                     </>
                     :
                     <>
-                        <Button variant='contained' disabled={createButtonDisable} onClick={handleSubmit}>
+                        <Button variant='contained' onClick={handleSubmit}>
                             Modificar Registro
                         </Button>
                         <Button variant='contained' color='error' onClick={handleClose}>

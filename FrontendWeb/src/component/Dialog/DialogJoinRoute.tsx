@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import { TextField, Typography } from '@mui/material';
+import { Alert, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import { RouteAdapter } from '../../api/adapters/RouteAdapter';
@@ -31,44 +31,35 @@ export default function DialogJoinRoute({ stateOpen } : DialogJoinRouteProps) {
     const [ open, setOpen ] = stateOpen
     const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
     const [ acept, setAcept ] = useState(false)
-    const [ confirmation, setConfirmation ] = useState(false)
-    const [ route, setRoute ] = useState<TRoute>({
-        _id : '',
-        description : '',
-        routeLeader : '',
-        status : RouteStatus.Active
-    })
+    const [ inviteCode, setInviteCode ] = useState('')
+    const { isSuccess, isError, isIdle, data, mutate, error } = RouteAdapter.useJoinRouteMutation(accessToken)
 
-    const { data, mutate } = RouteAdapter.usePostRouteMutation(route, accessToken)
 
     const handleClose = () => {
+        if(isSuccess) {
+            setRouteStatus(true)
+        } 
         setOpen(false)
-    }
-
-    useEffect(() => {
-       setAcept(routeStatus)
-       setConfirmation(routeStatus)
-    }, [routeStatus])
-
-    const handleDescriptionInput = (e : React.ChangeEvent<HTMLInputElement>) => {
-        setRoute({...route, description : e.target.value})
+        setInviteCode('')
     }
 
     const handleAcept = () => {
-        setAcept(true)
         setTimeout(() => {
-            mutate()
+            mutate(inviteCode)
         }, 300)
     }
 
+    const handleInviteCode = (e : React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault()
+        setInviteCode(e.target.value)
+    } 
+
     useEffect(() => {
-        if(data) {
-            setRoute(data)
-            setRouteStatus(true)
+        if(isSuccess) {
+            setAcept(true)
             setRouteId(data._id)
         }
-    }, [data])
-
+    }, [isSuccess]) 
 
     return (
         <>
@@ -93,15 +84,31 @@ export default function DialogJoinRoute({ stateOpen } : DialogJoinRouteProps) {
                         required 
                         label='Código de invitación'
                         placeholder='Ingresa el código'
-                        value={route.description}
-                        onChange={handleDescriptionInput}
+                        value={inviteCode}
+                        onChange={handleInviteCode}
                     />
+                    { 
+                        isIdle ? null :
+                        <Alert 
+                            severity={
+                                isError ? 'error' : 
+                                isSuccess ? 'success' :
+                                'error'
+                            }
+                        >  
+                            {
+                                isError ? `Ocurrio un error : ${(error as any).error}` :
+                                isSuccess ? `Ahora eres parte de la Ruta! todas los registros se vincularán con esta ruta` :
+                                'Ocurrio un error desconocido, intente más tarde'
+                            }
+                        </Alert>
+                    }
                 </DialogContent>
                     <DialogActions>
-                        <Button variant='contained' onClick={!confirmation ? handleAcept : handleClose}>
-                            {!confirmation ? 'Unirse' : 'Aceptar'}
+                        <Button variant='contained' onClick={!acept ? handleAcept : handleClose}>
+                            {!acept ? 'Unirse' : 'Aceptar'}
                         </Button>
-                        { !confirmation ? 
+                        { !acept ? 
                             <>
                                 <Button variant='contained' onClick={handleClose}>
                                     cancelar

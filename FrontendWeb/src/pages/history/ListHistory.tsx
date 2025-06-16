@@ -1,4 +1,4 @@
-import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListSubheader, Typography } from "@mui/material";
+import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListItem,  ListItemText,  ListSubheader, Typography } from "@mui/material";
 import { TRoute } from "../../api/services/RouteService";
 import ListDateItem from "./ListDateItem";
 import { THelpPoint } from "../../api/services/HelpPointService";
@@ -30,8 +30,8 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
             subheader={
                 <ListSubheader component={"div"} id="route-list-title" sx={{ padding : 0}}>
                     <div className="flex flex-col gap-2 py-3 my-2">
-                        <Typography sx={{ paddingX : 3}} variant="h6">
-                            Historial de rutas
+                        <Typography color="black" sx={{ paddingX : 3}} variant="h6">
+                            Historial de rutas  
                         </Typography>
                         <Divider />
                         <FormControl>
@@ -60,26 +60,33 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
                 </ListSubheader>
             }
         >
-            { Array.from(routes.entries()).map(([date, routes ], index) => (
-                <ListDateItem
-                    onlyUser={onlyUser}
-                    stateLocation={stateLocation} 
-                    stateShowLocation={stateShowLocation} 
-                    stateHelpPoints={stateHelpPoints} 
-                    routes={routes} 
-                    date={date} 
-                    key={date} 
-                    defaultOpen={index == 0} 
-                    sx={{
-                        '&.Mui-selected': {
-                        backgroundColor: 'primary.main',
-                        color: 'white',
-                        },
-                        '&.Mui-selected:hover': {
-                        backgroundColor: 'primary.dark',
-                        },
-                    }}
-                />
+            {   Array.from(routes.entries()).length === 0 ? 
+                <ListItem>
+                    <ListItemText className="text-center" secondary={'Puedes empezar a crear rutas desde la página principal'} >
+                       { onlyUser ? 'No hay rutas registradas' : ' No se registraron rutas'}
+                    </ListItemText>
+                </ListItem>
+                :
+                Array.from(routes.entries()).map(([date, routes ], index) => (
+                    <ListDateItem
+                        onlyUser={onlyUser}
+                        stateLocation={stateLocation} 
+                        stateShowLocation={stateShowLocation} 
+                        stateHelpPoints={stateHelpPoints} 
+                        routes={routes} 
+                        date={date} 
+                        key={date} 
+                        defaultOpen={index == 0} 
+                        sx={{
+                            '&.Mui-selected': {
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            },
+                            '&.Mui-selected:hover': {
+                            backgroundColor: 'primary.dark',
+                            },
+                        }}
+                    />
             ))}
         </List>
     )

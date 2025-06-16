@@ -59,3 +59,7 @@ html, body {
     border-color: #3b82f6;
     color: white;
 }
+
+.fc-event-title {
+  font-size: 0.85rem; 
+}

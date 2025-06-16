@@ -1,4 +1,4 @@
-import { Button, CircularProgress, ClickAwayListener, Divider, Fade } from "@mui/material"
+import { Button, CircularProgress, ClickAwayListener, Divider, Fade, Skeleton } from "@mui/material"
 import CustomDrawer from "../../component/CustomDrawer"
 import { UserAdapter } from "../../api/adapters/UserAdapter"
 import useSessionStore from "../../stores/useSessionStore"
@@ -26,15 +26,29 @@ export type TResumenActividad = {
 export default function Profile() {
 
     const { accessToken } = useSessionStore()
-    const { data, isLoading, isSuccess } = UserAdapter.useGetProfile(accessToken)
     const [ user, setUser ] = useState<TProfileResponse>()
-    const mutation = UserAdapter.useUpdateProfile( accessToken as string)
     const [ hasChange, setHasChange ] = useState(false)
-
     const [ resumenActividad, setResumenActividad ] = useState<TResumenActividad>({})
-
-
+    
+    const { data, isLoading, isSuccess, refetch } = UserAdapter.useGetProfile(accessToken, true)
     const useQueryRoutesByUser = RouteAdapter.useGetRouteByUserID(user?._id, accessToken, true)
+    const mutation = UserAdapter.useUpdateProfile( accessToken as string)
+
+    const clearStates = () => {
+        setUser(undefined)
+        setHasChange(false)
+        setResumenActividad({})
+    }
+
+
+    useEffect(() => {
+        refetch()
+        return () => {
+            clearStates()
+        }
+    }, [])
+
+
 
     useEffect(() => { // Calcular total rutas completadas & última fecha ruta
         if(useQueryRoutesByUser.data && user?._id) {
@@ -48,6 +62,7 @@ export default function Profile() {
     }, [useQueryRoutesByUser.data, user?._id])
 
     useEffect(() => {
+        console.log("aca en cambio de dato")
         if(data) {
             setUser({...data})
         }
@@ -59,7 +74,7 @@ export default function Profile() {
         mutation.mutate(user as TProfileRequest)
     }
 
-    const handleClickAway = () => {
+    const handleClickAway = (e : MouseEvent | TouchEvent) => {
         if(hasChange && mutation.isIdle) {
             const save = confirm("Tienes cambios por hacer, ¿Deseas Guardar los cambios?")
             if(save) {
@@ -79,9 +94,9 @@ export default function Profile() {
                     <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
                 </div>
             </div>
-            <ClickAwayListener onClickAway={handleClickAway}>
+            <ClickAwayListener onClickAway={(e) => {handleClickAway(e)}}>
                 <div className="flex grow flex-col self-stretch justify-start items-start justify-items-start gap-10 border border-neutral-300 rounded-xs px-5 bg-gray-100">
-                    <div className="flex flex-col justify-start items-start p-1 sm:p-2 md:p-4 lg:p-5 g-5 w-full">
+                    <div className="flex flex-col justify-start items-start p-1 sm:p-2 md:p-4 lg:p-5 g-5 w-full h-full">
                         <div className="flex flex-row w-full justify-between items-center">
                             <div className="flex flex-col justify-start items-start">
                                 <p  className="text-2xl font-semibold">Perfil</p>
@@ -109,10 +124,17 @@ export default function Profile() {
                         </div>
                         <Divider className="my-4 w-full" />
                         { isLoading || !isSuccess || !user ? 
-                        <p>Cargando...</p>  
-                        : 
-                        <TableProfile stateResumenActividad={[resumenActividad, setResumenActividad]} stateHasChanges={[hasChange, setHasChange]} stateUser={[user, setUser]}/> }
-                    </div>
+                            <div className="flex flex-col grow w-full h-full items-center justify-center gap-2">
+                                <CircularProgress size={90} color="inherit" thickness={2}/>
+                            </div>
+                            : 
+                            <TableProfile 
+                                stateResumenActividad={[resumenActividad, setResumenActividad]} 
+                                stateHasChanges={[hasChange, setHasChange]} 
+                                stateUser={[user, setUser]}
+                            /> 
+                        }
+                        </div>
                 </div>
             </ClickAwayListener>
         </div>

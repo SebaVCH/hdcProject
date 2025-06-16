@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Divider, Fab, IconButton, Paper, Typography } from "@mui/material";
+import { Backdrop, Card, Divider, Typography } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
 import ListIconHome from "../../component/ListIconHome";
-import NavigationIcon from '@mui/icons-material/Navigation';
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
 import useSessionStore from "../../stores/useSessionStore";
 import ButtonFinalizarRuta from "../../component/Button/ButtonFinalizarRuta";
@@ -24,13 +23,14 @@ import ButtonCurrentLocation from "../../component/Map/ButtonCurrentLocation";
 import LocationHandler from "../../component/Map/LocationHandler";
 import SpeedDialCreateRoute from "../../component/Button/SpeedDialCreateRoute";
 import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
+import { useAuth } from "../../context/AuthContext";
 
 
 
 
 export default function Home() {
 
-
+    const { role, loading } = useAuth()
     const { accessToken } = useSessionStore()
     const { routeStatus, routeId } = useSessionStore()
     const [ openDialRoute, setOpenDialRoute ] = useState(false)
@@ -53,7 +53,7 @@ export default function Home() {
 
 
     const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})
-    const [ currentLocation, setCurrentLocation ] = useState<Position>({latitude : -29.959003986327698, longitude : -71.34176826076656})
+    const [ currentLocation, setCurrentLocation ] = useState<Position>({latitude : 0, longitude : 0})
     const [ showLocation, setShowLocation ] = useState(false)
 
     const [ errorGeolocation, setErrorGeolocation ] = useState<GeolocationPositionError | undefined>()
@@ -72,6 +72,10 @@ export default function Home() {
         }
     }, [riskQuery.data, helpPointQuery.data])
 
+    useEffect(() => {
+        console.log("ROL DEL USUARIO: ", role)
+    }, [loading])
+
     return (
         <div className="flex flex-grow">
             { !onSelectLocationMap ?
@@ -80,7 +84,7 @@ export default function Home() {
                     <Divider variant="middle"/>
                     <ListIconHome />
                     <div className="flex grow justify-center items-end py-4">
-                        <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
+                        <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={48} height={48}/></a>
                     </div>
                 </div>
                 :
@@ -99,6 +103,7 @@ export default function Home() {
                         stateDialogRisk={[openDialogRisk, setOpenDialogRisk]}
                     />
                     <LocationHandler 
+                        stateErrorGeolocation={[errorGeolocation, setErrorGeolocation]}
                         stateShowLocation={[showLocation, setShowLocation]}
                         stateCurrentLocation={[currentLocation, setCurrentLocation]}                        
                     />
@@ -107,17 +112,22 @@ export default function Home() {
 
                 { !onSelectLocationMap ?
                     <>
+                        <MensajesFijados />
                         <Backdrop open={openDialRoute} className="z-10"/>
                         <Backdrop open={openSpeedCreateRoute} className="z-10"/>
-                        { routeStatus ? <ButtonFinalizarRuta /> : <MensajesFijados />}
+                        { routeStatus ? 
+                            <ButtonFinalizarRuta /> 
+                            : 
+                            null
+                        }
                         <div className="absolute bottom-16 right-16 scale-120 z-20">
                             {!routeStatus ? 
                                 <SpeedDialCreateRoute
                                     stateOpen={[openSpeedCreateRoute, setOpenSpeedCreateRoute]}
-                                    stateOpenCreateRoute={[openDialogRoute, setOpenDialogRoute]}
+                                    stateOpenCreateRoute={stateOpenCreateRoute}
                                     stateOpenJoinRoute={stateOpenJoinRoute}
                                 >
-                                    <DialogCreateRoute open={openDialogRoute} setOpen={setOpenDialogRoute} />
+                                    <DialogCreateRoute stateOpen={stateOpenCreateRoute} />
                                     <DialogJoinRoute stateOpen={stateOpenJoinRoute} />
                                 </SpeedDialCreateRoute>
                                 /*  

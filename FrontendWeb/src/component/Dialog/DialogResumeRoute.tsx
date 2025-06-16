@@ -10,6 +10,8 @@ import { Paper, Snackbar, Typography } from '@mui/material';
 import { useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
+import useSessionStore from '../../stores/useSessionStore';
+import { RouteAdapter } from '../../api/adapters/RouteAdapter';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -28,8 +30,15 @@ export type DialogResumeRiskProps = {
 
 export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps) {
 
+
+    const { routeId, accessToken } = useSessionStore()
+
     const [ open, setOpen ] = stateOpen
     const [ copySuccess, setCopySuccess ] = useState<undefined | boolean>()
+
+    const { isSuccess, isError, isPending, data } = RouteAdapter.useGetRouteByID( routeId as string, accessToken, true)
+
+
     
 
     const handleClose = () => {
@@ -77,7 +86,11 @@ export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps)
                     </Typography>
                     <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
                         <Typography>
-                            codigo
+                            {   isPending ? 'Cargando código...' :
+                                isSuccess ? data.inviteCode : 
+                                isError ? 'Error al intentar obtener el código' :
+                                'Error desconocido'
+                            }
                         </Typography>
                         <IconButton onClick={onClickContentCopy}>
                             { copySuccess ? <DoneIcon /> : <ContentCopyIcon />}

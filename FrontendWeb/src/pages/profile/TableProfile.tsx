@@ -9,6 +9,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ResumeItem from "./ResumeItem";
+import { useAuth } from "../../context/AuthContext";
 
 type TableProfileProps = {
      stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
@@ -18,6 +19,7 @@ type TableProfileProps = {
 
 export default function TableProfile({ stateUser, stateHasChanges, stateResumenActividad } : TableProfileProps ) {
 
+     const { role, loading } = useAuth()
      const [ open, setOpen ] = useState(false)
      const [ user, setUser ] = stateUser
      const [ resumen, setResumen ] = stateResumenActividad
@@ -40,13 +42,13 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                     <Typography variant="h6">
                          Acerca de ti
                     </Typography>
-                    <Paper elevation={2} className="flex items-center justify-center p-1 sm:p-2 md:p-3 lg:p-5 flex-col gap-8 border border-neutral-300">
+                    <Paper elevation={2} className="flex items-center justify-center p-1 sm:p-2 md:p-3 lg:p-5 flex-col gap-3 border border-neutral-300">
                          <TextField 
                               variant="standard"
                               margin="dense"
                               fullWidth
                               label="Nombre"
-                              id="outlined-required"
+                              id="name-input"
                               placeholder="Ingresa tu Nombre"
                               color={user.name == '' ? 'warning' : 'primary'}
                               value={user.name}
@@ -60,7 +62,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                               margin="dense"
                               variant="standard"
                               label="Teléfono"
-                              id="outlined-required"
+                              id="phone-input"
                               placeholder="Ingresa tu Número de Teléfono"
                               color={user.phone == '' ? 'warning' : 'primary'}
                               value={user.phone}
@@ -74,8 +76,18 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                               margin="dense"
                               variant="standard"
                               label="Email"
-                              id="outlined-required"
+                              id="email-input"
                               value={user.email}
+                              disabled
+                              size="small"
+                         />
+                         <TextField
+                              fullWidth
+                              margin="dense"
+                              variant="standard"
+                              label='Rol'
+                              id="role-input"
+                              value={role}
                               disabled
                               size="small"
                          />
@@ -85,7 +97,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                                    margin="dense"
                                    variant="standard"
                                    label="Contraseña"
-                                   id="outlined-required"
+                                   id="password-input"
                                    value={'------'}
                                    type="password"
                                    disabled
@@ -123,7 +135,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                          <Divider className="w-full" />    
                          <ResumeItem
                               icon={<CrisisAlertIcon color="warning" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Completados</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Notificados</Typography>}
                               activityValue={<Typography variant="body1" color='info'>10</Typography>}
                          />
                          <Divider className="w-full" />   

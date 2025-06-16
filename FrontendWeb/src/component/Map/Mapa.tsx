@@ -71,7 +71,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
     return (
         <>
             <MapContainer 
-                center={ [currentLocation.latitude, currentLocation.longitude] } 
+                center={ [currentLocation.latitude || -29.959003986327698, currentLocation.longitude || -71.34176826076656] } 
                 zoom={ 30 } 
                 scrollWheelZoom={true} 
                 className="h-full w-full z-0"
@@ -88,7 +88,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
                 {helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 
-                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} draggable >
+                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
                         <Popup >
                             <div className="flex flex-col items-center justify-center gap-2">
                                 <b>Edad: {helpPoint.helpedPerson?.age === -1 ? 'N/A' : helpPoint.helpedPerson?.age}</b>
@@ -107,8 +107,8 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                         pathOptions={{
                             color : '#800022',
                             opacity : 0.5,
-                            weight : 3
-
+                            weight : 3,
+                            dashArray: '5, 10'
                         }} 
                         positions={coords}
                     />

@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { TProfileRequest, UserService } from "../services/UserService";
-import { IUser } from "../interfaces/IUser";
 import useSessionStore from "../../stores/useSessionStore";
 import { UserRegister } from "../../component/Dialog/DialogCreateUser";
 
@@ -30,12 +29,14 @@ export class UserAdapter {
         })
     }
 
-    static useGetProfile(accessToken ?: string ) {
+    static useGetProfile(accessToken ?: string, disabled ?: boolean ) {
         return useQuery({
             queryKey : ['profile'],
             queryFn : () => (UserService.GetProfile(accessToken as string)),
-            enabled : accessToken ? true : false,
-            
+            enabled : !disabled,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            staleTime: Infinity, 
         })
     }
 

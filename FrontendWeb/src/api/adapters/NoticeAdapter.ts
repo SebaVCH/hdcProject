@@ -18,6 +18,7 @@ export class NoticeAdapter {
         return useQuery({
             queryKey: ['notices'],
             queryFn: () => (NoticeService.GetNotices(accessToken))
+             
         })
     }
 

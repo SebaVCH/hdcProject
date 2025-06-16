@@ -3,8 +3,6 @@ import { NavigateFunction } from 'react-router-dom'
 
 
 
-
-
 export const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_URL_BACKEND,
     timeout: 3000,
