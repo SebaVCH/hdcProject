@@ -17,6 +17,7 @@ type RouteUseCase interface {
 	DeleteRoute(c *gin.Context)
 	FinishRoute(c *gin.Context)
 	JoinRoute(c *gin.Context)
+	GetMyParticipation(c *gin.Context)
 }
 
 type routeUseCase struct {
@@ -153,4 +154,20 @@ func (r routeUseCase) JoinRoute(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": route})
+}
+
+func (r routeUseCase) GetMyParticipation(c *gin.Context) {
+	userID := c.Param("id")
+	if userID == "" {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de usuario no encontrado"})
+		return
+	}
+
+	quantity, err := r.routeRepository.GetMyParticipation(userID)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener participaciones"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": quantity})
 }

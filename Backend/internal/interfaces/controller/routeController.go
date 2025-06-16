@@ -42,3 +42,7 @@ func (r *routeController) FinishRoute(c *gin.Context) {
 func (r *routeController) JoinRoute(c *gin.Context) {
 	r.routeUseCase.JoinRoute(c)
 }
+
+func (r *routeController) GetMyParticipation(c *gin.Context) {
+	r.routeUseCase.GetMyParticipation(c)
+}

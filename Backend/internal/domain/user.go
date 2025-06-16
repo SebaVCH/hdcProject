@@ -1,6 +1,9 @@
 package domain
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"time"
+)
 
 type Usuario struct {
 	ID              bson.ObjectID `bson:"_id,omitempty" json:"_id"`
@@ -12,4 +15,5 @@ type Usuario struct {
 	ListRoutes      []Route       `bson:"list_routes" json:"list_routes"`
 	Role            string        `bson:"role" json:"role"`
 	Institution     string        `bson:"institution" json:"institution"`
+	DateRegister    time.Time     `bson:"date_register" json:"date_register"`
 }

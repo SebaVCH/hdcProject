@@ -10,7 +10,7 @@ import (
 
 type CalendarEventRepository interface {
 	GetAllCalendarEvents() ([]domain.EventoCalendario, error)
-	CreateCalendarEvent(event domain.EventoCalendario) error
+	CreateCalendarEvent(event domain.EventoCalendario, userID string) error
 	DeleteCalendarEvent(id string) error
 	UpdateCalendarEvent(updateData map[string]interface{}) (domain.EventoCalendario, error)
 	FindByIDAndUserID(id string, userID string) error
@@ -49,8 +49,9 @@ func (c calendarEventRepository) GetAllCalendarEvents() ([]domain.EventoCalendar
 	return events, nil
 }
 
-func (c calendarEventRepository) CreateCalendarEvent(event domain.EventoCalendario) error {
+func (c calendarEventRepository) CreateCalendarEvent(event domain.EventoCalendario, userID string) error {
 	event.ID = bson.NewObjectID()
+	event.AuthorID, _ = bson.ObjectIDFromHex(userID)
 	_, err := c.CalendarEventCollection.InsertOne(context.Background(), event)
 	return err
 }

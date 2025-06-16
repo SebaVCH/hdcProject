@@ -14,6 +14,9 @@ type NotificationUseCase interface {
 	DeleteNotification(c *gin.Context)
 	UpdateNotification(c *gin.Context)
 	GetNotifications(c *gin.Context)
+	GetUnreadNotifications(c *gin.Context)
+	GetReadNotifications(c *gin.Context)
+	MarkNotificationAsRead(c *gin.Context)
 }
 
 type notificationUseCase struct {
@@ -103,6 +106,7 @@ func (n notificationUseCase) UpdateNotification(c *gin.Context) {
 }
 
 func (n notificationUseCase) GetNotifications(c *gin.Context) {
+
 	notifications, err := n.notificationRepository.GetNotifications()
 	if err != nil {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso"})
@@ -110,4 +114,44 @@ func (n notificationUseCase) GetNotifications(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
+}
+
+func (n notificationUseCase) GetUnreadNotifications(c *gin.Context) {
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+	notifications, err := n.notificationRepository.GetUnreadNotifications(userID)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
+}
+
+func (n notificationUseCase) GetReadNotifications(c *gin.Context) {
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+	notifications, err := n.notificationRepository.GetReadNotifications(userID)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
+}
+
+func (n notificationUseCase) MarkNotificationAsRead(c *gin.Context) {
+	notificationID := c.Param("id")
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+	err := n.notificationRepository.MarkNotificationAsRead(notificationID, userID)
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Error al obtener aviso"})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "Aviso marcado como leído correctamente"})
 }

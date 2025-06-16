@@ -7,6 +7,7 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"time"
 )
 
 type AuthRepository interface {
@@ -58,6 +59,7 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 	user.CompletedRoutes = 0
 	user.ListRoutes = []domain.Route{}
 	user.Role = "voluntario"
+	user.DateRegister = time.Now()
 
 	res, err := a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
 	if err != nil {

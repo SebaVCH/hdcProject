@@ -47,7 +47,11 @@ func (ce calendarEventUseCase) CreateCalendarEvent(c *gin.Context) {
 		return
 	}
 
-	err := ce.calendarRepository.CreateCalendarEvent(event)
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+
+	err := ce.calendarRepository.CreateCalendarEvent(event, userID)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear el evento: "})
 		return

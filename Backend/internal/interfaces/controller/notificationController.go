@@ -30,3 +30,15 @@ func (n *notificationController) UpdateNotification(c *gin.Context) {
 func (n *notificationController) GetNotifications(c *gin.Context) {
 	n.notificationUseCase.GetNotifications(c)
 }
+
+func (n *notificationController) GetUnreadNotifications(c *gin.Context) {
+	n.notificationUseCase.GetUnreadNotifications(c)
+}
+
+func (n *notificationController) GetReadNotifications(c *gin.Context) {
+	n.notificationUseCase.GetReadNotifications(c)
+}
+
+func (n *notificationController) MarkNotificationAsRead(c *gin.Context) {
+	n.notificationUseCase.MarkNotificationAsRead(c)
+}
