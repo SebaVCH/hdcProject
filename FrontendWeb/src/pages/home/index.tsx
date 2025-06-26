@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Divider, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Backdrop, Card, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
-import ListIconHome from "../../component/ListIconHome";
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
 import useSessionStore from "../../stores/useSessionStore";
 import ButtonFinalizarRuta from "../../component/Button/ButtonFinalizarRuta";
@@ -24,8 +23,9 @@ import LocationHandler from "../../component/Map/LocationHandler";
 import SpeedDialCreateRoute from "../../component/Button/SpeedDialCreateRoute";
 import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
 import { useAuth } from "../../context/AuthContext";
-import HomeIcon from '@mui/icons-material/Home';
-import { useNavigate } from "react-router-dom";
+import Sidebar from "../../component/Sidebar";
+
+
 
 
 
@@ -77,10 +77,7 @@ export default function Home() {
         console.log("ROL DEL USUARIO: ", role)
     }, [loading])
 
-    const navigate = useNavigate()
-    const onClickHome = () => {
-        navigate('/')
-    }
+
 
     const theme = useTheme();
     const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
@@ -89,17 +86,8 @@ export default function Home() {
         <div className="flex flex-grow">
             { !onSelectLocationMap ?
                 computerDevice ? 
-                    <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-10">
-                        <Tooltip title={"Home"}>
-                            <IconButton onClick={onClickHome} sx={{ p : 2}}>
-                                <HomeIcon htmlColor="#374151" sx={{ fontSize: 40 }} />
-                            </IconButton>
-                        </Tooltip>
-                        <Divider variant="middle"/>
-                        <ListIconHome />
-                        <div className="flex grow justify-center items-end py-4">
-                            <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={48} height={48}/></a>
-                        </div>
+                    <div className="flex z-20">
+                        <Sidebar />
                     </div>
                     :
                     <div className="absolute top-4 z-20 left-2">
@@ -148,10 +136,6 @@ export default function Home() {
                                     <DialogCreateRoute stateOpen={stateOpenCreateRoute} />
                                     <DialogJoinRoute stateOpen={stateOpenJoinRoute} />
                                 </SpeedDialCreateRoute>
-                                /*  
-                                <Fab color="secondary" onClick={() => {setOpenDialogRoute(true)}}>
-                                    <NavigationIcon />
-                                </Fab>  */
                                 :
                                 <SpeedDialRoute 
                                     stateOpen={[ openDialRoute, setOpenDialRoute ]}

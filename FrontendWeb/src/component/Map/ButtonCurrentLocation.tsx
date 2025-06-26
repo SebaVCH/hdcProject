@@ -42,6 +42,12 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
     }
 
     const [ open, setOpen ] = useState(!enableGPS)
+
+
+    useEffect(() => {
+        console.log("estado open alerta: ", open)
+        console.log("Error geolocation: ", errorGeolocation)
+    }, [open])
     
 
     return (
@@ -104,7 +110,7 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         { !errorGeolocation ?
                             'Revisa tu ubicación actual!' 
                             :
-                            'Error: ' + errorGeolocation.message + `N° retry : ${countRetryGPS}`
+                            'ERROR: ' + errorGeolocation.message
                         }
                         </Alert>
                     </Fade>

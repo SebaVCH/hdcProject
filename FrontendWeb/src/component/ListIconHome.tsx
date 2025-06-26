@@ -9,7 +9,6 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DialogSendNotice from './Dialog/DialogSendNotice';
 import { useAuth } from '../context/AuthContext';
 import { Role } from '../api/interfaces/Enums';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 
 
 export default function ListIconHome() {
