@@ -8,6 +8,7 @@ import { NoticeAdapter } from "../api/adapters/NoticeAdapter";
 import React from "react";
 import { format, formatRelative } from "date-fns";
 import { es } from "date-fns/locale";
+import Mensaje from "./Mensaje";
 
 export default function MensajesFijados() {
 
@@ -37,7 +38,7 @@ export default function MensajesFijados() {
     return (
         <div className={"absolute right-8 " + (computerDevice ? (routeStatus ? 'top-16' : 'top-8') : (routeStatus ? 'top-8' : 'top-6')) }>
             <Paper className="relative inline-block" sx={{ borderRadius : 9}}>
-                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular" sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 15, minWidth: 15 } }}>
+                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular" >
                     <IconButton onClick={handleClick}>
                         { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize={"large"}/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize={"large"}/>}
                     </IconButton>
@@ -83,44 +84,7 @@ export default function MensajesFijados() {
                 isSuccess ? 
                     data.map((value, index) => (
                         <>
-                        <ListItem key={index}>
-                            <ListItemText
-                                primary={
-                                    <React.Fragment >
-                                        <div className="flex flex-row gap-3" >
-                                            <Typography
-                                                component={"span"}
-                                                variant='body2'
-                                                sx={{ color : 'text.primary'}}
-                                            >
-                                                {value.authorName}
-                                            </Typography>
-                                            <Typography
-                                                lineHeight={1.7}
-                                                component={"span"}
-                                                variant="caption"
-                                                sx={{ color : 'text.secondary', textAlign : 'end', my : 0.05}}
-                                            >
-                                                {formatRelative(new Date(value.createdAt as string), new Date(), { locale : es })}
-                                            </Typography>
-                                        </div>
-                                    </React.Fragment>
-                                }
-                                secondary={
-                                    <React.Fragment>
-                                        <div className="p-4 pb-0 text-justify">
-                                            <Typography
-                                                component={"span"}
-                                                variant='body1'
-                                                sx={{ color : 'text.primary', display : 'inline'}}
-                                            >
-                                                {value.description}
-                                            </Typography>     
-                                        </div>      
-                                    </React.Fragment>
-                                }
-                            />
-                        </ListItem>
+                        <Mensaje value={value} index={index} />
                         <Divider />
                         </>
                     )) 
