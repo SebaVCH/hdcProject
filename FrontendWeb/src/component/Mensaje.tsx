@@ -1,11 +1,8 @@
-import { Button, IconButton, ListItem, ListItemText, Typography } from "@mui/material";
-import  DeleteIcon from '@mui/icons-material/Delete';
+import { ListItem, ListItemText, Typography } from "@mui/material";
 import { TNotice } from "../api/services/NoticeService";
 import { useState } from "react";
 import { formatRelative } from "date-fns";
 import { es } from "date-fns/locale";
-import React from "react";
-
 
 
 
@@ -24,8 +21,8 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
   return (
     <ListItem key={index}>
       <ListItemText
+        disableTypography
         primary={
-            <React.Fragment >
                 <div className="flex flex-row gap-3" >
                     <Typography
                         component={"span"}
@@ -43,10 +40,9 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                         {formatRelative(new Date(value.createdAt as string), new Date(), { locale : es })}
                     </Typography>
                 </div>
-            </React.Fragment>
         }
+      
         secondary={
-          <React.Fragment>
               <div className="p-4 pb-0 text-justify">
                   <Typography
                       component={"span"}
@@ -67,7 +63,6 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                     <></>
                   }
               </div>      
-          </React.Fragment>
         }
       />
     </ListItem>
