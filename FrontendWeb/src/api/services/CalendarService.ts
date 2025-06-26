@@ -3,9 +3,12 @@ import { axiosInstance } from "./axiosInstance"
 
 export type TCalendarEvent = {
     _id : string
+    authorId: string
     title : string 
     description : string 
-    dateStart : string      
+    dateStart : string 
+    timeStart ?: string
+    timeEnd ?: string     
 }
 
 export class CalendarService {
@@ -23,13 +26,16 @@ export class CalendarService {
 
         return (data as any[]).map((value, _) => ({
             _id : value?._id,
+            authorId : value?.author_id,
             title : value?.title,
             description : value?.description,
-            dateStart : value?.date_start
+            dateStart : value?.date_start,
+            timeStart : value?.time_start,
+            timeEnd : value?.time_end
         }))
     }
 
-    static async AddEvent( event : Omit<TCalendarEvent, '_id'>, token ?: string) : Promise<TCalendarEvent> {
+    static async AddEvent( event : Omit<TCalendarEvent, '_id' | 'authorId'>, token ?: string) : Promise<TCalendarEvent> {
 
 
         const body = {
@@ -44,7 +50,8 @@ export class CalendarService {
         })
         return {
             ...event, 
-            _id : data?.message?._id
+            _id : data?.message?._id,
+            authorId : data?.message?.author_id
         }
     }
 

@@ -2,53 +2,223 @@ import { useEffect, useState } from "react";
 import { UserAdapter } from "../../api/adapters/UserAdapter";
 import { useNavigate } from "react-router-dom";
 import useSessionStore from "../../stores/useSessionStore";
-import { Button, Card, Input, Paper, TextField } from "@mui/material";
+import { Box, Button, Card, Divider, FormControl, FormLabel, SxProps, TextField, Theme, Typography } from "@mui/material";
+import { isValidEmail } from "../../utils/verifyInput";
+
+
 
 
 
 export default function Login() {
 
     const navigate = useNavigate()
-    const [email, setEmail] = useState<string>('')
-    const [password, setPassword] = useState<string>('')
+
+    const [ email, setEmail ] = useState<string>('')
+    const [ emailError, setEmailError ] = useState<string>('')
+    const [ password, setPassword ] = useState<string>('')
+    const [ passwordError, setPasswordError ] = useState<string>('')
+
     const { accessToken } = useSessionStore()
     const { isPending, mutate, error, isError, isSuccess } = UserAdapter.useLoginMutation(email, password)
+
+    const validateInputs = () => {
+      
+      if(email === '' || !isValidEmail(email)) {
+        setEmailError('Ingresa Ingresa un Email válido')
+      } else {
+        setEmailError('')
+      }
+
+      if(password === '') {
+        setPasswordError('Ingresa una Contraseña')
+      } else {
+        setPasswordError('')
+      }
+      
+    }
     
-  
 
     const onSubmitForm = (e :React.FormEvent) => {
-        e.preventDefault()
-        mutate()
-    }
 
-    
+      e.preventDefault()
+      console.log("jasnadkln")
+      if(emailError !== '' || passwordError !== '') {
+        return
+      }
+      console.log("jasnaqdkln")
+      mutate()
+    }
     useEffect(() => {
-        if(accessToken) {
-            navigate('/')
-        }
+      if(accessToken) {
+        navigate('/')
+      }
     }, [])
 
     useEffect(() => {
-        if(isSuccess) {
-            navigate('/')
-        }
+      if(isSuccess) {
+        console.log("jasnadkln")
+        navigate('/')
+      }
     }, [isSuccess, navigate])
 
 
-    if(isPending) {
-        return (
-            <>
-                Loading...
-            </>
-        )
-    } 
-
     return (
-<div className="flex min-h-screen flex-col justify-center items-center bg-gray-50 px-4">
-  <div className="w-full max-w-sm">
-    <h2 className="text-3xl font-semibold text-center mb-8">Iniciar Sesión</h2>
-    <form onSubmit={onSubmitForm}>
-      <Card className="flex flex-col gap-6 p-8 shadow-md rounded-2xl bg-white">
+      <Box className="flex w-full h-full justify-center"
+          sx={[
+          (theme) => ({
+            '&::before': {
+              content: '""',
+              display: 'block',
+              position: 'absolute',
+              zIndex: -1,
+              inset: 0,
+              backgroundImage:
+                'radial-gradient(ellipse at 50% 50%, 	hsl(184, 100%, 95%), hsl(0, 0%, 100%))',
+              backgroundRepeat: 'no-repeat',
+            },
+          })
+        ]}
+      >
+        <div className="flex items-center justify-center w-full xs:max-w-sm">
+          <form className="max-xs:h-full" onSubmit={onSubmitForm} noValidate>
+              <Card variant='elevation' elevation={1} className="flex flex-col gap-6 rounded-2xl h-full lg:h-150 w-full lg:w-250">
+                <div className="flex grow flex-col lg:flex-row items-center justify-between p-16 gap-1 lg:gap-16">
+                  <div className="flex flex-col items-start justify-start gap-8 w-full lg:w-90 px-0 lg:px-6">
+                    <Typography variant="h3" gutterBottom fontSize={{
+                      xs : '2.5rem'
+                    }}>
+                      Iniciar Sesión
+                    </Typography>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="email">Email</FormLabel>
+                      <TextField
+                        error={emailError !== ''}
+                        helperText={emailError}
+                        id="email"
+                        type="email"
+                        name="email"
+                        placeholder="Ingresa tu Correo"
+                        autoComplete="email"
+                        autoFocus
+                        required
+                        fullWidth
+                        variant="outlined"
+                        sx={sxInput}
+                        onChange={(e) => setEmail(e.currentTarget.value)}                        
+                      />
+                    </FormControl>
+                    <FormControl fullWidth>
+                      <FormLabel htmlFor="password">Contraseña</FormLabel>
+                      <TextField
+                        error={passwordError !== ''}
+                        helperText={passwordError}
+                        id="password"
+                        type="password"
+                        name="password"
+                        placeholder="Ingresa tu Contraseña"
+                        autoComplete="password"
+                        autoFocus
+                        required
+                        fullWidth
+                        variant="outlined"
+                        sx={sxInput}
+                        onChange={(e) => setPassword(e.currentTarget.value)}
+                      />
+                    </FormControl>
+                    <Button type="submit" fullWidth variant="contained"
+                      onClick={validateInputs}
+                      sx={{
+                        color : 'white',
+                        background : '#009BA5',
+                      }}
+                    >
+                      Ingresar
+                    </Button>
+                    <Divider className="w-full" />
+
+                    <Typography alignSelf={'center'}
+                      component={'a'}
+                      href="/change-password"
+                      sx={{
+                        textDecoration : 'underline',
+                      }}
+                      fontSize={{
+                        xs : '0.75rem',
+                        sm : '0.75rem',
+                        md : '1rem'
+                      }}
+                    >
+                      ¿Se te olvidó la contraseña?
+                    </Typography>
+                  </div>
+                  <div className="flex w-1/2 md:w-1/2 flex-col items-center justify-center">
+                      <img src="https://aportes.hogardecristo.cl/wp-content/uploads/2021/08/HDC_RGB_full-color-horizontal.png.webp" loading="lazy"/>
+                      <Typography variant='subtitle2' textAlign={'center'} fontSize={{
+                        xs : '0.4rem',
+                        sm : '1rem',
+                        md : '1rem',
+                      }}>
+                        Hecho con ❤️ por <a href="devSync"><b>DevSync</b></a>
+                      </Typography>
+                  </div>
+                </div>
+              </Card>
+          </form>
+        </div>
+      </Box>
+    )   
+}
+
+const sxInput : SxProps<Theme> = {
+  '& .MuiOutlinedInput-root': {
+    marginY : 1,
+    borderRadius: 2,
+    backgroundColor: '#fcfcfc', // ejemplo de fondo azul claro
+    paddingX: 1.5,
+    minHeight: '2.5rem',
+    display: 'flex',
+    alignItems: 'center', // centrado vertical
+    border: '1px solid #ccc',
+    transition: 'border 120ms ease-in',
+    '&:hover': {
+      borderColor: '#566481',
+    },
+
+    '&.Mui-focused': {
+      borderColor: '#566481',
+      outline: '2px solid #56648133',
+    },
+  },
+
+  '& .MuiOutlinedInput-notchedOutline': {
+    border: 'none', // quita doble borde
+  },
+
+  '& .MuiOutlinedInput-input': {
+    padding: 0,
+    height: '1.5rem', // altura del input (puedes ajustar)
+  },
+}
+
+/*
+<img src="undraw_destination_fkst.svg" alt="gps-view" className="max-w-1/2 h-auto object-contain"/>
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Ingresa tu Contraseña"
+                autoComplete="password"
+                autoFocus
+                required
+                fullWidth
+                variant="outlined"
+                sx={sxInput}
+
+
+
+
+
+
+<Card className="flex flex-col gap-6 p-8 shadow-md rounded-2xl bg-white">
         <div className="flex flex-col gap-2">
           <label htmlFor="email" className="text-sm font-medium text-gray-700">
             Correo electrónico
@@ -81,10 +251,4 @@ export default function Login() {
           </div>
         )}
       </Card>
-    </form>
-  </div>
-</div>
-
-    )   
-
-}
+*/

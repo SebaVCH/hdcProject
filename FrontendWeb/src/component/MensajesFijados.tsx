@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip, Badge } from "@mui/material";
+import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip, Badge, useMediaQuery, useTheme } from "@mui/material";
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import useSessionStore from "../stores/useSessionStore";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { NoticeAdapter } from "../api/adapters/NoticeAdapter";
-import React from "react";
-import { format, formatRelative } from "date-fns";
-import { es } from "date-fns/locale";
+import Mensaje from "./Mensaje";
 
 export default function MensajesFijados() {
 
-    const { accessToken } = useSessionStore()
+    const { accessToken, routeStatus } = useSessionStore()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const handleClick = (event : any) => {
         setAnchorEl(event.currentTarget)
@@ -22,22 +20,41 @@ export default function MensajesFijados() {
     const open = Boolean(anchorEl)
     const id = open ? "notification-popover" : undefined
 
-    const { isSuccess, isError, isPending, data } = NoticeAdapter.useGetNotices(accessToken)
+    const { isSuccess, isError, isLoading, data, refetch} = NoticeAdapter.useGetNoticesMap(accessToken)
 
     useEffect(() => {
         if(data) {
             console.log(data)
         }
+        console.log("data mensaje fijados: ", data)
     }, [data])
 
 
+    const mutationMarkNotice = NoticeAdapter.useMarkNoticesMutation(accessToken as string) 
+
+    const onClearNotices = () => {
+        if(!data?.unread || data?.unread.length === 0) return 
+        mutationMarkNotice.mutate(data.unread)
+    }
+
+    useEffect(() => {
+        if(mutationMarkNotice.isSuccess) {
+            refetch()
+        }
+    }, [mutationMarkNotice.isSuccess])
+
+
+
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
+
 
     return (
-        <div className="absolute top-8 right-8">
+        <div className={"absolute right-8 " + (computerDevice ? (routeStatus ? 'top-16' : 'top-8') : (routeStatus ? 'top-8' : 'top-6')) }>
             <Paper className="relative inline-block" sx={{ borderRadius : 9}}>
-                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular">
+                <Badge badgeContent={isSuccess? data.unread.length : 0} color="error" overlap="circular" >
                     <IconButton onClick={handleClick}>
-                        { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize="large"/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize="large"/>}
+                        { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize={"large"}/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize={"large"}/>}
                     </IconButton>
                 </Badge> 
             </Paper>
@@ -63,15 +80,19 @@ export default function MensajesFijados() {
             >
                 <div className="flex flex-row justify-between items-center py-1 px-3">
                     <Typography variant='subtitle1' sx={{ fontSize : 18 }}>Notificaciones</Typography>
-                    <Tooltip title={'Marcar como leídos'}>
-                        <IconButton>
-                            <ClearAllIcon htmlColor="black" fontSize="large" />
-                        </IconButton>
-                    </Tooltip>
+                    { isSuccess && data.unread.length !== 0 ?
+                        <Tooltip title={'Marcar como leídos'}>
+                            <IconButton onClick={onClearNotices}>
+                                <ClearAllIcon htmlColor="black" fontSize="large" />
+                            </IconButton>
+                        </Tooltip>
+                        :
+                        <></>
+                    }
                 </div>
                 <Divider />
                 {
-                isPending ? 
+                isLoading ? 
                     <ListItem>
                         <div className="flex grow items-center justify-center">
                             <CircularProgress size={25} color='inherit' />
@@ -79,61 +100,105 @@ export default function MensajesFijados() {
                     </ListItem>
                     :
                 isSuccess ? 
-                    data.map((value, index) => (
-                        <>
-                        <ListItem key={index}>
-                            <ListItemText
-                                primary={
-                                    <React.Fragment >
-                                        <div className="flex flex-row gap-3" >
-                                            <Typography
-                                                component={"span"}
-                                                variant='body2'
-                                                sx={{ color : 'text.primary'}}
-                                            >
-                                                {value.authorName}
-                                            </Typography>
-                                            <Typography
-                                                lineHeight={1.7}
-                                                component={"span"}
-                                                variant="caption"
-                                                sx={{ color : 'text.secondary', textAlign : 'end', my : 0.05}}
-                                            >
-                                                {formatRelative(new Date(value.createdAt as string), new Date(), { locale : es })}
-                                            </Typography>
-                                        </div>
-                                    </React.Fragment>
+                    
+                    <div>
+                        <ListItem sx={{ display : 'flex', flexDirection : 'column', alignItems : 'start', justifyItems: 'start', gap: 3}}>
+                            <div>
+                                <Typography>Avisos nuevos</Typography>
+                                {  data.unread.length !== 0 ?
+                                    data.unread.map((value, index) => (
+                                    <div key={index}>
+                                        <Mensaje value={value} index={index} />
+                                    </div>
+                                    ))
+                                    :
+                                    <ListItem>
+                                        <ListItemText
+                                            primary = {
+                                                <Typography variant="caption" color="gray">
+                                                    Sin notificaciones nuevas
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
                                 }
-                                secondary={
-                                    <React.Fragment>
-                                        <div className="p-4 pb-0 text-justify">
-                                            <Typography
-                                                component={"span"}
-                                                variant='body1'
-                                                sx={{ color : 'text.primary', display : 'inline'}}
-                                            >
-                                                {value.description}
-                                            </Typography>     
-                                        </div>      
-                                    </React.Fragment>
-                                }
-                            />
+                            </div>
                         </ListItem>
                         <Divider />
-                        </>
-                    )) 
+                        <ListItem>
+                            <div>
+                                <Typography>Avisos antiguos</Typography>
+                                { data.read.length !== 0 ?
+                                    data.read.map((value, index) => (
+                                    <div key={index}>
+                                        <Mensaje value={value} index={index} />
+                                    </div>
+                                    ))
+                                    :
+                                    <ListItem>
+                                        <ListItemText
+                                            primary = {
+                                                <Typography variant="caption" color="gray">
+                                                    Sin notificaciones antiguas
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                }
+                            </div>
+                        </ListItem>     
+                    </div>
+            
                     :
                     <ListItem>
                         <Typography>error</Typography>
                     </ListItem>
-
-                    
                 }
             </Popover>
         </div>
     )
 };
 
+
+/**
+{
+                isLoading ? 
+                    <ListItem>
+                        <div className="flex grow items-center justify-center">
+                            <CircularProgress size={25} color='inherit' />
+                        </div>
+                    </ListItem>
+                    :
+                isSuccess ? 
+                    data.length !== 0 ? 
+                        data.map((value, index) => (
+                            <div key={index}>
+                                <Mensaje value={value} index={index} />
+                                <Divider />
+                            </div>
+                        )) 
+                        :
+                        <ListItem>
+                            <ListItemText
+                                primary={
+                                    <Typography color="gray" variant='subtitle2'>
+                                        Sin notificaciones
+                                    </Typography>
+                                }
+
+                            />
+                        </ListItem>
+                    :
+                    <ListItem>
+                        <Typography>error</Typography>
+                    </ListItem>
+
+                    
+                } 
+
+
+
+ */
 
 /*
         <div className="absolute top-8 right-8">

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 
+
+
 html, body {
     height: 100%;
     margin: 0;
@@ -63,3 +65,4 @@ html, body {
 .fc-event-title {
   font-size: 0.85rem; 
 }
+

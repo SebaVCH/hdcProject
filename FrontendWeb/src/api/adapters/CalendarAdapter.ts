@@ -14,7 +14,7 @@ export class CalendarAdapter {
 
     static useAddEventCalendarMutation( token ?: string ) {
         return useMutation({
-            mutationFn : ( event : Omit<TCalendarEvent, '_id'>) => CalendarService.AddEvent(event, token)
+            mutationFn : ( event : Omit<TCalendarEvent, '_id' | 'authorId'>) => CalendarService.AddEvent(event, token)
         })
     }
     

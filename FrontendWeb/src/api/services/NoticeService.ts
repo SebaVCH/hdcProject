@@ -4,6 +4,8 @@ import { axiosInstance } from "./axiosInstance"
 import { UserService } from "./UserService"
 
 
+
+
 export type TNoticeResponse = {
     _id ?: string 
     description ?: string
@@ -28,37 +30,92 @@ export class NoticeService {
 
     private static readonly RESOURCE_NAME = 'notification'
 
+
+    static async MarkAsReadNotices( unreadNotices: TNoticeResponse[], accessToken : string ) : Promise<boolean> {
+        
+        Promise.all(unreadNotices.map(async (notice , _ ) => (
+            await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/read/${notice._id}`, {}, {
+                headers : {
+                    Authorization : `Bearer ${accessToken}`
+                }
+            })
+        )))
+        return true
+    }
+
+
+    static async GetNoticesWithAuthorName( data : TNoticeResponse[], accessToken : string ) : Promise<TNoticeResponse[]> {
+
+        const notices =  await Promise.all(data.map(async (notice, _) => {
+        
+            let name = 'Usuario Eliminado'
+            try {
+                name = (await UserService.FindUserById(notice.authorId as string, accessToken)).name
+            } catch(e) {
+                console.log(e)
+            }
+            
+            return ({
+                ...notice,
+                authorName : name
+            })
+        }))
+        return notices.sort(compareSortNotices)
+    }
+
+
+    static async GetReadNotices(accessToken ?: string) : Promise<TNoticeResponse[]> {
+        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/read`, {
+            headers : {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        if( data?.message === null) return []
+
+        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
+                _id : value?._id,
+                type : value?.type,
+                description : value?.description,
+                createdAt : value?.created_at,
+                authorId : value?.author_id,
+        }))
+        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
+    }
+
+    static async GetUnReadNotices(accessToken ?: string) : Promise<TNoticeResponse[]> {
+        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/unread`, {
+            headers : {
+                Authorization : `Bearer ${accessToken}`
+            }
+        })
+        if( data?.message === null) return []
+
+        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
+                _id : value?._id,
+                type : value?.type,
+                description : value?.description,
+                createdAt : value?.created_at,
+                authorId : value?.author_id,
+        }))
+        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
+    }
+
     static async GetNotices(accessToken ?: string) : Promise<TNoticeResponse[]>{
         const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`
             }
         }) 
+        if( data?.message === null) return []
 
-        await sleep(1)
-
-        const notices =  await Promise.all((data?.message as any[]).map(async (value, _) => {
-            
-            let name = 'Usuario Eliminado'
-
-            try {
-                name = (await UserService.FindUserById(value?.author_id, accessToken)).name
-            } catch(e) {
-                console.log(e)
-            }
-            
-            return ({
-                _id : value?._id,
-                type : value?.type,
-                description : value?.description,
-                createdAt : value?.created_at,
-                authorId : value?.author_id,
-                authorName : name,
-            })
+        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
+            _id : value?._id,
+            type : value?.type,
+            description : value?.description,
+            createdAt : value?.created_at,
+            authorId : value?.author_id,
         }))
-
-        return notices.sort(compareSortNotices)
-
+        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
     }
 
     static async PostNotice( body : TNoticeRequest, accessToken ?: string ) : Promise<TNoticeResponse> {
