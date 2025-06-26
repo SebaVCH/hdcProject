@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Divider, Typography } from "@mui/material";
+import { Backdrop, Card, Divider, IconButton, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
 import ListIconHome from "../../component/ListIconHome";
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
@@ -24,7 +24,8 @@ import LocationHandler from "../../component/Map/LocationHandler";
 import SpeedDialCreateRoute from "../../component/Button/SpeedDialCreateRoute";
 import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
 import { useAuth } from "../../context/AuthContext";
-
+import HomeIcon from '@mui/icons-material/Home';
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -76,17 +77,34 @@ export default function Home() {
         console.log("ROL DEL USUARIO: ", role)
     }, [loading])
 
+    const navigate = useNavigate()
+    const onClickHome = () => {
+        navigate('/')
+    }
+
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
+
     return (
         <div className="flex flex-grow">
             { !onSelectLocationMap ?
-                <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-10">
-                    <CustomDrawer DrawerList={DrawerList}/>
-                    <Divider variant="middle"/>
-                    <ListIconHome />
-                    <div className="flex grow justify-center items-end py-4">
-                        <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={48} height={48}/></a>
+                computerDevice ? 
+                    <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-10">
+                        <Tooltip title={"Home"}>
+                            <IconButton onClick={onClickHome} sx={{ p : 2}}>
+                                <HomeIcon htmlColor="#374151" sx={{ fontSize: 40 }} />
+                            </IconButton>
+                        </Tooltip>
+                        <Divider variant="middle"/>
+                        <ListIconHome />
+                        <div className="flex grow justify-center items-end py-4">
+                            <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={48} height={48}/></a>
+                        </div>
                     </div>
-                </div>
+                    :
+                    <div className="absolute top-4 z-20 left-2">
+                        <CustomDrawer DrawerList={DrawerList} />
+                    </div>
                 :
                 <></>
             }
@@ -120,7 +138,7 @@ export default function Home() {
                             : 
                             null
                         }
-                        <div className="absolute bottom-16 right-16 scale-120 z-20">
+                        <div className={"absolute bottom-16 scale-120 z-20 " + (computerDevice ? "right-16" : "right-8")}>
                             {!routeStatus ? 
                                 <SpeedDialCreateRoute
                                     stateOpen={[openSpeedCreateRoute, setOpenSpeedCreateRoute]}

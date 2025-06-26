@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type EventoCalendario struct {
@@ -11,4 +12,6 @@ type EventoCalendario struct {
 	Description string        `bson:"description" json:"description"`
 	DateStart   time.Time     `bson:"date_start" json:"date_start"`
 	AuthorID    bson.ObjectID `bson:"author_id" json:"author_id"`
+	TimeStart   string        `bson:"time_start" json:"time_start"`
+	TimeEnd     string        `bson:"time_end" json:"time_end"`
 }

@@ -13,6 +13,7 @@ export class UserAdapter {
         return useMutation({
             mutationFn: () => (UserService.Login(email, password)),
             onSuccess(data) {
+                console.log('oaa')
                 setToken((data.token as string))
             },
         })

@@ -54,7 +54,7 @@ func (r routeUseCase) CreateRoute(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidString(route.Title) || !utils.IsValidString(route.Description) || !utils.IsValidString(route.InviteCode) || !utils.IsValidString(route.Status) {
+	if !utils.IsValidString(route.Title) || !utils.IsValidString(route.Description){
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}

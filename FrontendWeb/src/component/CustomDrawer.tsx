@@ -1,4 +1,4 @@
-import { IconButton, Drawer } from "@mui/material";
+import { IconButton, Drawer, useMediaQuery, useTheme } from "@mui/material";
 import { JSX, useState } from "react";
 import MenuIcon from '@mui/icons-material/Menu';
 
@@ -12,6 +12,8 @@ export default function CustomDrawer({ DrawerList } : {DrawerList: () => JSX.Ele
     const toggleDrawer = (toggleDrawer : boolean) => () => {
         setOpenDrawer(toggleDrawer)
     }
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
     
     return (
         <>
@@ -20,7 +22,7 @@ export default function CustomDrawer({ DrawerList } : {DrawerList: () => JSX.Ele
                 edge="start"
                 color="inherit"
                 aria-label="menu"
-                sx={{ mr:0, ml: 0, p: 2}}
+                sx={{ mr:0, ml: 0, p: computerDevice ? 2 : 1}}
                 onClick={toggleDrawer(true)}
             >
                 <MenuIcon sx={{ fontSize: 40 }} />

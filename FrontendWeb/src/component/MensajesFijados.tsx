@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip, Badge } from "@mui/material";
+import { Divider, Typography, Paper, IconButton, Popover, List, ListItem, CircularProgress, ListItemText, Tooltip, Badge, useMediaQuery, useTheme } from "@mui/material";
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import useSessionStore from "../stores/useSessionStore";
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -11,7 +11,7 @@ import { es } from "date-fns/locale";
 
 export default function MensajesFijados() {
 
-    const { accessToken } = useSessionStore()
+    const { accessToken, routeStatus } = useSessionStore()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const handleClick = (event : any) => {
         setAnchorEl(event.currentTarget)
@@ -30,14 +30,16 @@ export default function MensajesFijados() {
         }
     }, [data])
 
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
 
 
     return (
-        <div className="absolute top-8 right-8">
+        <div className={"absolute right-8 " + (computerDevice ? (routeStatus ? 'top-16' : 'top-8') : (routeStatus ? 'top-8' : 'top-6')) }>
             <Paper className="relative inline-block" sx={{ borderRadius : 9}}>
-                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular">
+                <Badge badgeContent={isSuccess? data.length : 0} color="error" overlap="circular" sx={{ "& .MuiBadge-badge": { fontSize: 9, height: 15, minWidth: 15 } }}>
                     <IconButton onClick={handleClick}>
-                        { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize="large"/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize="large"/>}
+                        { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize={"large"}/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize={"large"}/>}
                     </IconButton>
                 </Badge> 
             </Paper>

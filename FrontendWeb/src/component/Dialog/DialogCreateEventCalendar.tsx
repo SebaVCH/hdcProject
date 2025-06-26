@@ -36,10 +36,10 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
 
     const [ open, setOpen ] = stateOpen
     const [ selectInfo, setSelectInfo ] = stateSelectInfo
-    const [startTime, setStartTime] = useState<string>();
-    const [endTime, setEndTime] = useState<string>();
-    const [listEndTime, setListEndTime] = useState<string[]>([]);
-    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<TCalendarEvent, '_id'>>({
+    const [ startTime, setStartTime] = useState<string>();
+    const [ endTime, setEndTime] = useState<string>();
+    const [ listEndTime, setListEndTime] = useState<string[]>([]);
+    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<TCalendarEvent, '_id'| 'authorId'>>({
         title : '',
         description : '',
         dateStart : ''
