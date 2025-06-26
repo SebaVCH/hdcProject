@@ -116,7 +116,7 @@ export default function MensajesFijados() {
                                         <ListItemText
                                             primary = {
                                                 <Typography variant="caption" color="gray">
-                                                    Sin notificaciones antiguas
+                                                    Sin notificaciones nuevas
                                                 </Typography>
                                             }
                                         />
