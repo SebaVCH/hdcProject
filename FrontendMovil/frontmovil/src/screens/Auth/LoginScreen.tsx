@@ -16,7 +16,10 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
-const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
+const backendUrl =
+  Platform.OS === 'android'
+    ? rawUrl.replace('localhost', '10.0.2.2')
+    : rawUrl;
 
 type LoginScreenProps = {
   navigation: NavigationProp<any>;
@@ -27,15 +30,12 @@ const authenticate = async (
   password: string
 ): Promise<{ accessToken: string } | null> => {
   try {
-    console.log('🔍 Backend URL:', backendUrl);
     const response = await axios.post(`${backendUrl}/login`, {
       email,
       password,
     });
 
     const token = response.data.token;
-    console.log('✅ TOKEN RECIBIDO DEL BACKEND:', token);
-
     if (!token) return null;
 
     return { accessToken: token };
@@ -50,38 +50,37 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-  setLoading(true);
-  const tokens = await authenticate(email,password);
-  setLoading(false);
+    setLoading(true);
+    const tokens = await authenticate(email, password);
+    setLoading(false);
 
-  if (tokens?.accessToken) {
-    try {
-      const decoded: any = jwt_decode(tokens.accessToken); // 👈 decodifica el JWT
-      const userId = decoded.user_id;
+    if (tokens?.accessToken) {
+      try {
+        const decoded: any = jwt_decode(tokens.accessToken);
+        const userId = decoded.user_id;
 
-      await AsyncStorage.setItem('accessToken', tokens.accessToken);
-      await AsyncStorage.setItem('userId', userId);
+        await AsyncStorage.setItem('accessToken', tokens.accessToken);
+        await AsyncStorage.setItem('userId', userId);
 
-      console.log("✅ ID del usuario decodificado:", userId);
-      navigation.navigate('Home');
-    } catch (error) {
-      console.error('Error al guardar datos en AsyncStorage', error);
+        navigation.navigate('Home');
+      } catch (error) {
+        console.error('Error al guardar datos en AsyncStorage', error);
+      }
+    } else {
+      Alert.alert('Error', 'Credenciales inválidas');
     }
-  } else {
-    Alert.alert('Error', 'Credenciales inválidas');
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Icon name="user-circle" size={80} color="#000" />
+        <Icon name="user-circle" size={80} color="#79CB3A" />
         <Text style={styles.title}>Iniciar Sesión</Text>
 
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
-          placeholderTextColor="#888"
+          placeholderTextColor="#666"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
@@ -91,17 +90,21 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
-          placeholderTextColor="#888"
+          placeholderTextColor="#666"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
-        <View style={styles.buttonsH}>
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-            <Text style={styles.buttonText}>{loading ? 'Cargando...' : 'Ingresar'}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Cargando...' : 'Ingresar'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -110,7 +113,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0F9997',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -121,43 +124,40 @@ const styles = StyleSheet.create({
     width: '85%',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 8,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#0F9997',
     marginVertical: 20,
   },
   input: {
     width: '100%',
     height: 50,
-    borderColor: '#000',
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    color: '#000',
+    backgroundColor: '#f9f9f9',
   },
   button: {
-    backgroundColor: '#000',
-    paddingHorizontal: 25,
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: '#FF5A00',
+    paddingVertical: 14,
+    paddingHorizontal: 30,
+    borderRadius: 12,
     marginTop: 10,
+    width: '100%',
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonsH: {
-    justifyContent: 'center',
-    width: '100%',
-    alignItems: 'center',
+    fontWeight: 'bold',
   },
 });
