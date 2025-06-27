@@ -2,35 +2,31 @@ import React, { useRef, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region, Circle } from 'react-native-maps';
 
-type MarkerData = {
-  id: string;
-  title: string;
-  description: string;
+
+type RiskMarker = {
   latitude: number;
   longitude: number;
+  description: string;
+};
+
+type HelpMarker = {
+  latitude: number;
+  longitude: number;
+  description: string;
 };
 
 type Props = {
-  markers?: MarkerData[];
-  riskMarkers?: { latitude: number; longitude: number; description: string }[];
-  onMapPress?: (coord: {latitude: number; longitude: number}) => void;
+  riskMarkers?: RiskMarker[];
+  helpMarkers?: HelpMarker[];
+  onMapPress?: (coord: { latitude: number; longitude: number }) => void;
 };
 
-const defaultMarkers: MarkerData[] = [
-  {
-    id: '1',
-    title: 'Mall Vivo Coquimbo',
-    description: 'Ubicación inicial del mapa',
-    latitude: -29.9533,
-    longitude: -71.3391,
-  },
-];
 
-export default function MapComponent({ 
-  markers = defaultMarkers,
+export default function MapComponent({
   riskMarkers = [],
+  helpMarkers = [],
   onMapPress,
- }: Props) {
+}: Props) {
   const initialRegion: Region = {
     latitude: -29.9533,
     longitude: -71.3391,
@@ -64,56 +60,56 @@ export default function MapComponent({
         showsUserLocation
         showsMyLocationButton
         onPress={(e) => {
-         if (onMapPress) onMapPress(e.nativeEvent.coordinate);
-        }
-}
+          if (onMapPress) onMapPress(e.nativeEvent.coordinate);
+        }}
       >
-        {markers.map((marker) => (
-          <React.Fragment key={marker.id}>
+        {riskMarkers.map((risk, index) => (
+          <React.Fragment key={`risk-${index}`}>
             <Marker
               coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
+                latitude: risk.latitude,
+                longitude: risk.longitude,
               }}
-              title={marker.title}
-              description={marker.description}
+              pinColor="red"
+              title="Riesgo"
+              description={risk.description}
             />
             <Circle
               center={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
+                latitude: risk.latitude,
+                longitude: risk.longitude,
               }}
-              radius={200} // En metros
-              strokeColor="rgba(0, 122, 255, 0.6)" // borde
-              fillColor="rgba(0, 122, 255, 0.2)"   // relleno
+              radius={80}
+              strokeColor="rgba(255, 0, 0, 0.6)"
+              fillColor="rgba(255, 0, 0, 0.2)"
             />
           </React.Fragment>
         ))}
-        {riskMarkers.map((risk, index) => (
-           <React.Fragment key={`risk-${index}`}>
-              <Marker
-                coordinate={{
-                  latitude: risk.latitude,
-                  longitude: risk.longitude,
-                }}
-                pinColor="red"
-                title="Riesgo"
-                description={risk.description}
-              />
-              <Circle
-                center={{
-                  latitude: risk.latitude,
-                  longitude: risk.longitude,
-                }}
-                radius={80}
-                strokeColor="rgba(255, 0, 0, 0.6)"
-                fillColor="rgba(255, 0, 0, 0.2)"
-              />
-            </React.Fragment>
+
+        {helpMarkers.map((help, index) => (
+          <React.Fragment key={`help-${index}`}>
+            <Marker
+              coordinate={{
+                latitude: help.latitude,
+                longitude: help.longitude,
+              }}
+              pinColor="lightgreen"
+              title="Punto de Ayuda"
+              description={help.description}
+            />
+            <Circle
+              center={{
+                latitude: help.latitude,
+                longitude: help.longitude,
+              }}
+              radius={80}
+              strokeColor="rgba(0, 255, 0, 0.6)"
+              fillColor="rgba(0, 255, 0, 0.2)"
+            />
+          </React.Fragment>
         ))}
       </MapView>
 
-      {/* Botones de zoom */}
       <View style={styles.zoomControls}>
         <TouchableOpacity style={styles.zoomButton} onPress={() => handleZoom(true)}>
           <Text style={styles.zoomText}>＋</Text>
