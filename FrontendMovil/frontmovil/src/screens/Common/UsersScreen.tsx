@@ -17,6 +17,8 @@ import Constants from 'expo-constants';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStack';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Users'>;
@@ -74,6 +76,35 @@ export default function UsersScreen({ navigation }: Props) {
     }
   };
 
+  const handleDownloadExcel = async () => {
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const downloadUrl = `${backendUrl}/export-data/people-helped`;
+    const fileUri = FileSystem.documentDirectory + 'people_helped.xlsx';
+
+    const downloadResumable = FileSystem.createDownloadResumable(
+      downloadUrl,
+      fileUri,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const { uri } = await downloadResumable.downloadAsync();
+    console.log('✅ Archivo descargado en:', uri);
+
+    if (!(await Sharing.isAvailableAsync())) {
+      Alert.alert('Compartir no disponible en este dispositivo');
+      return;
+    }
+
+    await Sharing.shareAsync(uri);
+  } catch (error) {
+    console.error('❌ Error al descargar el Excel:', error);
+    Alert.alert('Error al descargar el Excel');
+  }
+};
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -104,6 +135,10 @@ export default function UsersScreen({ navigation }: Props) {
 
       <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
         <Text style={styles.homeButtonText}>Volver al Home</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadExcel}>
+        <Text style={styles.downloadButtonText}>Descargar datos</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.fabButton} onPress={() => setRegisterModalVisible(true)}>
@@ -227,4 +262,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  downloadButton: {
+  backgroundColor: '#4682B4',
+  padding: 12,
+  borderRadius: 10,
+  alignItems: 'center',
+  marginVertical: 10,
+},
+downloadButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+},
 });

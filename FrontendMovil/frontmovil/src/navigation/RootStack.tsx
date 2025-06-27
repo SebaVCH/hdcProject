@@ -8,6 +8,7 @@ import UsersScreen from '../screens/Common/UsersScreen';
 import EventScreen from '../screens/Common/EventScreen';
 import RouteScreen from '../screens/Common/RouteScreen';
 import HistoryScreen from '../screens/Common/HistoryScreen';
+import FullMapScreen from '../screens/Common/FullMapScreen';
 
 export type RootStackParamList = {
   Initial: undefined;
@@ -18,6 +19,7 @@ export type RootStackParamList = {
   Event: undefined;
   Route: undefined;
   History: undefined;
+  FullMap: {routeId: string; isOngoing: boolean; codeRoute: string};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -49,6 +51,9 @@ const RootStackNavigation = () => {
         </Stack.Group>
         <Stack.Group screenOptions={{ headerShown: false}}>
           <Stack.Screen name="History" component={HistoryScreen} />
+        </Stack.Group>
+        <Stack.Group screenOptions={{ headerShown: false}}>
+          <Stack.Screen name= "FullMap" component={FullMapScreen} />
         </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>

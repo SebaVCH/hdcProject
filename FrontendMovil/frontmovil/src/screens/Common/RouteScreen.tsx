@@ -62,12 +62,19 @@ export default function RouteScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      const createdRoute = res.data.message;
       const inviteCode = res.data.message?.invite_code;
 
       console.log(res.data)
       Alert.alert('Ruta creada', `Código de invitación: ${inviteCode || 'No disponible'}`);
       setDescription('');
       setTeam('');
+
+      navigation.navigate('FullMap', {
+        routeId: createdRoute._id,
+        isOngoing: true,
+        codeRoute: inviteCode,
+      });
     } catch (err) {
       console.error(err);
       Alert.alert('Error', 'No se pudo crear la ruta.');

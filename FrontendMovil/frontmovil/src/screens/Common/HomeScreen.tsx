@@ -34,15 +34,14 @@ type Props = {
 
 export default function HomeScreen({ navigation }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
-  const [mapFullScreen, setMapFullScreen] = useState(false);
   const [alertText, setAlertText] = useState('');
   const [alertLog, setAlertLog] = useState<string[]>([]);
   const [alertModalVisible, setAlertModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
   const [riskMarkers, setRiskMarkers] = useState<{ latitude: number; longitude: number; description: string }[]>([]);
-  const [riskMode, setRiskMode] = useState(false);
-  const [riskModalVisible, setRiskModalVisible] = useState(false);
-  const [riskDescription, setRiskDescription] = useState('');
+  const [helpMarkers, setHelpMarkers] = useState<{ latitude: number; longitude: number; description: string }[]>([]);
+  const [joinRouteVisible, setJoinRouteVisible] = useState(false);
+  const [invitationCode, setInvitationCode] = useState('');
 
   const toggleMenu = () => {
     const toValue = menuVisible ? -screenWidth : 0;
@@ -88,10 +87,29 @@ export default function HomeScreen({ navigation }: Props) {
     }
   };
 
+  const fetchHelpPoints = async () => {
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.get(`${backendUrl}/helping-point`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const helpArray = Array.isArray(res.data.message) ? res.data.message : [];
+    const formatted = helpArray.map((h: any) => ({
+      latitude: h.coords[0],
+      longitude: h.coords[1],
+      description: 'Punto de ayuda',
+    }));
+    setHelpMarkers(formatted);
+  } catch (err) {
+    console.error('Error al obtener puntos de ayuda:', err);
+  }
+};
+
   useFocusEffect(
     React.useCallback(() => {
       fetchAlerts();
       fetchRisks();
+      fetchHelpPoints();
     }, [])
   );
 
@@ -139,29 +157,15 @@ export default function HomeScreen({ navigation }: Props) {
     navigation.reset({ index: 0, routes: [{ name: 'Initial' }] });
   };
 
-  const handleMapPress = async (coord: { latitude: number; longitude: number }) => {
-    if (!riskMode) return;
-    setRiskMode(false);
-    setRiskMarkers((prev) => [...prev, { ...coord, description: riskDescription }]);
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      await axios.post(`${backendUrl}/risk`, {
-        coords: [coord.latitude, coord.longitude],
-        description: riskDescription,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      RNAlert.alert('Riesgo añadido correctamente');
-      setRiskDescription('');
-    } catch (err) {
-      console.error(err);
-      RNAlert.alert('Error', 'No se pudo guardar el riesgo');
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.sidebar, { left: slideAnim }]}>...
+            {menuVisible && (
+        <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={toggleMenu}>
+          <View />
+        </TouchableOpacity>
+      )}
+
+      <Animated.View style={[styles.sidebar, { left: slideAnim }]}>
         {menuOptions.map((option) => (
           <TouchableOpacity
             key={option.route}
@@ -181,69 +185,21 @@ export default function HomeScreen({ navigation }: Props) {
         <Icon name="bars" size={24} color="#000" />
       </TouchableOpacity>
 
+      <TouchableOpacity style={[styles.alertToggleButton, { backgroundColor: '#4682B4' }]} onPress={() => setJoinRouteVisible(true)}>
+        <Text style={styles.alertToggleButtonText}>Unirse a Ruta</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.alertToggleButton} onPress={() => setAlertModalVisible(true)}>
         <Text style={styles.alertToggleButtonText}>Abrir Avisos</Text>
       </TouchableOpacity>
 
       <View style={styles.mapWrapper}>
         <MapComponent
-          key={riskMarkers.map(r => `${r.latitude}-${r.longitude}`).join(',')}
-          onMapPress={handleMapPress}
+          key={[...riskMarkers, ...helpMarkers].map(m => `${m.latitude}-${m.longitude}`).join(',')}
           riskMarkers={riskMarkers}
+          helpMarkers={helpMarkers}
         />
-        <TouchableOpacity style={styles.expandButton} onPress={() => setMapFullScreen(true)}>
-          <Icon name="arrows-alt" size={20} color="#fff" />
-        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity style={styles.addMarkerButton} onPress={() => setRiskModalVisible(true)}>
-        <Icon name="plus" size={20} color="#fff" />
-      </TouchableOpacity>
-
-      <Modal visible={riskModalVisible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Añadir riesgo</Text>
-            <Text style={{ marginBottom: 5 }}>Descripción:</Text>
-            <TextInput
-              style={styles.alertInput}
-              placeholder="Describe brevemente el riesgo..."
-              value={riskDescription}
-              onChangeText={setRiskDescription}
-              multiline
-            />
-            <TouchableOpacity
-              onPress={() => {
-                if (riskDescription.trim().length < 5) {
-                  RNAlert.alert('Descripción muy corta', 'Escribe al menos 5 caracteres.');
-                  return;
-                }
-                setRiskMode(true);
-                setRiskModalVisible(false);
-              }}
-              style={styles.sendButton}
-            >
-              <Text style={styles.sendButtonText}>Seleccionar ubicación en el mapa</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setRiskModalVisible(false)} style={styles.cancelButton}>
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={mapFullScreen} animationType="fade">
-        <TouchableOpacity style={styles.fullscreenCloseButton} onPress={() => setMapFullScreen(false)}>
-          <Icon name="close" size={24} color="#fff" />
-        </TouchableOpacity>
-        <View style={styles.fullscreenMap}>
-          <MapComponent
-            key={riskMarkers.map(r => `${r.latitude}-${r.longitude}`).join(',')}
-            onMapPress={handleMapPress}
-            riskMarkers={riskMarkers}
-          />
-        </View>
-      </Modal>
 
       <Modal visible={alertModalVisible} animationType="slide">
         <ScrollView contentContainerStyle={styles.alertModalContainer}>
@@ -269,9 +225,52 @@ export default function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
         </ScrollView>
       </Modal>
+
+      <Modal visible={joinRouteVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.alertTitle}>Unirse a una Ruta</Text>
+            <TextInput
+              style={styles.alertInput}
+              placeholder="Código de invitación"
+              value={invitationCode}
+              onChangeText={setInvitationCode}
+            />
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={async () => {
+                try {
+                  const token = await AsyncStorage.getItem('accessToken');
+                  const res = await axios.get(`${backendUrl}/route/code/${invitationCode}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (res.data?.message) {
+                    setJoinRouteVisible(false);
+                    setInvitationCode('');
+                    navigation.navigate('FullMap', { routeId: res.data.message._id });
+                  } else {
+                    RNAlert.alert('Error', 'Código inválido o ruta no encontrada');
+                  }
+                } catch (error) {
+                  RNAlert.alert('Error', 'No se pudo encontrar la ruta');
+                }
+              }}
+            >
+              <Text style={styles.sendButtonText}>Unirse</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setJoinRouteVisible(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -348,7 +347,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     left: 20,
-    zIndex: 10,
+    zIndex: 30, // ← AUMENTA este valor
+    backgroundColor: '#fff', // opcional para visibilidad
+    padding: 8,               // opcional para más área táctil
+    borderRadius: 20,         // opcional para que se vea circular
+    elevation: 10,            // para Android
   },
   mapWrapper: {
     height: screenHeight * 0.75,
@@ -356,18 +359,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     position: 'relative',
-  },
-  fullscreenMap: {
-    flex: 1,
-  },
-  fullscreenCloseButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    zIndex: 10,
-    backgroundColor: '#000',
-    padding: 8,
-    borderRadius: 30,
   },
   sidebar: {
     position: 'absolute',
@@ -391,39 +382,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginVertical: 10,
   },
-  expandButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: '#000',
-    padding: 10,
-    borderRadius: 30,
-    zIndex: 5,
-  },
-  addMarkerButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    backgroundColor: '#000',
-    padding: 10,
-    borderRadius: 30,
-    zIndex: 5,
-  },
   modalOverlay: {
   flex: 1,
-  backgroundColor: 'rgba(0,0,0,0.5)',
   justifyContent: 'center',
   alignItems: 'center',
-},
-modalBox: {
-  backgroundColor: '#fff',
-  borderRadius: 10,
-  padding: 20,
-  width: '85%',
-},
-modalTitle: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  marginBottom: 10,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalBox: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  overlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: screenWidth,
+  height: screenHeight,
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  zIndex: 15,
 },
 });
