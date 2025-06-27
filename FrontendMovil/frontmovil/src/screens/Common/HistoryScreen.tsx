@@ -33,6 +33,8 @@ export default function HistoryScreen() {
   const [editedStatus, setEditedStatus] = useState('');
   const [userId, setUserId] = useState('');
   const [showOnlyMine, setShowOnlyMine] = useState(true); // ✅ Por defecto: solo mis rutas
+  const [expandedRoutes, setExpandedRoutes] = useState<{ [key: string]: boolean }>({});
+  const [helpPointsByRoute, setHelpPointsByRoute] = useState<{ [key: string]: any[] }>({});
 
   useEffect(() => {
     const init = async () => {
@@ -56,6 +58,22 @@ export default function HistoryScreen() {
       setLoading(false);
     }
   };
+
+  const fetchPeopleHelped = async (routeId: string) => {
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.get(`${backendUrl}/helping-point`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const filtered = res.data.message.filter(
+      (point: any) => point.route_id === routeId
+    );
+    setHelpPointsByRoute(prev => ({ ...prev, [routeId]: filtered }));
+  } catch (error) {
+    console.error('Error al obtener personas ayudadas:', error);
+  }
+};
 
   const applyFilter = () => {
     const now = new Date();
@@ -89,6 +107,14 @@ export default function HistoryScreen() {
     );
   };
 
+  const toggleExpand = (routeId: string) => {
+  const alreadyExpanded = expandedRoutes[routeId];
+  if (!alreadyExpanded && !helpPointsByRoute[routeId]) {
+    fetchPeopleHelped(routeId);
+  }
+  setExpandedRoutes(prev => ({ ...prev, [routeId]: !alreadyExpanded }));
+};
+
   const handleSave = async () => {
     try {
       const token = await AsyncStorage.getItem('accessToken');
@@ -111,27 +137,54 @@ export default function HistoryScreen() {
   };
 
   const renderItem = ({ item }: any) => (
-    <View style={styles.routeItem}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={styles.description}>📍 {item.description}</Text>
-        <TouchableOpacity
-          onPress={() => {
-            setSelectedRoute(item);
-            setEditedDescription(item.description);
-            setEditedStatus(item.status);
-            setEditModalVisible(true);
-          }}
-        >
-          <Text style={styles.options}>⋯</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.detail}>
-        Fecha: {new Date(item.date_created).toLocaleString()}
-      </Text>
-      <Text style={styles.detail}>Código: {item.invite_code || 'N/A'}</Text>
-      <Text style={styles.detail}>Estado: {item.status}</Text>
+  <View style={styles.routeItem}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <Text style={styles.description}>📍 {item.description}</Text>
+      <TouchableOpacity
+        onPress={() => {
+          setSelectedRoute(item);
+          setEditedDescription(item.description);
+          setEditedStatus(item.status);
+          setEditModalVisible(true);
+        }}
+      >
+        <Text style={styles.options}>⋯</Text>
+      </TouchableOpacity>
     </View>
-  );
+    <Text style={styles.detail}>
+      Fecha: {new Date(item.date_created).toLocaleString()}
+    </Text>
+    <Text style={styles.detail}>Código: {item.invite_code || 'N/A'}</Text>
+    <Text style={styles.detail}>Estado: {item.status}</Text>
+
+    {/* 🔽 FLECHA PARA EXPANDIR / COLAPSAR */}
+    <TouchableOpacity onPress={() => toggleExpand(item._id)}>
+      <Text style={{ color: '#4682B4', marginTop: 5 }}>
+        {expandedRoutes[item._id] ? '▲ Ocultar personas registradas' : '▼ Ver personas registradas'}
+      </Text>
+    </TouchableOpacity>
+
+    {/* 👥 PERSONAS REGISTRADAS */}
+    {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length > 0 && (
+      <View style={{ marginTop: 10 }}>
+        {helpPointsByRoute[item._id].map((point, index) => (
+          <View key={index} style={{ paddingLeft: 10, marginBottom: 5 }}>
+            <Text style={{ fontSize: 13 }}>👤 Edad: {point.people_helped.age} | Género: {point.people_helped.gender}</Text>
+            <Text style={{ fontSize: 12, color: '#666' }}>
+              Fecha: {new Date(point.date_register).toLocaleString()}
+            </Text>
+          </View>
+        ))}
+      </View>
+    )}
+
+    {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length === 0 && (
+      <Text style={{ fontSize: 13, fontStyle: 'italic', color: '#999', marginTop: 5 }}>
+        No hay personas registradas en esta ruta.
+      </Text>
+    )}
+  </View>
+);
 
   return (
     <View style={styles.container}>
