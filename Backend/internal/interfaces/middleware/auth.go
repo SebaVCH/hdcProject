@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"backend/Backend/internal/config"
 	"errors"
+	"github.com/SebaVCH/hdcProject/internal/config"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"

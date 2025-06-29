@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/repository"
-	"backend/Backend/internal/utils"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/repository"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -73,7 +73,7 @@ func (a authUseCase) Register(c *gin.Context) {
 
 	token, err := a.authRepository.Register(user)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Ocurrio un error con el token del usuario"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Ocurrio un registrar el usuario"})
 		return
 	}
 

@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"backend/Backend/internal/interfaces/middleware"
+	"github.com/SebaVCH/hdcProject/internal/interfaces/middleware"
 	"github.com/gin-gonic/gin"
 )
 

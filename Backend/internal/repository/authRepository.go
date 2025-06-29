@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/utils"
 	"context"
 	"errors"
+	"fmt"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"time"
@@ -73,7 +74,10 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 		return "", err
 	}
 
-	go utils.SendRegistrationMail(user, unhashedPassword)
+	err = utils.SendRegistrationMail(user, unhashedPassword)
+	if err != nil {
+		fmt.Println("Error enviando correo:", err)
+	}
 
 	return token, nil
 }
