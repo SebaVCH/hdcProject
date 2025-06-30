@@ -5,7 +5,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
 import { Paper, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
@@ -17,7 +16,8 @@ import InputDescription from '../Input/InputDescription';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseDialogButton from '../Button/CloseDialogButton';
-import { isSunday } from 'date-fns';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -41,6 +41,7 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
     const [ confirmation, setConfirmation ] = useState(false)
     const [ route, setRoute ] = useState<TRoute>({
         _id : '',
+        title : `Ruta ${format(new Date(), "'del' dd 'de' MMMM", { locale : es})}`,
         description : '',
         routeLeader : '',
         status : RouteStatus.Active
@@ -60,6 +61,10 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
 
     const handleDescriptionInput = (e : React.ChangeEvent<HTMLInputElement>) => {
         setRoute({...route, description : e.target.value})
+    }
+
+    const handleTitleInput = (e : React.ChangeEvent<HTMLInputElement>) => {
+        setRoute({...route, title : e.target.value})
     }
 
     const handleAcept = () => {
@@ -112,6 +117,13 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                                     
                                 Podrás finalizar la ruta en cualquier momento
                             </Typography>
+                            <TextField 
+                                variant='standard'
+                                label="Ingresa el Título de la Ruta"
+                                value={route.title}
+                                required
+                                onChange={handleTitleInput}
+                            />
                             <InputDescription
                                 variant='standard'
                                 required 
@@ -121,11 +133,7 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                                 maxLength={50}
                                 onChange={handleDescriptionInput}
                             />
-                            <TextField 
-                                variant='standard'
-                                label="Ingresa el Título de la Ruta"
-                                defaultValue={"Ruta-Fecha"}
-                            />
+                            
                         </>
                     :
                         !confirmation ? 

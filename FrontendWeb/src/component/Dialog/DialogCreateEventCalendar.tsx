@@ -190,7 +190,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
             <DialogContent>
                 { isIdle ? 
                     <div className='flex flex-col gap-4'>
-                        <Typography>
+                        <Typography textAlign={'justify'}>
                             Agrega un nuevo evento al calendario. Solo necesitas un título, una breve descripción y la fecha.
                         </Typography>
                         <TextField
@@ -213,12 +213,12 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
                             value={formCalendarEvent.description}       
                             onChange={handleOnChangeDescription}        
                         />
-                        <div className="flex flex-col w-75 gap-2">
+                        <div className="flex flex-col  gap-2">
                             <label htmlFor="horario" className="text-sm font-medium text-gray-700">
                                 Horario
                             </label>
                             <div className='flex flex-row gap-4 justify-center items-center'>
-                                <ComboBox  onChange={(e, value, reason) => {
+                                <ComboBox size='small'  onChange={(e, value, reason) => {
                                     if(reason === 'clear') {
                                         setEndTime(undefined)
                                     }
@@ -227,7 +227,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
                                 label='Empieza' 
                                 options={timeSlots} />
                                 <p>-</p> 
-                                <ComboBox onChange={(e, value) => {setEndTime(value as string)}} disabled={startTime == undefined} label='Termina' options={listEndTime as string[]}/>
+                                <ComboBox size='small' onChange={(e, value) => {setEndTime(value as string)}} disabled={startTime == undefined} label='Termina' options={listEndTime as string[]}/>
                             </div>                           
                             <Typography variant='caption' color='error'>
                                 {formErrors.errorStartTime ? formErrors.errorStartTime : formErrors.errorEndTime}

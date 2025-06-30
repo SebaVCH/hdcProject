@@ -31,45 +31,54 @@ export default function DrawerList() {
         navigate('/')
     }
 
+        const onClickHistory = () => {
+        navigate('/history')
+    }
 
+
+    const onClickSchedule = () => {
+        navigate('/schedule')
+    }
+
+    const color = '#28bdc8'
     
     return (
-        <div className="py-5 gap-5 w-50 flex grow flex-col flex-wrap justify-items-between">
-            <Button fullWidth onClick={onClickHome}>
-                <div className="flex w-full justify-start px-5 gap-10 items-center">
-                    <HomeIcon />
+        <div className={`py-5 gap-4 w-45 flex grow flex-col flex-wrap justify-items-between`}>
+            <Button fullWidth onClick={onClickHome} color='info'>
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
+                    <HomeIcon  />
                      <Typography>Home</Typography>
                  </div>
             </Button>
-            <Button fullWidth onClick={onClickProfile}>
-                <div className="flex w-full justify-start px-5 gap-10 items-center">
+            <Button fullWidth onClick={onClickProfile} color='info' >
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
                     <AccountBoxIcon />
                     <Typography>Perfil</Typography>
                 </div>
             </Button>
-            <Button fullWidth>
-                <div className="flex w-full justify-start px-5 gap-10 items-center">
+            <Button fullWidth onClick={onClickSchedule} color='info' >
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
                     <EventIcon />
                     <Typography>Agendar</Typography>
                 </div>
             </Button>
-            <Button fullWidth>
-                <div className="flex w-full justify-start px-5 gap-10 items-center">
+            <Button fullWidth onClick={onClickHistory} color='info' >
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
                     <HistoryIcon />
                     <Typography>Historial</Typography>
                 </div>
             </Button>
-            <Button fullWidth onClick={onClickUsuarios}>
-                <div className="flex w-full justify-start px-5 gap-10 items-center">
+            <Button fullWidth onClick={onClickUsuarios} color='info' >
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
                     <GroupIcon/>
                     <Typography>Usuarios</Typography>
                 </div>
             </Button>
-            <div className="flex grow items-end w-full">
-                <Button fullWidth color="warning" onClick={onClickCerrarSesion} >
-                    <div className="flex w-full justify-start px-5 gap-1 items-center">
+            <div className="flex grow items-end w-full" >
+                <Button  fullWidth color="warning" onClick={onClickCerrarSesion}  >
+                    <div className="flex w-full justify-start px-2 gap-5 items-center">
                         <LogoutIcon fontSize="small" />
-                        <Typography>Cerrar Sesión</Typography>
+                        <Typography variant="body2">Cerrar Sesión</Typography>
                     </div>
                 </Button>
             </div>

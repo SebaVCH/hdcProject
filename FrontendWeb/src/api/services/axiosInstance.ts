@@ -22,8 +22,6 @@ export const interceptorResponse = (navigate : NavigateFunction,  clearSesion : 
         (response) => {
             return response;
         }, (error) => {
-            
-            console.log(error)
             if(isAxiosError(error) && ((error as AxiosError).status == 401)) {
                 clearSesion()
                 navigate('/login')

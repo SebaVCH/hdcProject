@@ -42,7 +42,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                     <Typography variant="h6">
                          Acerca de ti
                     </Typography>
-                    <Paper elevation={2} className="flex items-center justify-center p-1 sm:p-2 md:p-3 lg:p-5 flex-col gap-3 border border-neutral-300">
+                    <Paper elevation={2} className="flex items-center justify-center p-2 sm:p-2 md:p-3 lg:p-5 flex-col gap-3 border border-neutral-300">
                          <TextField 
                               variant="standard"
                               margin="dense"

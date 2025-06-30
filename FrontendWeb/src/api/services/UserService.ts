@@ -1,5 +1,3 @@
-
-import axios, { Axios, AxiosError } from "axios"
 import { axiosInstance } from "./axiosInstance"
 import { IUser } from "../interfaces/IUser"
 import { sleep } from "../../utils/sleep"
@@ -52,7 +50,6 @@ export type TFindAllUsers = IUser[]
 export class UserService {
 
     static async Login(email: string, password: string) : Promise<TLoginResponse> {
-        console.log({email, password})
         const body :TLoginRequest  = { email: email, password: password}
         const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/login`, body)
         return { token: data?.token, error: false }
@@ -89,15 +86,11 @@ export class UserService {
                 role : data?.message?.role
             };
         } catch (error: any) {
-            console.log(error)
             throw new Error(error?.response?.data?.message || 'Error al obtener el perfil');
         }
     }
 
     static async UpdateProfile(user : TProfileRequest, accessToken : string) : Promise<TProfileUpdateResponse> {
-
-
-        await sleep(1000)
         
         const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/user/update`, user, {
             headers: {

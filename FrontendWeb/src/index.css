@@ -17,11 +17,9 @@ html, body {
 }
 
 
-/* Agrega esto a tu archivo CSS */
 .fc {
-    max-width: 100%;
-    margin: 0 auto;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 100%;
+  font-size: 0.9rem;
 }
 
 .fc .fc-toolbar-title {
@@ -65,4 +63,32 @@ html, body {
 .fc-event-title {
   font-size: 0.85rem; 
 }
+@media (max-width: 600px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1.2rem;
+    margin: 4px 0;
+  }
+  
 
+  
+
+  
+  .fc .fc-button {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .fc-event {
+    margin: 1px;
+    padding: 0 2px;
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
+  
+}
