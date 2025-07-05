@@ -104,7 +104,7 @@ func FuzzIsValidPhone_AnyNumber_True(f *testing.F) {
 }
 
 func TestIsValidString_NormalString_True(t *testing.T) {
-	stringTest := "Hello World-123.,@_"
+	stringTest := "Helló World-123.,@_"
 	ok := IsValidString(stringTest)
 	assert.True(t, ok, "La cadena debe ser solo puede presentar caracteres alfanuméricos, espacios, guiones, guiones bajos, puntos y comas")
 }
@@ -130,3 +130,47 @@ func FuzzIsValidString_AnyChars_True(f *testing.F) {
 		assert.True(t, ok, "La cadena debe ser solo puede presentar caracteres alfanuméricos, espacios, guiones, guiones bajos, puntos y comas")
 	})
 }
+
+func TestIsValidColor_OnlyNumbers_True(t *testing.T) {
+	normalColor := "#123"
+	ok := IsValidColor(normalColor)
+	assert.True(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_OnlyNumbers6Digits_True(t *testing.T) {
+	normalColor := "#123456"
+	ok := IsValidColor(normalColor)
+	assert.True(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_OnlyLetters_True(t *testing.T) {
+	normalColor := "#abc"
+	ok := IsValidColor(normalColor)
+	assert.True(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_OnlyLetters6Digits_True(t *testing.T) {
+	normalColor := "#abcdef"
+	ok := IsValidColor(normalColor)
+	assert.True(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_mixedString_True(t *testing.T) {
+	normalColor := "#0ab2c2"
+	ok := IsValidColor(normalColor)
+	assert.True(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_unacceptedLetters_False(t *testing.T) {
+	normalColor := "#gggggg"
+	ok := IsValidColor(normalColor)
+	assert.False(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+func TestIsValidColor_unacceptedChars_False(t *testing.T) {
+	normalColor := "#!%&"
+	ok := IsValidColor(normalColor)
+	assert.False(t, ok, "La cadena solo debe contener letras desde la a hasta la f y/o numeros desde el 0 hasta el 9")
+}
+
+

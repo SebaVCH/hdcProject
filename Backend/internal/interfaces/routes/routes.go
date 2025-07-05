@@ -6,6 +6,7 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
 	SetupAuthRouter(r)
@@ -17,5 +18,6 @@ func SetupRouter() *gin.Engine {
 	SetupNotificationRouter(r)
 	SetupCalendarEventRouter(r)
 	SetupExportDataRouter(r)
+	SetupInstitutionRouter(r)
 	return r
 }

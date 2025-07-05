@@ -35,7 +35,7 @@ func (ed exportDataUseCase) ExportPeopleHelped(c *gin.Context) {
 	f.SetActiveSheet(actualsheet)
 	f.DeleteSheet("Sheet1")
 
-	headers := []string{"ID", "Nombre", "Genero", "Fecha de Registro"}
+	headers := []string{"ID", "Edad", "Genero", "Nombre", "Fecha de Registro"}
 	for i, header := range headers {
 		cell := string(rune('A'+i)) + "1"
 		f.SetCellValue(sheetName, cell, header)
@@ -46,7 +46,8 @@ func (ed exportDataUseCase) ExportPeopleHelped(c *gin.Context) {
 		f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), person.ID.Hex())
 		f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), person.Age)
 		f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), person.Gender)
-		f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), person.DateRegister.Format("2006-01-02"))
+		f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), person.Name)
+		f.SetCellValue(sheetName, fmt.Sprintf("E%d", row), person.DateRegister.Format("2006-01-02"))
 	}
 
 	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

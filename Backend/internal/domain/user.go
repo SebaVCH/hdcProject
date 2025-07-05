@@ -14,6 +14,6 @@ type Usuario struct {
 	CompletedRoutes int           `bson:"completed_routes" json:"completed_routes"`
 	ListRoutes      []Route       `bson:"list_routes" json:"list_routes"`
 	Role            string        `bson:"role" json:"role"`
-	Institution     string        `bson:"institution" json:"institution"`
+	InstitutionID   bson.ObjectID `bson:"institutionID" json:"institutionID"`
 	DateRegister    time.Time     `bson:"date_register" json:"date_register"`
 }
