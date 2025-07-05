@@ -1,4 +1,4 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Divider, Checkbox, alpha, Box, IconButton, TableSortLabel, Toolbar, Tooltip, Typography, FormControlLabel, Switch, TablePagination } from "@mui/material";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Divider, Checkbox, alpha, Box, IconButton, TableSortLabel, Toolbar, Tooltip, Typography, FormControlLabel, Switch, TablePagination, useMediaQuery, useTheme } from "@mui/material";
 import { IUser } from "../api/interfaces/IUser";
 import { visuallyHidden } from '@mui/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -6,30 +6,31 @@ import React, { useEffect } from "react";
 import { Order, getComparator } from "../utils/utilsSort";
 
 
+
 interface HeadCell {
   disablePadding: boolean;
   id: keyof IUser;
   label: string;
-  numeric: boolean;
+  align: "center" | "left" | "right" | "justify" | "inherit";
 }
 
 
 const headCells: readonly HeadCell[] = [
   {
     id: 'name',
-    numeric: false,
+    align: 'left',
     disablePadding: true,
     label: 'Nombre',
   },
   {
     id: 'email',
-    numeric: true,
+    align: 'left',
     disablePadding: false,
     label: 'Email',
   },
   {
     id: 'phone',
-    numeric: true,
+    align: 'center',
     disablePadding: false,
     label: 'Teléfono',
   }
@@ -45,6 +46,8 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
+  const theme = useTheme();
+  const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
     props;
   const createSortHandler =
@@ -69,7 +72,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
+            align={headCell.align == 'right' ? (computerDevice ? 'right' : 'left') : headCell.align}
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -152,7 +155,8 @@ export default function TableUser({ users, setUsers, prefixSearch } : { users : 
   const [order, setOrder] = React.useState<Order>('asc');
   const [orderBy, setOrderBy] = React.useState<keyof IUser>('email');
   const [selected, setSelected] = React.useState<readonly string[]>([]);
-
+      const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof IUser,
@@ -210,9 +214,10 @@ export default function TableUser({ users, setUsers, prefixSearch } : { users : 
         <EnhancedTableToolbar numSelected={selected.length} onDeleteUsers={onDeleteUsers}/>
         <TableContainer>
           <Table
-            sx={{ minWidth: 750 }}
+            sx={{ minWidth: 600, tableLayout: 'fixed' }}
             aria-labelledby="tableTitle"
             size={'medium'}
+            stickyHeader
           >
             <EnhancedTableHead
               numSelected={selected.length}
@@ -255,8 +260,8 @@ export default function TableUser({ users, setUsers, prefixSearch } : { users : 
                     >
                       {row.name}
                     </TableCell>
-                    <TableCell align="right">{row.email}</TableCell>
-                    <TableCell align="right">{row.phone}</TableCell>
+                    <TableCell align={'left'}>{row.email}</TableCell>
+                    <TableCell align={("center")}>{row.phone}</TableCell>
                   </TableRow>
                 );
               })}

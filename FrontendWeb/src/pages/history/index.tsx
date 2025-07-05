@@ -1,4 +1,4 @@
-import { Divider, Paper } from "@mui/material";
+import { Divider, Paper, useMediaQuery, useTheme } from "@mui/material";
 import CustomDrawer from "../../component/CustomDrawer";
 import DrawerList from "../../component/DrawerList";
 import ListIconHome from "../../component/ListIconHome";
@@ -18,6 +18,7 @@ import { UserAdapter } from "../../api/adapters/UserAdapter";
 import DialogUpdateAtended from "../../component/Dialog/DialogUpdateAttended";
 import compareSort from "../../utils/compareDate";
 import { RouteStatus } from "../../api/interfaces/Enums";
+import Sidebar from "../../component/Sidebar";
 
 
 function getFormatDate(a : Date, opt : string) {
@@ -88,19 +89,22 @@ export default function RouteHistory() {
 
     }, [opFecha, routes])
 
-
+    const theme = useTheme()
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'))
+    
     return (
         <div className="flex flex-grow">
-            <div className="flex flex-col z-10">
-                <CustomDrawer DrawerList={DrawerList}/>
-                <Divider variant="middle"/>
-                <ListIconHome />
-                <div className="flex grow justify-center items-end py-4">
-                    <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
-                </div>
+            <div className="flex">
+                { computerDevice ?
+                    <Sidebar />
+                    :
+                    <div className="absolute top-4 z-20 left-2">
+                        <CustomDrawer DrawerList={DrawerList} />
+                    </div>
+                }
             </div>
 
-            <div className={`relative flex grow flex-col justify-between`}>
+            <div className={`flex grow justify-between ${(computerDevice ? 'flex-row-reverse' : 'flex-col')}`}>
                 <Mapa
                     stateCurrentLocation={[currentLocation, setCurrentLocation]}
                     helpPoints={helpPoints}
@@ -109,7 +113,7 @@ export default function RouteHistory() {
                 >
                     <HandlerLocationHistory stateShowLocation={[showLocation, setShowLocation]} stateLocation={[HPLocation, setHPLocation]} />
                 </Mapa>
-                <Paper variant="outlined" square className="absolute w-100 h-full">
+                <Paper variant="outlined" square className={"h-full z-10 " + (computerDevice ? 'w-100 shadow-[4px_0_6px_-1px_rgba(0,0,0,0.1)]' : 'w-full overflow-y-hidden')}>
                     <ListHistory 
                         stateOnlyUser={[onlyUser, setOnlyUser]}
                         stateOPFecha={[opFecha, setOPFecha]}

@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { UserAdapter } from "../../api/adapters/UserAdapter";
 import { useNavigate } from "react-router-dom";
 import useSessionStore from "../../stores/useSessionStore";
-import { Box, Button, Card, Divider, FormControl, FormLabel, SxProps, TextField, Theme, Typography } from "@mui/material";
+import { Box, Button, Card, Divider, FormControl, FormLabel, TextField, Typography } from "@mui/material";
 import { isValidEmail } from "../../utils/verifyInput";
+import { sxInput } from "../../style/sxInput";
 
 
 
@@ -19,7 +20,7 @@ export default function Login() {
     const [ passwordError, setPasswordError ] = useState<string>('')
 
     const { accessToken } = useSessionStore()
-    const { isPending, mutate, error, isError, isSuccess } = UserAdapter.useLoginMutation(email, password)
+    const { mutate, isSuccess } = UserAdapter.useLoginMutation(email, password)
 
     const validateInputs = () => {
       
@@ -37,9 +38,7 @@ export default function Login() {
       
     }
     
-
     const onSubmitForm = (e :React.FormEvent) => {
-
       e.preventDefault()
       console.log("jasnadkln")
       if(emailError !== '' || passwordError !== '') {
@@ -48,11 +47,12 @@ export default function Login() {
       console.log("jasnaqdkln")
       mutate()
     }
+    
     useEffect(() => {
       if(accessToken) {
         navigate('/')
       }
-    }, [])
+    }, [accessToken])
 
     useEffect(() => {
       if(isSuccess) {
@@ -65,7 +65,7 @@ export default function Login() {
     return (
       <Box className="flex w-full h-full justify-center"
           sx={[
-          (theme) => ({
+          (_) => ({
             '&::before': {
               content: '""',
               display: 'block',
@@ -168,87 +168,3 @@ export default function Login() {
       </Box>
     )   
 }
-
-const sxInput : SxProps<Theme> = {
-  '& .MuiOutlinedInput-root': {
-    marginY : 1,
-    borderRadius: 2,
-    backgroundColor: '#fcfcfc', // ejemplo de fondo azul claro
-    paddingX: 1.5,
-    minHeight: '2.5rem',
-    display: 'flex',
-    alignItems: 'center', // centrado vertical
-    border: '1px solid #ccc',
-    transition: 'border 120ms ease-in',
-    '&:hover': {
-      borderColor: '#566481',
-    },
-
-    '&.Mui-focused': {
-      borderColor: '#566481',
-      outline: '2px solid #56648133',
-    },
-  },
-
-  '& .MuiOutlinedInput-notchedOutline': {
-    border: 'none', // quita doble borde
-  },
-
-  '& .MuiOutlinedInput-input': {
-    padding: 0,
-    height: '1.5rem', // altura del input (puedes ajustar)
-  },
-}
-
-/*
-<img src="undraw_destination_fkst.svg" alt="gps-view" className="max-w-1/2 h-auto object-contain"/>
-                id="password"
-                type="password"
-                name="password"
-                placeholder="Ingresa tu Contraseña"
-                autoComplete="password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                sx={sxInput}
-
-
-
-
-
-
-<Card className="flex flex-col gap-6 p-8 shadow-md rounded-2xl bg-white">
-        <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Correo electrónico
-          </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="ejemplo@correo.com"
-            onChange={(e) => setEmail(e.currentTarget.value)}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <label htmlFor="password" className="text-sm font-medium text-gray-700">
-            Contraseña
-          </label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="********"
-            onChange={(e) => setPassword(e.currentTarget.value)}
-          />
-        </div>
-        <Button type="submit" className="w-full">
-          Ingresar
-        </Button>
-        {isError && (
-          <div className="text-red-600 text-sm text-center mt-2">
-            <p>Error al iniciar sesión</p>
-            <p>{(error as Error).message}</p>
-          </div>
-        )}
-      </Card>
-*/

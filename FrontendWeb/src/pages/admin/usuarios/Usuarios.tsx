@@ -1,4 +1,4 @@
-import { Button, Divider, IconButton, InputBase, Paper, Tooltip, Typography } from "@mui/material";
+import { Button, Divider, IconButton, InputBase, Paper, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { IUser } from "../../../api/interfaces/IUser";
 import CustomDrawer from "../../../component/CustomDrawer";
 import TableUser from "../../../component/TableUser";
@@ -10,6 +10,7 @@ import { UserAdapter } from "../../../api/adapters/UserAdapter";
 import useSessionStore from "../../../stores/useSessionStore";
 import DialogCreateUser from "../../../component/Dialog/DialogCreateUser";
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import Sidebar from "../../../component/Sidebar";
 
 
 export default function Usuarios() {
@@ -54,27 +55,35 @@ export default function Usuarios() {
             console.log(err)
         })
     }
-
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
 
     return (
-        <div className="flex flex-row grow">
-            <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)] z-30">
-                <CustomDrawer DrawerList={DrawerList}/>
-                <Divider variant="middle"/>
-                <ListIconHome />
-                <div className="flex grow justify-center items-end py-4">
-                    <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} width={48} height={48}/></a>
+        <div className={"flex grow " + (computerDevice ? 'flex-row' : 'flex-col')}>
+            { computerDevice ? 
+                <div className="flex z-10">
+                    <Sidebar />
+                </div>    
+                :
+                <div className="flex flex-row bg-gray-100">
+                    <CustomDrawer DrawerList={DrawerList} />
+                    <p className="flex text-2xl text-center font-semibold p-3 items-center">Gestión Usuarios</p>
                 </div>
-            </div>
-            <div className="flex grow flex-col self-stretch justify-start items-start justify-items-start gap-10 border border-neutral-300 rounded-xs p-5 bg-gray-100">
-                <div>
-                    <Typography variant="h5">Gestión de Usuarios</Typography>
-                </div>
+
+            }
+            <div className="flex w-full h-full flex-col justify-start gap-10 p-5 bg-gray-100">
+                { computerDevice ? 
+                    <div>
+                        <Typography variant="h5">Gestión de Usuarios</Typography>
+                    </div>
+                    :
+                    <></>
+                }
                 <div className="flex flex-col gap-5 min-w-11/12">
-                    <div className="flex flex-row gap-5">
+                    <div className={"flex flex-row gap-5 "}>
                         <Paper
                             component="form"
-                            className="px-0.5 py-1 flex items-center w-1/4"
+                            className={"px-0.5 py-1 flex items-center " + (computerDevice ? 'w-100' : 'grow')}
                         >
                             <InputBase
                                 fullWidth
@@ -87,21 +96,23 @@ export default function Usuarios() {
                                 <SearchIcon />
                             </IconButton>
                         </Paper>
-                        <Button variant="contained" onClick={()=>{setOpen(true)}}>
+                        <Button size="small" variant="contained" onClick={()=>{setOpen(true)}}>
                             Agregar Usuario
-                        </Button>
+                        </Button>  
+                    </div>
+                    { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}
+                </div>
+            </div>
+            <DialogCreateUser open={open} setOpen={setOpen} />
+        </div>
+    )
+};
 
+
+/*
                         <Tooltip title={'exportar datos'}>
                             <Button color='info' variant="contained" onClick={handleExport}>
                                 <FileDownloadIcon fontSize="large" />
                             </Button>    
                         </Tooltip>
-  
-                        <DialogCreateUser open={open} setOpen={setOpen} />
-                    </div>
-                    { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}
-                </div>
-            </div>
-        </div>
-    )
-};
+*/
