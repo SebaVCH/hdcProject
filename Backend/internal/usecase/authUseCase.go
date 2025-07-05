@@ -61,7 +61,7 @@ func (a authUseCase) Register(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidString(user.Name) || !utils.IsValidString(user.Password) || !utils.IsValidPhone(user.Phone) || !utils.IsValidString(user.Institution) {
+	if !utils.IsValidString(user.Name) || !utils.IsValidString(user.Password) || !utils.IsValidPhone(user.Phone) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Los datos entregados solo pueden presentar caracteres alfanuméricos, espacios, guiones, guiones bajos, puntos y comas"})
 		return
 	}
@@ -73,7 +73,7 @@ func (a authUseCase) Register(c *gin.Context) {
 
 	token, err := a.authRepository.Register(user)
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Ocurrio un registrar el usuario"})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Ocurrió un registrar el usuario"})
 		return
 	}
 

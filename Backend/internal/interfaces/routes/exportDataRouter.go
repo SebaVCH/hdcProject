@@ -17,5 +17,5 @@ func SetupExportDataRouter(r *gin.Engine) {
 
 	protected := r.Group("/export-data")
 	protected.Use(middleware.AuthMiddleware())
-	protected.GET("/people-helped", exportDataController.ExportPeopleHelped)
+	protected.GET("/people-helped", middleware.RoleMiddleware("admin"), exportDataController.ExportPeopleHelped)
 }
