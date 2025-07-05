@@ -18,7 +18,7 @@ type RouteRepository interface {
 	DeleteRoute(routeId string) error
 	FinishRoute(id string) error
 	JoinRoute(code string, userID string) (domain.Route, error)
-	GetMyParticipation(userID string) (int, error)
+	GetMyParticipation(userID string) (map[string]int, error)
 }
 
 type routeRepository struct {
@@ -160,56 +160,51 @@ func (r *routeRepository) JoinRoute(code string, userID string) (domain.Route, e
 	return route, nil
 }
 
-func (r *routeRepository) GetMyParticipation(userID string) (int, error) {
+func (r *routeRepository) GetMyParticipation(userID string) (map[string]int, error) {
 	userObjID, err := bson.ObjectIDFromHex(userID)
 	if err != nil {
-		return 0, errors.New("ID de usuario inválido")
+		return nil, errors.New("ID de usuario inválido")
 	}
 
 	filter := bson.M{
 		"$or": []bson.M{
 			{"team": userObjID},
-			{"leader": userObjID},
+			{"team": userID},
+			{"route_leader": userObjID},
 		},
 	}
 	cursor, err := r.RouteCollection.Find(context.Background(), filter)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	defer cursor.Close(context.Background())
 
 	var routes []domain.Route
 	if err := cursor.All(context.Background(), &routes); err != nil {
-		return 0, err
+		return nil, err
 	}
 
+	totalRoutes := len(routes)
 	routeIDs := make([]bson.ObjectID, 0, len(routes))
 	for _, route := range routes {
 		routeIDs = append(routeIDs, route.ID)
 	}
 
-	if len(routeIDs) == 0 {
-		return 0, nil
+	totalHelpingPoints := 0
+	if len(routeIDs) > 0 {
+		helpCount, err := r.HelpPointCollection.CountDocuments(context.Background(), bson.M{
+			"route_id": bson.M{"$in": routeIDs},
+		})
+		if err != nil {
+			return nil, err
+		}
+		totalHelpingPoints = int(helpCount)
 	}
 
-	helpCursor, err := r.HelpPointCollection.Find(context.Background(), bson.M{
-		"route_id": bson.M{"$in": routeIDs},
-	})
-	if err != nil {
-		return 0, err
-	}
-	defer helpCursor.Close(context.Background())
-
-	var helpingPoints []domain.PuntoAyuda
-	if err := helpCursor.All(context.Background(), &helpingPoints); err != nil {
-		return 0, err
+	myParticipation := map[string]int{
+		"total_routes":        totalRoutes,
+		"total_helpingpoints": totalHelpingPoints,
 	}
 
-	totalHelped := 0
-
-	for i := 0; i < len(helpingPoints)-1; i++ {
-		totalHelped += 1
-	}
-
-	return totalHelped, nil
+	return myParticipation, nil
 }
