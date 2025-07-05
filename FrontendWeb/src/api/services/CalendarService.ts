@@ -37,7 +37,7 @@ export class CalendarService {
 
     static async AddEvent( event : Omit<TCalendarEvent, '_id' | 'authorId'>, token ?: string) : Promise<TCalendarEvent> {
 
-
+        console.log(event)
         const body = {
             ...event,
             date_start : new Date(event.dateStart)

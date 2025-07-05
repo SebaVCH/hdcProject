@@ -27,7 +27,7 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                     <Typography
                         component={"span"}
                         variant='body2'
-                        sx={{ color : 'text.primary'}}
+                        sx={{ color : '#424242'}}
                     >
                         {value.authorName}
                     </Typography>
@@ -35,7 +35,7 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                         lineHeight={1.7}
                         component={"span"}
                         variant="caption"
-                        sx={{ color : 'text.secondary', textAlign : 'end', my : 0.05}}
+                        sx={{ color : '#757575', textAlign : 'end', my : 0.05}}
                     >
                         {formatRelative(new Date(value.createdAt as string), new Date(), { locale : es })}
                     </Typography>
@@ -47,7 +47,7 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                   <Typography
                       component={"span"}
                       variant='body1'
-                      sx={{ color : 'text.primary', display : 'inline'}}
+                      sx={{ color : 'text.primary', display : 'inline' }}
                   >
                       { isTruncated && !toggleIsShowingMore ? 
                           msg.slice(0, MAX_LENGTH) + '... ' 

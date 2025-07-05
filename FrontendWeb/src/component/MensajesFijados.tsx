@@ -102,30 +102,24 @@ export default function MensajesFijados() {
                 isSuccess ? 
                     
                     <div>
-                        <ListItem sx={{ display : 'flex', flexDirection : 'column', alignItems : 'start', justifyItems: 'start', gap: 3}}>
-                            <div>
-                                <Typography>Avisos nuevos</Typography>
-                                {  data.unread.length !== 0 ?
-                                    data.unread.map((value, index) => (
-                                    <div key={index}>
-                                        <Mensaje value={value} index={index} />
-                                    </div>
-                                    ))
-                                    :
-                                    <ListItem>
-                                        <ListItemText
-                                            primary = {
-                                                <Typography variant="caption" color="gray">
-                                                    Sin notificaciones nuevas
-                                                </Typography>
-                                            }
-                                        />
-                                    </ListItem>
-                                }
-                            </div>
-                        </ListItem>
+                        { data.unread.length !== 0 ? 
+                            <ListItem sx={{ display : 'flex', flexDirection : 'column', alignItems : 'start', justifyItems: 'start', gap: 3, bgcolor: '#E3F2FD'}}>
+                                <div>
+                                    <Typography>Avisos nuevos</Typography>
+                                    {  
+                                        data.unread.map((value, index) => (
+                                        <div key={index}>
+                                            <Mensaje value={value} index={index} />
+                                        </div>
+                                        ))
+                                    }
+                                </div>
+                            </ListItem>
+                            :
+                            <></>
+                        }
                         <Divider />
-                        <ListItem>
+                        <ListItem sx={{ bgcolor: '#F5F5F5'}}>
                             <div>
                                 <Typography>Avisos antiguos</Typography>
                                 { data.read.length !== 0 ?

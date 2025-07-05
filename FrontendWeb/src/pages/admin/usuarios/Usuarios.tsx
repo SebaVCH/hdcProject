@@ -99,6 +99,11 @@ export default function Usuarios() {
                         <Button size="small" variant="contained" onClick={()=>{setOpen(true)}}>
                             Agregar Usuario
                         </Button>  
+                                                <Tooltip title={'exportar datos'}>
+                            <Button color='info' variant="contained" onClick={handleExport}>
+                                <FileDownloadIcon fontSize="large" />
+                            </Button>    
+                        </Tooltip>
                     </div>
                     { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}
                 </div>

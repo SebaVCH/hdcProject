@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Backdrop, Card, Dialog, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
 import useSessionStore from "../../stores/useSessionStore";
@@ -24,6 +24,7 @@ import SpeedDialCreateRoute from "../../component/Button/SpeedDialCreateRoute";
 import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../component/Sidebar";
+import DialogUpdateRisk from "../../component/Dialog/DialogUpdateRisk";
 
 
 
@@ -178,6 +179,7 @@ export default function Home() {
                     </Card>
                 }
             </div>
+            <DialogUpdateRisk />
         </div>
     )
 } 

@@ -1,12 +1,14 @@
 import L, { LatLngExpression, svg } from "leaflet";
 import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { Divider, radioClasses, TextField, Zoom } from "@mui/material";
+import { Button, Divider, IconButton, radioClasses, TextField, Zoom } from "@mui/material";
 import { format } from 'date-fns';
 import { THelpPoint } from "../../api/services/HelpPointService";
 import { TRisk } from "../../api/services/RiskService";
 import { Position } from "../../utils/getCurrentLocation";
 import { useEffect, useState } from "react";
 import ZoomHandler from "./ZoomHandler";
+import EditIcon from '@mui/icons-material/Edit';
+import { useRiskUpdateDialog } from "../../context/RiskUpdateContext";
 
 var greenIcon = new L.Icon({
     iconUrl: 'marker-icon-2x-green.png',
@@ -28,11 +30,11 @@ var redIcon = new L.Icon({
 
 
 var alertIcon = new L.Icon({
-    iconUrl: 'warning-alert.svg',
+    iconUrl: 'warning-alert-green.svg',
     iconSize: [30, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
 })
 
 
@@ -67,6 +69,9 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
         } 
     }, [enableTraceLine, helpPoints])
 
+
+
+    const [ _, setRiskUpdate] = useRiskUpdateDialog()
     
     return (
         <>
@@ -117,15 +122,24 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                 {risks.map((risk, index) => (
                     <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
                         <Popup>
-                            <div className="flex flex-col items-center justify-center gap-2">
-                                <b>{risk.description}</b>
-                                <Divider className="w-full" variant="middle"/>
-                                <b>Fecha: {format(new Date(risk.createdAt), 'dd-MM-yyyy')}</b>
+                            <div className="flex flex-col items-start justify-center gap-2">
+                                <b className="text-sm">{risk.description}</b>
+                                <Divider className="w-full" variant="fullWidth"/>
+                                <p className="text-xs p-0 !m-0">Última modificación: {format(new Date(risk.createdAt), 'dd-MM-yyyy')}</p>
+                                <Button variant="contained" sx={{
+                                    alignSelf : 'left',
+                                    fontSize : 12,
+                                    p: 0,
+                                }} onClick={() => {
+                                    setRiskUpdate(risk)
+                                }}>
+                                    Editar
+                                </Button>
                             </div>
                         </Popup>
+                        
                     </Marker>
                 ))}
-
                 {children}
             </MapContainer>
         </>

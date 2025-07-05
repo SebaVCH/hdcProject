@@ -123,7 +123,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
 
         const newEvent = {
             ...formCalendarEvent,
-            title: `${startTime} - ${endTime} | ${formCalendarEvent.title}`
+            title: formCalendarEvent.title  //`${startTime} - ${endTime} _ ${formCalendarEvent.title}`
         }
         if(selectInfo) {
             console.log(selectInfo.startStr)

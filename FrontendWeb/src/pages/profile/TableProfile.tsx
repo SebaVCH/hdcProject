@@ -6,7 +6,6 @@ import { TResumenActividad } from ".";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import RouteIcon from '@mui/icons-material/Route';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ResumeItem from "./ResumeItem";
 import { useAuth } from "../../context/AuthContext";
@@ -131,13 +130,7 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                               icon={<QuestionAnswerIcon color="info" />}
                               activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Registros Completados</Typography>}
                               activityValue={<Typography variant="body1" color='info'>2</Typography>}
-                         />
-                         <Divider className="w-full" />    
-                         <ResumeItem
-                              icon={<CrisisAlertIcon color="warning" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Notificados</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>10</Typography>}
-                         />
+                         />  
                          <Divider className="w-full" />   
                          <ResumeItem
                               icon={<HowToRegIcon color="success" />}

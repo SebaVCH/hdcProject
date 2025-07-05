@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 
-
+.leaflet-popup-content {
+  min-width: 200px;
+}
 
 html, body {
     height: 100%;

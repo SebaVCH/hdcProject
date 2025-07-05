@@ -20,7 +20,7 @@ export default function Login() {
     const [ passwordError, setPasswordError ] = useState<string>('')
 
     const { accessToken } = useSessionStore()
-    const { mutate, isSuccess } = UserAdapter.useLoginMutation(email, password)
+    const { mutate, isSuccess, error } = UserAdapter.useLoginMutation(email, password)
 
     const validateInputs = () => {
       
@@ -135,6 +135,9 @@ export default function Login() {
                       Ingresar
                     </Button>
                     <Divider className="w-full" />
+                    <Typography variant='body2' alignSelf={'center'} textAlign={'center'} color="error">
+                      {error ? (error as any).error : ''}
+                    </Typography>
 
                     <Typography alignSelf={'center'}
                       component={'a'}
