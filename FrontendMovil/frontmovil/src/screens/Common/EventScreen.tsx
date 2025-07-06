@@ -1,3 +1,4 @@
+// EventScreen.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,106 +8,141 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Modal,
+  Platform,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStack';
-import { Modal } from 'react-native';
 
-export default function EventScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+type Props = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Event'>;
+};
+
+
+const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
+const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
+
+export default function EventScreen({ navigation }: Props) {
   const [selectedDate, setSelectedDate] = useState('');
   const [eventName, setEventName] = useState('');
   const [eventTime, setEventTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [eventDescription, setEventDescription] = useState('');
-  const [markedDates, setMarkedDates] = useState<{ [date: string]: { marked: boolean; dotColor?: string; selected?: boolean; selectedColor?: string } }>({});
-  const [eventsForSelectedDate, setEventsForSelectedDate] = useState<any[]>([]);
+  const [markedDates, setMarkedDates] = useState({});
+  const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
 
-    const handleDatePress = async (date: string) => {
-    setSelectedDate(date);
+  const API = `${backendUrl}/calendar-event`;
+
+  const getToken = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      console.warn('No se encontró token');
+    }
+    return token;
+  };
+
+  const loadEvents = async () => {
+    const token = await getToken();
+    if (!token) return;
+
     try {
-        const stored = await AsyncStorage.getItem('events');
-        const events = stored ? JSON.parse(stored) : [];
-        const filtered = events.filter((e: any) => e.date === date);
-        setEventsForSelectedDate(filtered);
-        setShowEventModal(true);
+      const res = await axios.get(API, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const allEvents = Array.isArray(res.data) ? res.data : [];
+      const marked = {};
+
+      allEvents.forEach((event) => {
+        const date = new Date(event.date_start).toISOString().split('T')[0];
+        marked[date] = {
+          marked: true,
+          dotColor: '#0F9997', // puedes cambiar esto dinámicamente si tienes info de institución
+        };
+      });
+
+      if (selectedDate) {
+        marked[selectedDate] = {
+          ...(marked[selectedDate] || {}),
+          selected: true,
+          selectedColor: '#000',
+        };
+      }
+
+      setMarkedDates(marked);
     } catch (err) {
-        console.error('Error al obtener eventos del día:', err);
+      console.error('Error al obtener eventos:', err);
     }
-    };
+  };
 
-    const loadMarkedDates = async () => {
+  const handleDatePress = async (day) => {
+    const date = day.dateString;
+    setSelectedDate(date);
+
+    const token = await getToken();
+    if (!token) return;
+
     try {
-        const stored = await AsyncStorage.getItem('events');
-        const events = stored ? JSON.parse(stored) : [];
+      const res = await axios.get(`${API}?date=${date}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEventsForSelectedDate(Array.isArray(res.data) ? res.data : []);
+      setShowEventModal(true);
+    } catch (err) {
+      console.error('Error al obtener eventos del día:', err);
+    }
+  };
 
-        const newMarked: { [date: string]: { marked: boolean; dotColor: string } } = {};
-        events.forEach((event: any) => {
-        newMarked[event.date] = { marked: true, dotColor: '#000' };
-        });
-
-        // Marcar también el día seleccionado si corresponde
-        if (selectedDate) {
-        newMarked[selectedDate] = {
-            ...(newMarked[selectedDate] || {}),
-            selected: true,
-            selectedColor: '#000',
-        };
-        }
-
-            setMarkedDates(newMarked);
-        } catch (err) {
-            console.error('Error al cargar eventos:', err);
-        }
-        };
-
-    useEffect(() => {
-    loadMarkedDates();
-    }, [selectedDate]);
-
-    const handleCreateEvent = async () => {
+  const handleCreateEvent = async () => {
     if (!eventName || !selectedDate) {
-        Alert.alert('Faltan datos', 'Debes ingresar nombre y fecha del evento.');
-        return;
+      Alert.alert('Faltan datos', 'Debes ingresar nombre y fecha del evento.');
+      return;
     }
 
-    const newEvent = {
-        name: eventName,
-        date: selectedDate,
-        time: eventTime.toLocaleTimeString(),
-        description: eventDescription,
-    };
+    const token = await getToken();
+    if (!token) return;
 
     try {
-        const existing = await AsyncStorage.getItem('events');
-        const events = existing ? JSON.parse(existing) : [];
-        events.push(newEvent);
-        await AsyncStorage.setItem('events', JSON.stringify(events));
+      await axios.post(
+        API,
+        {
+          title: eventName,
+          description: eventDescription,
+          date_start: new Date(selectedDate),
+          time_start: eventTime.toLocaleTimeString('es-CL', { hour12: false }),
+          time_end: '',
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-        Alert.alert('Evento guardado', 'El evento ha sido guardado exitosamente.');
-
-        setEventName('');
-        setEventDescription('');
-        setSelectedDate('');
-
-        await loadMarkedDates(); // 🔁 Vuelve a cargar fechas marcadas
-    } catch (error) {
-        console.error('Error al guardar evento', error);
-        Alert.alert('Error', 'No se pudo guardar el evento.');
+      Alert.alert('Evento creado');
+      setEventName('');
+      setEventDescription('');
+      setSelectedDate('');
+      await loadEvents();
+    } catch (err) {
+      console.error('Error al crear evento:', err.response?.data || err.message);
     }
-    };
+  };
+
+  useEffect(() => {
+    loadEvents();
+  }, [selectedDate]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Calendario de Eventos</Text>
 
       <Calendar
-        onDayPress={(day) => handleDatePress(day.dateString)}
+        onDayPress={handleDatePress}
         markedDates={markedDates}
         style={styles.calendar}
       />
@@ -119,10 +155,7 @@ export default function EventScreen() {
           style={styles.input}
         />
 
-        <TouchableOpacity
-          onPress={() => setShowTimePicker(true)}
-          style={styles.timeButton}
-        >
+        <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.timeButton}>
           <Text style={styles.timeButtonText}>Seleccionar hora</Text>
         </TouchableOpacity>
         <Text style={styles.selectedTime}>Hora: {eventTime.toLocaleTimeString()}</Text>
@@ -131,12 +164,10 @@ export default function EventScreen() {
           <DateTimePicker
             value={eventTime}
             mode="time"
-            is24Hour={true}
+            is24Hour
             display="default"
             onChange={(event, selected) => {
-              if (selected) {
-                setEventTime(selected);
-              }
+              if (selected) setEventTime(selected);
               setShowTimePicker(false);
             }}
           />
@@ -156,137 +187,202 @@ export default function EventScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={styles.backButtonText}>Volver al Inicio</Text>
-      </TouchableOpacity>
       <Modal
         visible={showEventModal}
         transparent
         animationType="fade"
         onRequestClose={() => setShowEventModal(false)}
-        >
+      >
         <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Eventos del {selectedDate}</Text>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>📅 Eventos del {selectedDate}</Text>
+
             {eventsForSelectedDate.length > 0 ? (
-                eventsForSelectedDate.map((event, index) => (
-                <View key={index} style={styles.modalEventBox}>
-                    <Text style={{ fontWeight: 'bold' }}>{event.name}</Text>
-                    <Text>🕒 {event.time}</Text>
-                    <Text>📝 {event.description}</Text>
+              eventsForSelectedDate.map((event, index) => (
+                <View key={index} style={styles.modalEventCard}>
+                  <Text style={styles.eventTitle}>🎉 {event.title}</Text>
+                  <Text style={styles.eventDetail}>🕒 <Text style={styles.bold}>{event.time_start}</Text></Text>
+                  <Text style={styles.eventDetail}>📝 <Text style={styles.bold}>{event.description}</Text></Text>
                 </View>
-                ))
+              ))
             ) : (
-                <Text style={{ textAlign: 'center' }}>No hay eventos.</Text>
+              <Text style={{ textAlign: 'center', color: '#777' }}>No hay eventos.</Text>
             )}
-            <TouchableOpacity
-                onPress={() => setShowEventModal(false)}
-                style={styles.modalCloseButton}
-            >
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Cerrar</Text>
+
+            <TouchableOpacity onPress={() => setShowEventModal(false)} style={styles.modalCloseButton}>
+              <Text style={styles.modalCloseText}>Cerrar</Text>
             </TouchableOpacity>
-            </View>
+          </View>
         </View>
-        </Modal>
+      </Modal>
+      <TouchableOpacity
+    onPress={() => navigation.navigate('Home')}
+    style={styles.backButton}
+  >
+    <Text style={styles.backButtonText}>Volver al Home</Text>
+  </TouchableOpacity>
     </ScrollView>
-    
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
+    flexGrow: 1,
+    backgroundColor: '#F0F4F8',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 10,
     textAlign: 'center',
+    color: '#0F9997',
+    marginBottom: 20,
   },
   calendar: {
-    marginBottom: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: 'hidden',
+    marginBottom: 20,
+    elevation: 2,
+    backgroundColor: '#fff',
   },
   formSection: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
     marginBottom: 30,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: '#D0E8E6',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
+    backgroundColor: '#F9F9F9',
+    fontSize: 16,
+    color: '#333',
   },
   timeButton: {
-    backgroundColor: '#000',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#0F9997',
+    padding: 12,
+    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   timeButtonText: {
     color: '#fff',
-  },
-  selectedTime: {
-    marginBottom: 10,
+    fontWeight: 'bold',
     fontSize: 16,
   },
+  selectedTime: {
+    marginBottom: 15,
+    fontSize: 16,
+    color: '#0F9997',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   createButton: {
-    backgroundColor: '#000',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#FF5A00',
+    paddingVertical: 14,
+    borderRadius: 10,
     alignItems: 'center',
+    marginTop: 10,
   },
   createButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   backButton: {
     alignSelf: 'center',
-    marginTop: 20,
-    padding: 10,
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    backgroundColor: '#79CB3A',
+    borderRadius: 12,
+    elevation: 3,
   },
   backButtonText: {
-    color: '#4682B4',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
   modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-modalContainer: {
-  backgroundColor: '#fff',
-  padding: 20,
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    padding: 22,
+    borderRadius: 16,
+    width: '88%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#0F9997',
+  },
+  modalEventBox: {
+    borderWidth: 1,
+    borderColor: '#D0E8E6',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
+    backgroundColor: '#F4FDFD',
+  },
+  modalCloseButton: {
+    backgroundColor: '#0F9997',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  modalEventCard: {
+  backgroundColor: '#F9F9F9',
   borderRadius: 10,
-  width: '85%',
-  maxHeight: '80%',
-},
-modalTitle: {
-  fontSize: 18,
-  fontWeight: 'bold',
-  marginBottom: 10,
-  textAlign: 'center',
-},
-modalEventBox: {
+  padding: 16,
+  marginBottom: 12,
   borderWidth: 1,
-  borderColor: '#ccc',
-  borderRadius: 8,
-  padding: 10,
-  marginBottom: 10,
+  borderColor: '#D0E8E6',
+  shadowColor: '#000',
+  shadowOpacity: 0.05,
+  shadowOffset: { width: 0, height: 1 },
+  shadowRadius: 3,
+  elevation: 2,
 },
-modalCloseButton: {
-  backgroundColor: '#000',
-  padding: 10,
-  borderRadius: 8,
-  alignItems: 'center',
-  marginTop: 10,
+eventTitle: {
+  fontSize: 17,
+  fontWeight: 'bold',
+  marginBottom: 6,
+  color: '#0F9997',
+},
+eventDetail: {
+  fontSize: 15,
+  marginBottom: 4,
+  color: '#333',
+},
+bold: {
+  fontWeight: '600',
+},
+modalCloseText: {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 16,
 },
 });
+
