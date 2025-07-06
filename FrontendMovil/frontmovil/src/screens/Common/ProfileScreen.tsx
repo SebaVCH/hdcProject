@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -31,25 +32,41 @@ export default function ProfileScreen({ navigation }: Props) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [completedRoutes, setCompletedRoutes] = useState(0);
+  const [lastRouteDate, setLastRouteDate] = useState('');
+  const [registerDate, setRegisterDate] = useState('');
+  const [role, setRole] = useState('');
+  const [institution, setInstitution] = useState('');
 
   useEffect(() => {
-    const loadUserProfile = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        const res = await axios.get(`${backendUrl}/user/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setName(res.data.message.name);
-        setPhone(res.data.message.phone);
-        setEmail(res.data.message.email);
-      } catch (error) {
-        console.error('Error al cargar perfil:', error);
-        Alert.alert('Error', 'No se pudo cargar tu perfil');
-      }
-    };
+  const loadUserProfile = async () => {
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const res = await axios.get(`${backendUrl}/user/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setName(res.data.message.name);
+      setPhone(res.data.message.phone);
+      setEmail(res.data.message.email);
+      setCompletedRoutes(res.data.message.completed_routes);
+      setRegisterDate(new Date(res.data.message.date_register).toLocaleDateString('es-CL'));
+      setRole(res.data.message.role); // <-- aquí
+      setInstitution(res.data.message.institution); // <-- aquí
 
-    loadUserProfile();
-  }, []);
+      type Route = { date: string };
+      const list: Route[] = res.data.message.list_routes;
+      if (list.length > 0) {
+        const sorted = list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setLastRouteDate(new Date(sorted[0].date).toLocaleDateString('es-CL'));
+      }
+    } catch (error) {
+      console.error('Error al cargar perfil:', error);
+      Alert.alert('Error', 'No se pudo cargar tu perfil');
+    }
+  };
+
+  loadUserProfile();
+}, []);
 
   const handleSave = async () => {
     try {
@@ -89,122 +106,183 @@ export default function ProfileScreen({ navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <Text style={styles.title}>Mi Perfil</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Mi Perfil</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.label}>Nombre:</Text>
+          <TextInput
+            style={[styles.input, !isEditing && styles.readOnly]}
+            value={name}
+            onChangeText={setName}
+            editable={isEditing}
+          />
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Nombre:</Text>
-        <TextInput
-          style={[styles.input, !isEditing && styles.readOnly]}
-          value={name}
-          onChangeText={setName}
-          editable={isEditing}
-        />
+          <Text style={styles.label}>Correo:</Text>
+          <TextInput
+            style={[styles.input, !isEditing && styles.readOnly]}
+            value={email}
+            onChangeText={setEmail}
+            editable={isEditing}
+            keyboardType="email-address"
+          />
 
-        <Text style={styles.label}>Correo:</Text>
-        <TextInput
-          style={[styles.input, !isEditing && styles.readOnly]}
-          value={email}
-          onChangeText={setEmail}
-          editable={isEditing}
-          keyboardType="email-address"
-        />
+          <Text style={styles.label}>Teléfono:</Text>
+          <TextInput
+            style={[styles.input, !isEditing && styles.readOnly]}
+            value={phone}
+            onChangeText={setPhone}
+            editable={isEditing}
+            keyboardType="phone-pad"
+          />
 
-        <Text style={styles.label}>Teléfono:</Text>
-        <TextInput
-          style={[styles.input, !isEditing && styles.readOnly]}
-          value={phone}
-          onChangeText={setPhone}
-          editable={isEditing}
-          keyboardType="phone-pad"
-        />
+         <Text style={styles.label}>Rol:</Text>
+          <TextInput
+            style={[styles.input, styles.readOnly]}
+            value={role === 'admin' ? 'Admin' : 'Voluntario'}
+            editable={false}
+          />
 
-        {isEditing && (
-          <>
-            <Text style={styles.label}>Contraseña actual:</Text>
-            <TextInput
-              style={styles.input}
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry
-              placeholder="Requerida para cambiar contraseña"
-            />
+          <Text style={styles.label}>Institución:</Text>
+          <TextInput
+            style={[styles.input, styles.readOnly]}
+            value={institution}
+            editable={false}
+          />
+          {isEditing && (
+            <>
+              <Text style={styles.label}>Contraseña actual:</Text>
+              <TextInput
+                style={styles.input}
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry
+                placeholder="Requerida para cambiar contraseña"
+              />
 
-            <Text style={styles.label}>Nueva contraseña:</Text>
-            <TextInput
-              style={styles.input}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry
-            />
+              <Text style={styles.label}>Nueva contraseña:</Text>
+              <TextInput
+                style={styles.input}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry
+              />
 
-            <Text style={styles.label}>Confirmar nueva contraseña:</Text>
-            <TextInput
-              style={styles.input}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
-          </>
+              <Text style={styles.label}>Confirmar nueva contraseña:</Text>
+              <TextInput
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+              />
+            </>
+          )}
+
+          {/* Opción PRO: Solo muestra un botón relevante */}
+          {isEditing ? (
+            <TouchableOpacity
+              style={[styles.button, { marginBottom: 30 }]}
+              onPress={handleSave}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Guardando...' : 'Guardar'}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setIsEditing(true)}
+              >
+                <Text style={styles.buttonText}>Editar datos</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.homeButton}
+                onPress={() => navigation.navigate('Home')}
+              >
+                <Text style={styles.homeButtonText}>Volver al Home</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
+        {/* SOLO MUESTRA EL RESUMEN SI NO ESTÁS EDITANDO */}
+        {!isEditing && (
+          <View style={styles.activitySummary}>
+            <Text style={styles.summaryTitle}>Resumen de tu Actividad</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>🗓️ Última Ruta Realizada</Text>
+              <Text style={styles.summaryValue}>{lastRouteDate || 'Sin rutas'}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>🛣️ Cantidad de Rutas Completadas</Text>
+              <Text style={styles.summaryValue}>{completedRoutes}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>🕒 Fecha de Creación</Text>
+              <Text style={styles.summaryValue}>{registerDate}</Text>
+            </View>
+          </View>
         )}
-
-        <TouchableOpacity style={styles.button} onPress={isEditing ? handleSave : () => setIsEditing(true)}>
-          <Text style={styles.buttonText}>{isEditing ? (loading ? 'Guardando...' : 'Guardar') : 'Editar datos'}</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
-        <Text style={styles.homeButtonText}>Volver al Home</Text>
-      </TouchableOpacity>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: '#fff',
     paddingTop: 60,
-    paddingHorizontal: 30,
-    justifyContent: 'space-between',
+    paddingHorizontal: 25,
+    paddingBottom: 60,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
+    color: '#0F9997',
   },
   infoContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 10,
   },
   label: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 5,
+    fontSize: 15,
+    color: '#0F9997',
+    marginBottom: 6,
     marginTop: 15,
+    fontWeight: '600',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#aaa',
+    borderColor: '#B2DFDB',
     borderRadius: 10,
     paddingHorizontal: 15,
     height: 45,
     fontSize: 16,
+    backgroundColor: '#F9F9F9',
     color: '#000',
   },
   readOnly: {
-    backgroundColor: '#eee',
-    color: '#888',
+    backgroundColor: '#EAEAEA',
+    color: '#777',
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: '#FF5A00',
     paddingVertical: 12,
     borderRadius: 10,
-    marginTop: 25,
+    marginTop: 30,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   buttonText: {
     textAlign: 'center',
@@ -213,12 +291,44 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   homeButton: {
+    marginTop: 10,
     marginBottom: 40,
     alignSelf: 'center',
+    backgroundColor: '#79CB3A',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
   },
   homeButtonText: {
     fontSize: 16,
-    color: '#4682B4',
+    color: '#fff',
     fontWeight: 'bold',
+  },
+  activitySummary: {
+    backgroundColor: '#F0F4F8',
+    marginTop: 40,
+    padding: 20,
+    borderRadius: 10,
+    elevation: 2,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#0F9997',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#333',
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#007BFF',
   },
 });

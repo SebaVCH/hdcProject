@@ -5,9 +5,10 @@ import (
 	"backend/Backend/internal/utils"
 	"context"
 	"errors"
+	"time"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"time"
 )
 
 type AuthRepository interface {
@@ -58,7 +59,6 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 	user.Password = hashedPassword
 	user.CompletedRoutes = 0
 	user.ListRoutes = []domain.Route{}
-	user.Role = "voluntario"
 	user.DateRegister = time.Now()
 
 	res, err := a.UserCollection.Database().Collection("usuarios").InsertOne(context.TODO(), user)
@@ -68,7 +68,7 @@ func (a *authRepository) Register(user domain.Usuario) (string, error) {
 
 	usuarioID := res.InsertedID.(bson.ObjectID)
 
-	token, err := utils.GenerateToken(usuarioID.Hex(), "voluntario")
+	token, err := utils.GenerateToken(usuarioID.Hex(), user.Role)
 	if err != nil {
 		return "", err
 	}
