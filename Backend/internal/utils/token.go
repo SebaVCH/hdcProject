@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backend/Backend/internal/config"
+	"github.com/SebaVCH/hdcProject/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )

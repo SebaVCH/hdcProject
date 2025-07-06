@@ -1,7 +1,7 @@
 package main
 
 import (
-	"backend/Backend/cmd/app"
+	"github.com/SebaVCH/hdcProject/cmd/app"
 )
 
 func main() {

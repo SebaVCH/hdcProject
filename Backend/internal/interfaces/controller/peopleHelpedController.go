@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"backend/Backend/internal/usecase"
+	"github.com/SebaVCH/hdcProject/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
 

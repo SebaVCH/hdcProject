@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"backend/Backend/internal/usecase"
+	"github.com/SebaVCH/hdcProject/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,4 +29,8 @@ func (u *userController) GetUserProfile(c *gin.Context) {
 
 func (u *userController) GetUserByID(c *gin.Context) {
 	u.userUseCase.GetUserByID(c)
+}
+
+func (u *userController) GetNameByID(c *gin.Context) {
+	u.userUseCase.GetNameByID(c)
 }

@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/utils"
 	"context"
 	"errors"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -14,6 +14,7 @@ type UserRepository interface {
 	GetUserProfile(userID string) (domain.Usuario, error)
 	UpdateUserInfo(userID bson.ObjectID, userData map[string]interface{}) (domain.Usuario, error)
 	GetAllUsers() ([]domain.Usuario, error)
+	GetNameByID(id string) (map[string]string, error)
 }
 
 type userRepository struct {
@@ -37,6 +38,21 @@ func (u *userRepository) GetAllUsers() ([]domain.Usuario, error) {
 	}
 	return users, nil
 }
+
+func (u *userRepository) GetNameByID(id string) (map[string]string, error) {
+	var user domain.Usuario
+	objID, err := bson.ObjectIDFromHex(id)
+	if err != nil {
+		return map[string]string{"name": ""}, err
+	}
+
+	err = u.UserCollection.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&user)
+	if err != nil {
+		return map[string]string{"name": ""}, err
+	}
+	return map[string]string{"name": user.Name}, nil
+}
+
 func (u *userRepository) GetUserByID(id string) (domain.Usuario, error) {
 	var user domain.Usuario
 	objID, err := bson.ObjectIDFromHex(id)

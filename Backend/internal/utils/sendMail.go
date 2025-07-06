@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"backend/Backend/internal/domain"
 	"bytes"
+	"github.com/SebaVCH/hdcProject/internal/domain"
 	"gopkg.in/gomail.v2"
 	"html/template"
 	"os"
@@ -11,7 +11,7 @@ import (
 
 func SendNotificationMail(user domain.Usuario, notification domain.Aviso) error {
 
-	HTMLLoad, err := template.ParseFiles("Backend/utils/Template_Notification.html")
+	HTMLLoad, err := template.ParseFiles("internal/utils/Template_Notification.html")
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func SendNotificationMail(user domain.Usuario, notification domain.Aviso) error 
 }
 func SendRegistrationMail(user domain.Usuario, unhashedPass string) error {
 
-	HTMLLoad, err := template.ParseFiles("utils/Template_Registration.html")
+	HTMLLoad, err := template.ParseFiles("internal/utils/Template_Registration.html")
 	if err != nil {
 		return err
 	}
@@ -78,9 +78,6 @@ func SendRegistrationMail(user domain.Usuario, unhashedPass string) error {
 	}
 
 	dialer := gomail.NewDialer(os.Getenv("SMTP_HOST"), port, os.Getenv("EMAIL_FROM"), os.Getenv("EMAIL_PASS"))
-
-	print("Aca en sendMail")
-	print(dialer.DialAndSend(newMail))
 
 	return dialer.DialAndSend(newMail)
 }

@@ -126,7 +126,7 @@ export default function Home() {
                             : 
                             null
                         }
-                        <div className={"absolute bottom-16 scale-120 z-20 " + (computerDevice ? "right-16" : "right-8")}>
+                        <div className={"absolute bottom-16 z-20 " + (computerDevice ? "right-16 scale-120" : "right-8")}>
                             {!routeStatus ? 
                                 <SpeedDialCreateRoute
                                     stateOpen={[openSpeedCreateRoute, setOpenSpeedCreateRoute]}

@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/repository"
-	"backend/Backend/internal/utils"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/repository"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

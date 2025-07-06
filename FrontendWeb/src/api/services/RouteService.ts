@@ -42,6 +42,7 @@ export class RouteService {
 
         return {
             _id : data?.message?._id,
+            title : data?.message?.title,
             description : data?.message?.description,
             routeLeader : data?.message?.route_leader,
             status : data?.message?.status,

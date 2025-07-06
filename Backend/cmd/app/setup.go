@@ -1,9 +1,9 @@
 package app
 
 import (
-	"backend/Backend/internal/config"
-	"backend/Backend/internal/infrastructure/database"
-	"backend/Backend/internal/interfaces/routes"
+	"github.com/SebaVCH/hdcProject/internal/config"
+	"github.com/SebaVCH/hdcProject/internal/infrastructure/database"
+	"github.com/SebaVCH/hdcProject/internal/interfaces/routes"
 )
 
 func StartBackend() error {

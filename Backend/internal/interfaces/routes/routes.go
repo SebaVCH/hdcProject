@@ -1,11 +1,12 @@
 package routes
 
 import (
-	"backend/Backend/internal/interfaces/middleware"
+	"github.com/SebaVCH/hdcProject/internal/interfaces/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(middleware.CORSMiddleware())
 	SetupAuthRouter(r)
@@ -17,5 +18,6 @@ func SetupRouter() *gin.Engine {
 	SetupNotificationRouter(r)
 	SetupCalendarEventRouter(r)
 	SetupExportDataRouter(r)
+	SetupInstitutionRouter(r)
 	return r
 }

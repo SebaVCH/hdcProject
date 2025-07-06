@@ -1,4 +1,4 @@
-import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListItem,  ListItemText,  ListSubheader, Typography } from "@mui/material";
+import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListItem,  ListItemText,  ListSubheader, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { TRoute } from "../../api/services/RouteService";
 import ListDateItem from "./ListDateItem";
 import { THelpPoint } from "../../api/services/HelpPointService";
@@ -21,16 +21,16 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
     const [ opFecha, setOPFecha ] = stateOPFecha
     const [ onlyUser, setOnlyUser ] = stateOnlyUser
 
-
+    
     return (
         <List 
-            sx={{ width : '100%', maxHeight: "100%", bgcolor : 'background.paper', overflowY: "auto"}}
+            sx={{ width : '100%', maxHeight: "100%", bgcolor : 'background.paper', overflowY : 'auto'}}
             component={"div"}
             aria-labelledby="route-list"
             subheader={
                 <ListSubheader component={"div"} id="route-list-title" sx={{ padding : 0}}>
-                    <div className="flex flex-col gap-2 py-3 my-2">
-                        <Typography color="black" sx={{ paddingX : 3}} variant="h6">
+                    <div className={"flex flex-col gap-2 py-3 my-0 md:my-3 "}>
+                        <Typography color="black" sx={{ paddingX : 3 }} variant="h6">
                             Historial de rutas  
                         </Typography>
                         <Divider />

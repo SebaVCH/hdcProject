@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/repository"
-	"backend/Backend/internal/utils"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/repository"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -54,7 +54,7 @@ func (r routeUseCase) CreateRoute(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidString(route.Title) || !utils.IsValidString(route.Description){
+	if !utils.IsValidString(route.Title) || !utils.IsValidString(route.Description) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
 	}
@@ -163,11 +163,11 @@ func (r routeUseCase) GetMyParticipation(c *gin.Context) {
 		return
 	}
 
-	quantity, err := r.routeRepository.GetMyParticipation(userID)
+	participation, err := r.routeRepository.GetMyParticipation(userID)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener participaciones"})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": quantity})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": participation})
 }

@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"backend/Backend/internal/domain"
-	"backend/Backend/internal/utils"
 	"context"
 	"errors"
+	"github.com/SebaVCH/hdcProject/internal/domain"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"time"

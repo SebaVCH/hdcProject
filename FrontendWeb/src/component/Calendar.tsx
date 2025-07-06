@@ -4,7 +4,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useEffect, useState } from 'react'
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core'
-import { Button, IconButton, Popover, Tooltip, Typography } from '@mui/material'
+import { Button, IconButton, Popover, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import esLocale from '@fullcalendar/core/locales/es';
 import { isSingleDaySelection } from '../utils/calendar'
 import DialogCreateEventCalendar from './Dialog/DialogCreateEventCalendar'
@@ -22,6 +22,7 @@ export default function Calendar() {
     const { accessToken } = useSessionStore()
     const [selectInfo, setSelectInfo] = useState<DateSelectArg | null>(null)
     const [open, setOpen] = useState(false)
+    
     const handleDateSelect = (selectInfo: DateSelectArg) => {
         setSelectInfo(selectInfo)
         setOpen(true)
@@ -56,29 +57,32 @@ export default function Calendar() {
             }
         }
     }
+    const theme = useTheme();
+    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
 
     return (
-        <div className='flex flex-col flex-nowwrap justify-center items-start gap-5'>
-            <div className='px-10'>
+        <div className='flex flex-col w-full h-full'>
+            <div className='px-2 sm:px-10 w-full'>
                 <FullCalendar 
+                    longPressDelay={100}
                     plugins={[ dayGridPlugin, timeGridPlugin, interactionPlugin ]}
                     headerToolbar={{
-                        left: 'prev,next today',
+                        left: ( computerDevice ? 'prev,next today' : 'prev,next'),
                         center: 'title',
-                        right: 'dayGridMonth'
+                        right: ( computerDevice ? 'dayGridMonth' : '')
                     }}
                     initialView="dayGridMonth"
                     firstDay={1}
                     height="auto" 
                     contentHeight="auto"
                     selectMirror={true}
-                    dayMaxEvents={true}
+                    dayMaxEvents={(computerDevice ? true : 2)}
                     unselectAuto
                     locale={esLocale}
                     events={data?.map((event, index) => ({
                         id : event._id,
                         date : new Date(event.dateStart),
-                        title : event.title,
+                        title : ((computerDevice || event.title.length < 5) ? event.title : event.title.slice(0, 5) + '...'),
                         allDay : true,
                     }))}
                     select={handleDateSelect}
@@ -86,12 +90,11 @@ export default function Calendar() {
                     selectAllow={isSingleDaySelection}
                     displayEventTime={false}
                     eventClick={handleEventClick}
+                    dayHeaderFormat={computerDevice ? { weekday: 'long' } : { weekday: 'short' }}
+                    titleFormat={computerDevice ? { year: 'numeric', month: 'long' } : { year: 'numeric', month: 'short' }}
+                    
+                    
                 />
-            </div>
-            <div className='flex w-full justify-start items-start px-10'>
-                <Button variant='contained'>
-                    Sincronizar Con Google Calendar
-                </Button>
             </div>
             <DialogCreateEventCalendar stateOpen={[open, setOpen]} stateSelectInfo={[selectInfo, setSelectInfo]}  />
             <Popover

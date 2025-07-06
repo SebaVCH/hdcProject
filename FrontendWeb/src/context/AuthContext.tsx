@@ -20,7 +20,6 @@ export function AuthProvider({ children } : { children : React.ReactNode}) {
     const { isLoading, data, isSuccess, isError, error,  } = UserAdapter.useGetProfile(accessToken)
     
     useEffect(() => {
-        console.log("auth provider: ", data)
         if(isSuccess) {
             setRole(data.role as string)
 

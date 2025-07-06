@@ -12,12 +12,14 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import { Role } from "../api/interfaces/Enums";
 import LogoutIcon from '@mui/icons-material/Logout';
 import useSessionStore from "../stores/useSessionStore";
+import DialogLogout from "./Dialog/DialogLogout";
 
 export default function Sidebar() {
 
     const navigate = useNavigate()
     const { clearSession } = useSessionStore()
     const [ open, setOpen ] = useState(false)
+    const [ openDialogLogout, setOpenLogout ] = useState(false)
     const { role, loading } = useAuth()
 
     const handleClickOpen = () => {
@@ -43,8 +45,7 @@ export default function Sidebar() {
         navigate('/')
     }
     const onClickCerrarSesion = () => {
-        clearSession()
-        navigate('/login')
+        setOpenLogout(true)
     }
 
     return (
@@ -74,6 +75,7 @@ export default function Sidebar() {
                 <a href="https://www.hogardecristo.cl/" target="_blank" rel="noopener noreferrer"><img src={"https://hcstore.org/wp-content/uploads/2020/01/cropped-hc-192x192.png"} loading="lazy" width={45} height={45}/></a>
             </div>
             <DialogSendNotice open={open} setOpen={setOpen} />
+            <DialogLogout stateOpen={[openDialogLogout, setOpenLogout]} />
         </div>
     )
 };
