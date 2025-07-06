@@ -14,6 +14,7 @@ type UserUseCase interface {
 	GetUserProfile(c *gin.Context)
 	UpdateUserInfo(c *gin.Context)
 	GetAllUsers(c *gin.Context)
+	GetNameByID(c *gin.Context)
 }
 
 type userUseCase struct {
@@ -34,6 +35,16 @@ func (u userUseCase) GetUserByID(c *gin.Context) {
 		return
 	}
 	c.IndentedJSON(http.StatusOK, gin.H{"message": user})
+}
+
+func (u userUseCase) GetNameByID(c *gin.Context) {
+	id := c.Param("id")
+	result, err := u.userRepository.GetNameByID(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Usuario no encontrado"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{"message": result})
 }
 
 func (u userUseCase) GetUserProfile(c *gin.Context) {
