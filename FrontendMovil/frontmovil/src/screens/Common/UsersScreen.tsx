@@ -45,23 +45,27 @@ export default function UsersScreen({ navigation }: Props) {
   const [institutions, setInstitutions] = useState([
     'Hogar de cristo', 
     'UCN Pastoral', 
-    'Sagrada familia', 
-    'Otra'
+    'RED CALLE', 
+    'Otra institución'
   ]);
   const [selectedInstitution, setSelectedInstitution] = useState('');
 
   const fetchUsers = async () => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const res = await axios.get(`${backendUrl}/user/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data.message);
-    } catch (err) {
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.get(`${backendUrl}/user/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    // Ordena por nombre alfabéticamente, ignorando mayúsculas/minúsculas
+    const sortedUsers = res.data.message.sort((a, b) =>
+      a.name?.toLowerCase().localeCompare(b.name?.toLowerCase())
+    );
+    setUsers(sortedUsers);
+  } catch (err) {
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleRegisterUser = async () => {
   // Validaciones front
