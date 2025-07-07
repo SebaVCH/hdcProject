@@ -67,8 +67,8 @@ export default function Sidebar() {
                 { role === Role.admin  ?
 
                     <Tooltip title="Gestionar Usuarios">
-                        <IconButton onClick={onClickUsers}>
-                            <PeopleAltIcon htmlColor='#374151' fontSize='large' sx={{ ...hoverStyles }}/>
+                        <IconButton onClick={onClickUsers}  sx={{ ...hoverStyles }}>
+                            <PeopleAltIcon htmlColor='#374151' fontSize='large'/>
                         </IconButton>
                     </Tooltip>
                     :

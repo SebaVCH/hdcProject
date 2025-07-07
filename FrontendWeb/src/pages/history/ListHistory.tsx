@@ -1,15 +1,15 @@
 import { Checkbox, Divider, FormControl, FormControlLabel,  List,  ListItem,  ListItemText,  ListSubheader, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { TRoute } from "../../api/services/RouteService";
 import ListDateItem from "./ListDateItem";
-import { THelpPoint } from "../../api/services/HelpPointService";
 import ComboBox from "../../component/Button/ComboBox";
+import { Route } from "../../api/models/Route";
+import { HelpPoint } from "../../api/models/HelpPoint";
 
 
 
 type ListHistoryProps = {
     stateOnlyUser : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
-    stateRoutes : [ Map<string, TRoute[]>, React.Dispatch<React.SetStateAction<Map<string, TRoute[]>>> ]
-    stateHelpPoints : [ THelpPoint[], React.Dispatch<React.SetStateAction<THelpPoint[]>> ] 
+    stateRoutes : [ Map<string, Route[]>, React.Dispatch<React.SetStateAction<Map<string, Route[]>>> ]
+    stateHelpPoints : [ HelpPoint[], React.Dispatch<React.SetStateAction<HelpPoint[]>> ] 
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocation : [ number[], React.Dispatch<React.SetStateAction<number[]>> ] 
     stateOPFecha : [ string, React.Dispatch<React.SetStateAction<string>> ]

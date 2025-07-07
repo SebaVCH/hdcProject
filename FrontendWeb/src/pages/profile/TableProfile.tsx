@@ -9,6 +9,8 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ResumeItem from "./ResumeItem";
 import { useAuth } from "../../context/AuthContext";
 import { IUser } from "../../api/models/User";
+import { format } from "date-fns";
+import { useUserParticipation } from "../../api/hooks/UserHooks";
 
 type TableProfileProps = {
      stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
@@ -23,6 +25,8 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
      const [ user, setUser ] = stateUser
      const [ resumen, setResumen ] = stateResumenActividad
      const [ , setHasChange ] = stateHasChanges
+
+     const helpPoints = useUserParticipation(user.id).data?.total_helpingpoints
 
      const onChangeName = (name : string) => {
           setHasChange(true)
@@ -115,26 +119,26 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                     <Paper elevation={2} className="flex items-start justify-start py-4 flex-col gap-4 border border-neutral-300">
                          <ResumeItem 
                               icon={<EventAvailableIcon color="action" />} 
-                              activityDescription={<Typography variant="button" color="textSecondary"> última Ruta realizada</Typography>}
+                              activityDescription={<Typography variant="button" color="textSecondary">Última ruta realizada</Typography>}
                               activityValue={<Typography variant="button" color="info">{resumen.lastRouteDate}</Typography>}
                          />
                          <Divider className="w-full" />
                          <ResumeItem
                               icon={<RouteIcon color='secondary' />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Rutas Completadas</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Rutas completadas</Typography>}
                               activityValue={<Typography variant="body1" color='info'>{resumen.amountCompletedRoutes}</Typography>}
                          />
                          <Divider  className="w-full" /> 
                          <ResumeItem
                               icon={<QuestionAnswerIcon color="info" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Registros Completados</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>2</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Puntos de ayuda registrados</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>{helpPoints}</Typography>}
                          />  
                          <Divider className="w-full" />   
                          <ResumeItem
                               icon={<HowToRegIcon color="success" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Fecha Creación de la cuenta</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>20-03-2025</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Miembro desde</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>{format(user.dateRegister, 'dd-MM-yyyy')}</Typography>}
                          />                                              
                     </Paper>
                </div>

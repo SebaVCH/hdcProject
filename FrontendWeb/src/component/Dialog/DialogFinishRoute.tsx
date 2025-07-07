@@ -70,7 +70,7 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
                         isPending ? 
                         <CircularProgress />
                         :
-                        <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                        <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='standard' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
                             {isSuccess ? 'Se Finalizo la ruta éxitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
                         </Alert>
                     }

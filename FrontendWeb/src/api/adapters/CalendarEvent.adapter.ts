@@ -1,4 +1,5 @@
 import { CalendarEvent } from "../models/Calendar"
+import { InstitutionService } from "../services/InstitutionService"
 import { UserService } from "../services/UserService"
 
 export type TCalendarEventBackend = {
@@ -13,7 +14,7 @@ export type TCalendarEventBackend = {
 
 export type TCalendarEventCreateRequest = Omit<
     TCalendarEventBackend,
-    '_id' | 'author_id'
+    '_id'
 >
 
 export type TCalendarEventUpdateRequest = TCalendarEventBackend
@@ -21,15 +22,27 @@ export type TCalendarEventUpdateRequest = TCalendarEventBackend
 export async function MapCalendarEventFromBackend(
     data: Partial<TCalendarEventBackend>
 ): Promise<CalendarEvent> {
+
+    let authorName = 'Usuario Eliminado'
+    let colorInstitution = '#000000'
+    try {
+        const user = (await UserService.FindUserById(data.author_id as string))
+        colorInstitution = (await InstitutionService.FindByID(user.institutionID)).color
+        authorName = user.name
+    } catch(e) {
+        console.log(e)
+    }
+
     const event: Partial<CalendarEvent> = {
         id: data._id,
         title: data.title,
         description: data.description,
-        DateStart: data.date_start ? new Date(data.date_start) : undefined,
+        dateStart: data.date_start ? new Date(data.date_start) : undefined,
         authorID: data.author_id,
-        authorName: (await UserService.FindUserById(data.author_id as string)).name,
+        authorName: authorName,
         timeStart: data.time_start,
         timeEnd: data.time_end,
+        colorInstitution : colorInstitution
     }
     Object.entries(event).forEach(([key, value]) => {
         if (value === undefined) {
@@ -40,14 +53,15 @@ export async function MapCalendarEventFromBackend(
 }
 
 export function MapCalendarEventToCreateRequest(
-    data: Omit<CalendarEvent, 'id' | 'authorID' | 'authorName'>
+    data: Omit<CalendarEvent, 'id' | 'authorName' | 'colorInstitution'>
 ): TCalendarEventCreateRequest {
     return {
         title: data.title,
         description: data.description,
-        date_start: data.DateStart.toISOString(),
+        date_start: data.dateStart.toISOString(),
         time_start: data.timeStart,
         time_end: data.timeEnd,
+        author_id: data.authorID
     }
 }
 
@@ -58,7 +72,7 @@ export function MapCalendarEventToUpdateRequest(
         _id: data.id,
         title: data.title,
         description: data.description,
-        date_start: data.DateStart.toISOString(),
+        date_start: data.dateStart.toISOString(),
         author_id: data.authorID,
         time_start: data.timeStart,
         time_end: data.timeEnd,

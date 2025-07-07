@@ -19,7 +19,7 @@ export function useLogin() {
 
 export function useRegister() {
     return useMutation({
-        mutationFn: ( user : Pick<IUser, 'email' | 'password' | 'phone' | 'institutionID' | 'name'>) => (UserService.Register(MapUserToCreateRequest(user)))
+        mutationFn: ( user : Pick<IUser, 'email' | 'password' | 'phone' | 'institutionID' | 'name' | 'role'>) => (UserService.Register(MapUserToCreateRequest(user)))
     })
 }
 
@@ -57,6 +57,13 @@ export function useUser( id : string) {
     return useQuery({
         queryKey : ['findUserId', id],
         queryFn : () => (UserService.FindUserById(id)),
+    })
+}
+
+export function useUserParticipation( id: string) {
+    return useQuery({
+        queryKey: ['participation', id],
+        queryFn: () => (UserService.GetParticipationUser(id))
     })
 }
 

@@ -51,7 +51,7 @@ export default function Profile() {
             const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
             setResumenActividad({...resumenActividad, 
                 amountCompletedRoutes : routes.length, 
-                lastRouteDate : routes.length != 0 ? format(routes[0].dateFinished, "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
+                lastRouteDate : routes.length != 0 ? format(routes[0].dateCreated, "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
             })
         } 
 

@@ -4,22 +4,20 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { useEffect, useState } from 'react'
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core'
-import { Button, IconButton, Popover, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { IconButton, Popover, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import esLocale from '@fullcalendar/core/locales/es';
 import { isSingleDaySelection } from '../utils/calendar'
 import DialogCreateEventCalendar from './Dialog/DialogCreateEventCalendar'
-import useSessionStore from '../stores/useSessionStore'
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+//import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useCalendarEvents } from '../api/hooks/CalendarEventHooks'
+import { useCalendarEvents, useDeleteCalendarEvent } from '../api/hooks/CalendarEventHooks'
 import { CalendarEvent } from '../api/models/Calendar'
 
 export default function Calendar() {
 
-    const { accessToken } = useSessionStore()
     const [selectInfo, setSelectInfo] = useState<DateSelectArg | null>(null)
     const [open, setOpen] = useState(false)
     
@@ -28,7 +26,10 @@ export default function Calendar() {
         setOpen(true)
     };
 
-    const { isError, isPending, isSuccess, data, error} = useCalendarEvents()
+    const { isError, isPending, isSuccess, data, error, refetch} = useCalendarEvents()
+    const deleteQuery = useDeleteCalendarEvent() 
+    const mutate = deleteQuery.mutate
+
     
     const [ eventClicked, setEventClicked ] = useState<CalendarEvent | undefined>(undefined)
     const [ anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -43,10 +44,18 @@ export default function Calendar() {
     }
 
     useEffect(() => {
+        console.log(error)
         if(isSuccess) {
             console.log("aca en calendar: ", data)
         }
     }, [data])
+
+    useEffect(() => {
+        if(deleteQuery.data) {
+            handleCloseEventView()
+            refetch()
+        }
+    }, [deleteQuery.data])
 
     const handleEventClick = (clickInfo : EventClickArg) => {
         setAnchorEl(clickInfo.el)
@@ -72,6 +81,7 @@ export default function Calendar() {
                         right: ( computerDevice ? 'dayGridMonth' : '')
                     }}
                     initialView="dayGridMonth"
+                    timeZone='local'
                     firstDay={1}
                     height="auto" 
                     contentHeight="auto"
@@ -81,9 +91,10 @@ export default function Calendar() {
                     locale={esLocale}
                     events={data?.map((event, index) => ({
                         id : event.id,
-                        date : event.DateStart,
+                        start : event.dateStart.toISOString().slice(0, 10),
                         title : ((computerDevice || event.title.length < 5) ? event.title : event.title.slice(0, 5) + '...'),
                         allDay : true,
+                        color: event.colorInstitution
                     }))}
                     select={handleDateSelect}
                     selectable={true}
@@ -125,13 +136,20 @@ export default function Calendar() {
                 <div className="flex flex-row justify-end items-center py-3 px-5">
                     <div className='flex flex-row gap-5'>
                         <div className='flex flex-row gap-1'>
-                            <Tooltip title={'Eliminar Evento'}>
+                            {
+                            /*
+                            <Tooltip title={'Editar Evento'}>
                                 <IconButton>
                                     <EditIcon htmlColor="black" fontSize="small" />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title={'Editar Evento'}>
-                                <IconButton>
+                            */
+                            }
+                            <Tooltip title={'Eliminar Evento'}>
+                                <IconButton onClick={() => {
+                                    if(eventClicked === undefined) return
+                                    mutate(eventClicked.id)
+                                }}>
                                     <DeleteIcon htmlColor="black" fontSize="small" />
                                 </IconButton>
                             </Tooltip>
@@ -151,8 +169,8 @@ export default function Calendar() {
                                 {eventClicked.title}
                             </Typography>
                             <Typography variant='inherit'>
-                                {format(eventClicked.DateStart, "EEEE, dd 'de' MMMM", { locale : es})}
-                                <Typography variant='caption' fontSize={12}>
+                                {format(eventClicked.dateStart, "EEEE, dd 'de' MMMM", { locale : es})}
+                                <Typography variant='caption' fontSize={12} sx={{ color : 'text.secondary'}}>
                                     {`, a las ${eventClicked.timeStart} hasta ${eventClicked.timeEnd}`}
                                 </Typography>
                             </Typography>
@@ -161,7 +179,12 @@ export default function Calendar() {
                                     {eventClicked?.description}
                                 </Typography>
                             </div>
-
+                            <Typography 
+                            variant="caption" 
+                            sx={{ fontStyle: 'italic', color: 'text.secondary' }}
+                            >
+                            Creado por {eventClicked.authorName}
+                            </Typography>
                         </div>
                         :
                         <div>

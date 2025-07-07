@@ -1,3 +1,4 @@
+import { RiskStatus } from "../../Enums/RiskStatus"
 import { Risk } from "../models/Risk"
 
 
@@ -5,7 +6,7 @@ export type TRiskBackend = {
     _id : string 
     author_id : string 
     coords : number[]
-    Status : string
+    Status : RiskStatus
     date_register : string 
     description : string
 }

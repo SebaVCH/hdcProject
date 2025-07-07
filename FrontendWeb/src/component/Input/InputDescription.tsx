@@ -8,7 +8,7 @@ interface InputDescriptionProps extends Omit<TextFieldProps, 'onChange' | 'value
 }
 
 
-export default function InputDescription({ value, onChange, maxLength, ...props} : InputDescriptionProps) {
+export default function InputDescription({ value, onChange, maxLength, helperText, ...props} : InputDescriptionProps) {
     
 
     const handleOnChange = (e : React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +23,7 @@ export default function InputDescription({ value, onChange, maxLength, ...props}
             multiline
             value={value}
             onChange={handleOnChange}
-            helperText={<span className={(value ? value.length : 0) >= maxLength ? 'text-red-500' : ''}>{value ? value.length : 0} de {maxLength}</span>}
+            helperText={<span className={(value ? value.length : 0) >= maxLength ? 'text-red-500' : ''}>{value ? value.length : 0} de {maxLength} {helperText}</span>}
         />
     )
 };

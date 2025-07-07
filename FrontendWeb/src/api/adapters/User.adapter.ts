@@ -26,7 +26,8 @@ export type TRegisterRequest = Pick<TUserBackend,
     'password' |
     'phone' | 
     'institutionID' | 
-    'name'
+    'name' |
+    'role'
 >
 
 export type TUpdateUserRequest = Pick<TUserBackend,
@@ -71,10 +72,11 @@ export function MapUserToLoginRequest(data : Pick<IUser, 'email' | 'password'>) 
 
 export function MapUserToCreateRequest( data : 
     Pick<IUser, 
-        'email' |
-        'password' |
-        'phone' | 
+        'email'         |
+        'password'      |
+        'phone'         | 
         'institutionID' | 
+        'role'          |
         'name'>
     ) : TRegisterRequest {
         return {
@@ -83,6 +85,7 @@ export function MapUserToCreateRequest( data :
             password : data.password,
             phone : data.phone,
             institutionID : data.institutionID,
+            role: data.role
         }
 }
 

@@ -6,19 +6,26 @@ export type TNoticeBackend = {
     author_id: string;
     description: string;
     created_at: string;
-    sendEmail: boolean;
+    send_email: boolean;
 }
 export type TNoticeCreateRequest = Omit<TNoticeBackend, '_id' | 'created_at'>;
 export type TNoticeUpdateRequest = TNoticeBackend;
 
 export async function MapNoticeFromBackend(data: TNoticeBackend): Promise<Notice> {
+
+    let authorName = 'Usuario Eliminado'
+    try {
+        authorName = (await UserService.FindUserById(data.author_id as string)).name
+    } catch(e) {
+        console.log(e)
+    }
     const notice: Partial<Notice> = {
         id: data._id,
         authorID: data.author_id,
         description: data.description,
         createdAt: data.created_at ? new Date(data.created_at) : undefined,
-        sendEmail: data.sendEmail,
-        authorName : (await UserService.FindUserById(data.author_id)).name
+        sendEmail: data.send_email,
+        authorName : authorName
     };
 
     Object.entries(notice).forEach(([key, value]) => {
@@ -35,7 +42,7 @@ export function MapNoticeToCreateRequest(
     return {
         author_id: data.authorID,
         description: data.description,
-        sendEmail: data.sendEmail
+        send_email: data.sendEmail
     }
 }
 
@@ -47,6 +54,6 @@ export function MapNoticeToUpdateRequest(
         author_id: data.authorID,
         description: data.description,
         created_at: data.createdAt.toISOString(),
-        sendEmail: data.sendEmail
+        send_email: data.sendEmail
     }
 }

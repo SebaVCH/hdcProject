@@ -31,7 +31,7 @@ const headCells: readonly HeadCell[] = [
     label: 'Email',
   }, {
     id: 'institutionID',
-    align : 'center',
+    align : 'left',
     disablePadding : false,
     label: 'Institución'
   },
@@ -149,11 +149,15 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </div>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={onDeleteUsers}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
+        <>
+        {/*
+          <Tooltip title="Delete">
+            <IconButton onClick={onDeleteUsers}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        */}
+        </>
       ) : (
         <>
         </>

@@ -263,7 +263,7 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                         <CircularProgress size={70} />
                     </div>
                     :
-                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='standard' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
                             {isSuccess ? 'Se Creo el registro exitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
                     </Alert>
                 }

@@ -47,7 +47,7 @@ func (n notificationUseCase) CreateNotification(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"Aviso": notification})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": notification})
 }
 
 func (n notificationUseCase) DeleteNotification(c *gin.Context) {

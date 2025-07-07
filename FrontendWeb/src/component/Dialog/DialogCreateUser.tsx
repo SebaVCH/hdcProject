@@ -6,7 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { FormControl, Input, InputLabel, Typography } from '@mui/material';
+import { FormControl, FormHelperText, Input, InputLabel, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { isValidEmail } from '../../utils/verifyInput';
 import { useRegister } from '../../api/hooks/UserHooks';
@@ -78,6 +78,7 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
 
     useEffect(() => {
         if(data || isSuccess) {
+            
             setTimeout(() => {
                 handleOnClose()
             }, 1000)
@@ -85,33 +86,33 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
     }, [data, isSuccess])
 
     const validateForm = () => {
-        if(user.name !== '') {
+        if(user.name === '') {
             setInputError({... inputError, name : 'Debe ingresar un nombre al usuario'})
             return false
         }
-        if(user.email !== '') {
+        if(user.email === '') {
             setInputError({...inputError, email: 'Debe ingresar el correo del usuario'})
             return false
         }
-        if(user.phone !== '') {
+        if(user.phone === '') {
             setInputError({...inputError, phone : 'Debe ingresar el teléfono del usuario'})
             return false
         }
-        if(user.institutionID !== '') {
+        if(user.institutionID === '') {
             setInputError({...inputError, institutionID : 'Debe seleccionar una institución'})
             return false 
         }
+        if(user.role === '') {
+            setInputError({...inputError, role : 'Debes seleccionar un rol para el usuario' })
+            return false
+        }
+        setInputError({name: '', email: '', institutionID:'', role: '', phone: ''})
         return true
     }
 
     const handleUserRegister = () => {
-
         setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
-        }, 600)
-
-        if(!validateForm) return
+        if(!validateForm()) return
         mutate({
             ...user,
             password: Math.random().toString(36).slice(-8)
@@ -119,6 +120,7 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
     }
 
     const handleOnClose = () => {
+        setLoading(false)
         setInputError({name :'', email : '', phone : '', institutionID : '', role: ''})
         reset()
         setOpen(false)
@@ -153,14 +155,17 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
                             <FormControl variant="standard" required error={inputError.name !== ''} className='rounded-b-sm border border-gray-600'>
                                 <InputLabel htmlFor="nombres-input" shrink>Nombre Completo</InputLabel>
                                 <Input onBlur={handleInputChange('name')} onChange={handleInputChange('name')} id="nombres-input" placeholder="Ingresa el Nombre Completo" />
+                                <FormHelperText error={inputError.name !== ''}>{inputError.name}</FormHelperText>
                             </FormControl>
                              <FormControl variant="standard" required error={inputError.email !== ''} className='rounded-b-sm border border-gray-600'>
                                 <InputLabel htmlFor="email-input" shrink>Correo Electrónico</InputLabel>
                                 <Input onBlur={handleInputChange('email')} onChange={handleInputChange('email')} id="email-input" placeholder="Ingresa el Correo Electrónico" />
+                                <FormHelperText error={inputError.email !== ''}>{inputError.email}</FormHelperText>
                             </FormControl>
                             <FormControl variant="standard" required error={inputError.phone !== ''} className='rounded-b-sm border border-gray-600'>
                                 <InputLabel htmlFor="phone-input" shrink>Teléfono</InputLabel>
                                 <Input onBlur={handleInputChange('phone')} onChange={handleInputChange('phone')} id="phone-input" placeholder="Ingresa el Número de Teléfono" />
+                                <FormHelperText error={inputError.phone !== ''}>{inputError.phone}</FormHelperText>
                             </FormControl>
                             <div className="flex gap-4">
                                 <div className="flex-1">
@@ -185,11 +190,12 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
                                             setUser({ ...user, institutionID: inst.id });
                                         }}
                                     />
+                                    <FormHelperText error={inputError.institutionID !== ''}>{inputError.institutionID}</FormHelperText>
                                     </FormControl>
                                 </div>
 
                                 <div className="w-1/4">
-                                    <FormControl variant="standard" fullWidth>
+                                    <FormControl required variant="standard" fullWidth>
                                         <InputLabel htmlFor='rol-input' shrink>Rol</InputLabel>
                                         <ComboBox
                                             fullWidth
@@ -199,11 +205,13 @@ export default function DialogCreateUser({ open, setOpen } : { open : boolean, s
                                             options={Object.values(Role)}
                                             onChange={(e, v) => {
                                                 const role = v as Role;
+                                                console.log(role)
                                                 if (!role) return;
                                                 setUser({ ...user, role: role });
                                             }}
                                         />
                                     </FormControl>
+                                    <FormHelperText error={inputError.role !== ''}>{inputError.role}</FormHelperText>
                                 </div>
                             </div>
 

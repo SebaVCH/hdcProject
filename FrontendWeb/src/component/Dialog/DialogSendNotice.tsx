@@ -6,12 +6,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControlLabel, TextField } from '@mui/material';
+import { Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import useSessionStore from '../../stores/useSessionStore';
-import { useCreateNotice } from '../../api/hooks/NoticeHooks';
+import { useCreateNotice, useNotices, useNoticesMap } from '../../api/hooks/NoticeHooks';
 import { Notice } from '../../api/models/Notice';
 import { useProfile } from '../../api/hooks/UserHooks';
+import InputDescription from '../Input/InputDescription';
+import CloseDialogButton from '../Button/CloseDialogButton';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -30,35 +31,57 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
         authorID : '',
         sendEmail : false
     })
-    const { isError, mutate, data } = useCreateNotice()
-    const useQueryResult = useProfile()
+
+    const [ noticeError, setNoticeError ] = useState({
+        description: '',
+        authorID: '',
+    })
+
+    const { isError, mutate, data, isSuccess } = useCreateNotice()
+    const { refetch } = useNoticesMap()
+
+    const authorID = useProfile().data?.id
 
     const onChangeTextField = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault()
         setNotice({ ...notice, description : e.target.value})
     }
 
+    const clearStates = () => {
+        setNotice({description: '', authorID: '', sendEmail : false})
+        setNoticeError({description: '', authorID: ''})
+    }
+
     const handleClose = () => {
+        clearStates()
         setOpen(false);
     }
 
+    const validateForm = () => {
+        if(notice.description === '') {
+            setNoticeError({...noticeError, description: 'Escribe un mensaje para enviar la notificación'})
+            return false
+        }
+        if(!authorID) {
+            setNoticeError({...noticeError, authorID: 'Ha ocurrido un error inesperado. Intenta más tarde'})
+            return false 
+        }
+        return true
+    }
+
     const onPostNotice = () => {
-        mutate(notice)
-        handleClose()
+        if(!validateForm()) return 
+        mutate({...notice, authorID: authorID as string})
+        setTimeout(() => {
+            handleClose()
+        }, 600)
     }
 
     useEffect(() => {
-        console.log(data)
-    }, [data])
-
-    useEffect(() => {
-        if(useQueryResult.data) {
-            setNotice(prev => ({
-                ...prev,
-                authorId: useQueryResult.data.id
-            }))
+        if(isSuccess){
+            refetch()
         }
-    }, [useQueryResult.data])
+    }, [isSuccess])
 
     return (
         <>
@@ -71,32 +94,28 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
                 <DialogTitle className='m-0 p-2' id="aviso-titulo">
                     Enviar Un Aviso
                 </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={(theme) => ({
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: theme.palette.grey[600],
-                    })}
-                    >
-                    <CloseIcon />
-                </IconButton>
-                <DialogContent dividers className='flex flex-col gap-5'>
-                    <TextField  
+                <CloseDialogButton handleClose={handleClose}/>
+                <DialogContent className='flex flex-col gap-5'>
+                    <InputDescription  
+                        maxLength={256}   
+                        variant='standard'                
                         label="Mensaje"
                         multiline
                         fullWidth
                         size="small"
-                        placeholder="Escribe el mensaje" 
-                        type={"text"} 
+                        placeholder="Escribe el mensaje"
+                        type={"text"}
                         value={notice.description}
                         onChange={onChangeTextField}
+                        error={noticeError.description !== ''}
+                        helperText={noticeError.description}
                     />
                     <div className='flex justify-start'>
-                        <FormControlLabel label="Enviar por Email" control={<Checkbox />}/>
+                        <FormControlLabel label="Enviar por Email" control={<Checkbox  checked={notice.sendEmail} onChange={(e) => {setNotice({...notice, sendEmail: e.target.checked})}}/>}/>
                     </div>
+                    <Typography color='error'>
+                        {noticeError.authorID}
+                    </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button variant='contained' onClick={onPostNotice}>

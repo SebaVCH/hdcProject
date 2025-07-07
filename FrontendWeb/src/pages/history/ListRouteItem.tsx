@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react"
-import { TRoute } from "../../api/services/RouteService"
 import { ListItemButton, ListItemText, Collapse, List, ListItemButtonProps, ListItem, IconButton, Fade } from "@mui/material"
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { THelpPoint } from "../../api/services/HelpPointService";
 import EditIcon from '@mui/icons-material/Edit';
 import { useHelpPointUpdateDialog } from "../../context/HelpPointUpdateContext";
+import { HelpPoint } from "../../api/models/HelpPoint";
+import { Route } from "../../api/models/Route";
 
 type ListRouteItemProps = {
-    route : TRoute
-    stateHelpPoints : [ THelpPoint[], React.Dispatch<React.SetStateAction<THelpPoint[]>> ]
+    route : Route
+    stateHelpPoints : [ HelpPoint[], React.Dispatch<React.SetStateAction<HelpPoint[]>> ]
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocation : [ number[], React.Dispatch<React.SetStateAction<number[]>> ] 
     openRoot : boolean
@@ -19,7 +19,7 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
     
     const [ open, setOpen ] = useState(openRoot)
     const [ helpPoints, setHelpPoints ] = stateHelpPoints
-    const [ hpRoutes, setHPRoutes ] = useState<THelpPoint[]>([])
+    const [ hpRoutes, setHPRoutes ] = useState<HelpPoint[]>([])
 
     const [ _, setHelpPointUpdate ] = useHelpPointUpdateDialog()
 
@@ -42,8 +42,8 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
     }
 
     useEffect(() => {
-        setHPRoutes(helpPoints.reduce<THelpPoint[]>((acc: THelpPoint[], hp) => {
-            if(hp.routeId == route._id) {
+        setHPRoutes(helpPoints.reduce<HelpPoint[]>((acc: HelpPoint[], hp) => {
+            if(hp.routeID == route.id) {
                 acc.push(hp)
             }
             return acc
@@ -52,14 +52,14 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
 
     useEffect(() => {
         setHelpPoints(prev => prev.map((hp) => {
-            if( route._id === hp.routeId) {
+            if( route.id === hp.routeID) {
                 hp.disabled = !open || !openRoot
             }
             return hp
         }))
         return () => {
             setHelpPoints(prev => prev.map((hp) => {
-                if(route._id === hp.routeId) {
+                if(route.id === hp.routeID) {
                     hp.disabled = true
                 }
                 return hp

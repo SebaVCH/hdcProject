@@ -9,14 +9,20 @@ export class CalendarService {
 
     static async GetEvents() : Promise<CalendarEvent[]> {
         const { data } = await axiosInstance.get(`/${this.RESOURCE_NAME}`)
-        return await Promise.all((data?.message as TCalendarEventBackend[]).map(async (event, _) => (
+        console.log(data)
+        return await Promise.all((data as TCalendarEventBackend[]).map(async (event, _) => (
            await MapCalendarEventFromBackend(event as TCalendarEventBackend) 
         )))
     }
 
     static async AddEvent( event : TCalendarEventCreateRequest) : Promise<CalendarEvent> {
         const { data } = await axiosInstance.post(`/${this.RESOURCE_NAME}`, event)
-        return await MapCalendarEventFromBackend(data?.message as TCalendarEventBackend)
+        return await MapCalendarEventFromBackend(data as TCalendarEventBackend)
+    }
+
+    static async DeleteEvent( eventID : string) : Promise<string> {
+        const { data } = await axiosInstance.delete(`/${this.RESOURCE_NAME}/${eventID}`)
+        return data?.message
     }
 
 } 

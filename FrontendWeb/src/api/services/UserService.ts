@@ -4,8 +4,10 @@ import { axiosInstance } from "./axiosInstance"
 
 
 
-
-
+export type TParticipationRespone = {
+    total_routes : number,
+    total_helpingpoints : number
+}
 
 
 export class UserService {
@@ -40,5 +42,10 @@ export class UserService {
     static async FindUserById(id : string) : Promise<IUser> {
         const { data } = await axiosInstance.get(`/user/${id}`)
         return MapUserFromBackend(data?.message as TUserBackend)
+    }
+
+    static async GetParticipationUser(id : string) : Promise<TParticipationRespone> {
+        const { data } = await axiosInstance.get(`/route/participation/${id}`)
+        return data?.message as TParticipationRespone
     }
 } 
