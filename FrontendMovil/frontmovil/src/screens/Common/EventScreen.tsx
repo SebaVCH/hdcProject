@@ -1,15 +1,8 @@
 // EventScreen.tsx
 import React, { useState, useEffect } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  Modal,
-  Platform,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert,
+  ScrollView, Modal, Platform,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -22,7 +15,6 @@ import { RootStackParamList } from '../../navigation/RootStack';
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Event'>;
 };
-
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
 const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
@@ -37,16 +29,58 @@ export default function EventScreen({ navigation }: Props) {
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
 
+  const [institutions, setInstitutions] = useState<{ [id: string]: { name: string, color: string } }>({});
+  const [userCache, setUserCache] = useState<{ [id: string]: any }>({}); // cache de usuarios por id
+
   const API = `${backendUrl}/calendar-event`;
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('accessToken');
-    if (!token) {
-      console.warn('No se encontró token');
-    }
+    if (!token) console.warn('No se encontró token');
     return token;
   };
 
+  // Cargar todas las instituciones y crear el mapa id → { name, color }
+  const loadInstitutions = async () => {
+    const token = await getToken();
+    if (!token) return;
+
+    try {
+      // Ojo: Si tienes auth de admin, cambia endpoint a uno público si es posible
+      const res = await axios.get(`${backendUrl}/institution/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const arr = res.data.message || [];
+      const map: { [id: string]: { name: string, color: string } } = {};
+      arr.forEach((inst: any) => {
+        map[inst._id] = { name: inst.name, color: inst.color };
+      });
+      setInstitutions(map);
+    } catch (err) {
+      console.error('Error al obtener instituciones:', err);
+    }
+  };
+
+  // Cargar usuario por id y guardar en cache
+  const getUserById = async (userId: string) => {
+    if (userCache[userId]) return userCache[userId];
+
+    const token = await getToken();
+    if (!token) return null;
+    try {
+      const res = await axios.get(`${backendUrl}/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const user = res.data.message;
+      setUserCache(prev => ({ ...prev, [userId]: user }));
+      return user;
+    } catch (err) {
+      console.error('Error al obtener usuario:', err);
+      return null;
+    }
+  };
+
+  // Cargar eventos, usuarios autores y marcar fechas por color de institución
   const loadEvents = async () => {
     const token = await getToken();
     if (!token) return;
@@ -57,16 +91,62 @@ export default function EventScreen({ navigation }: Props) {
       });
 
       const allEvents = Array.isArray(res.data) ? res.data : [];
-      const marked = {};
+      const marked: any = {};
+      const userIdSet = new Set<string>();
 
-      allEvents.forEach((event) => {
-        const date = new Date(event.date_start).toISOString().split('T')[0];
-        marked[date] = {
-          marked: true,
-          dotColor: '#0F9997', // puedes cambiar esto dinámicamente si tienes info de institución
-        };
+      // 1. Junta todos los authorIDs únicos
+      allEvents.forEach((event: any) => {
+        if (event.author_id) userIdSet.add(event.author_id);
+        else if (event.authorID) userIdSet.add(event.authorID); // según tu modelo
       });
 
+      // 2. Carga todos los usuarios (solo los necesarios)
+      const userArr = Array.from(userIdSet);
+      const usersById: { [id: string]: any } = { ...userCache };
+
+      await Promise.all(
+        userArr.map(async (id) => {
+          if (!usersById[id]) {
+            const user = await getUserById(id);
+            if (user) usersById[id] = user;
+          }
+        })
+      );
+
+      setUserCache(usersById); // Actualiza el cache global
+
+      // 3. Marca las fechas usando el color de la institución del usuario autor
+      allEvents.forEach((event: any) => {
+        const date = new Date(event.date_start).toISOString().split('T')[0];
+        const authorId = event.author_id || event.authorID;
+        const user = usersById[authorId];
+        let instId = user?.institution;
+        let dotColor = institutions[instId]?.color || '#0F9997';
+
+        // Por si aún no se ha cargado institutions, fallback por nombre
+        if (!dotColor && user?.institution_name && institutions) {
+          const instEntry = Object.values(institutions).find(inst => inst.name === user.institution_name);
+          if (instEntry) dotColor = instEntry.color;
+        }
+
+        // MULTI-DOT: si hay varios eventos en una fecha, muestra varios dots
+        if (marked[date]) {
+          if (!marked[date].dots) {
+            marked[date].dots = [{ color: marked[date].dotColor || '#0F9997' }];
+          }
+          if (!marked[date].dots.some((d: any) => d.color === dotColor)) {
+            marked[date].dots.push({ color: dotColor });
+          }
+        } else {
+          marked[date] = {
+            marked: true,
+            dotColor: dotColor,
+            dots: [{ color: dotColor }]
+          };
+        }
+      });
+
+      // Si tienes seleccionada una fecha, márcala
       if (selectedDate) {
         marked[selectedDate] = {
           ...(marked[selectedDate] || {}),
@@ -81,7 +161,8 @@ export default function EventScreen({ navigation }: Props) {
     }
   };
 
-  const handleDatePress = async (day) => {
+  // Al seleccionar día, carga eventos del día
+  const handleDatePress = async (day: any) => {
     const date = day.dateString;
     setSelectedDate(date);
 
@@ -99,6 +180,7 @@ export default function EventScreen({ navigation }: Props) {
     }
   };
 
+  // Crear evento (puedes agregar la institución si la necesitas en el modelo)
   const handleCreateEvent = async () => {
     if (!eventName || !selectedDate) {
       Alert.alert('Faltan datos', 'Debes ingresar nombre y fecha del evento.');
@@ -134,8 +216,17 @@ export default function EventScreen({ navigation }: Props) {
   };
 
   useEffect(() => {
-    loadEvents();
-  }, [selectedDate]);
+    (async () => {
+      await loadInstitutions();
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      await loadEvents();
+    })();
+    // eslint-disable-next-line
+  }, [selectedDate, institutions]);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -144,6 +235,7 @@ export default function EventScreen({ navigation }: Props) {
       <Calendar
         onDayPress={handleDatePress}
         markedDates={markedDates}
+        markingType={'multi-dot'}
         style={styles.calendar}
       />
 
@@ -198,7 +290,7 @@ export default function EventScreen({ navigation }: Props) {
             <Text style={styles.modalTitle}>📅 Eventos del {selectedDate}</Text>
 
             {eventsForSelectedDate.length > 0 ? (
-              eventsForSelectedDate.map((event, index) => (
+              eventsForSelectedDate.map((event: any, index: number) => (
                 <View key={index} style={styles.modalEventCard}>
                   <Text style={styles.eventTitle}>🎉 {event.title}</Text>
                   <Text style={styles.eventDetail}>🕒 <Text style={styles.bold}>{event.time_start}</Text></Text>
@@ -215,15 +307,19 @@ export default function EventScreen({ navigation }: Props) {
           </View>
         </View>
       </Modal>
+
       <TouchableOpacity
-    onPress={() => navigation.navigate('Home')}
-    style={styles.backButton}
-  >
-    <Text style={styles.backButtonText}>Volver al Home</Text>
-  </TouchableOpacity>
+        onPress={() => navigation.navigate('Home')}
+        style={styles.backButton}
+      >
+        <Text style={styles.backButtonText}>Volver al Home</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
+
+// ...Tus estilos aquí...
+
 
 const styles = StyleSheet.create({
   container: {
@@ -337,13 +433,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#0F9997',
   },
-  modalEventBox: {
+  modalEventCard: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#D0E8E6',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 10,
-    backgroundColor: '#F4FDFD',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  eventTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: '#0F9997',
+  },
+  eventDetail: {
+    fontSize: 15,
+    marginBottom: 4,
+    color: '#333',
+  },
+  bold: {
+    fontWeight: '600',
   },
   modalCloseButton: {
     backgroundColor: '#0F9997',
@@ -352,37 +467,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  modalEventCard: {
-  backgroundColor: '#F9F9F9',
-  borderRadius: 10,
-  padding: 16,
-  marginBottom: 12,
-  borderWidth: 1,
-  borderColor: '#D0E8E6',
-  shadowColor: '#000',
-  shadowOpacity: 0.05,
-  shadowOffset: { width: 0, height: 1 },
-  shadowRadius: 3,
-  elevation: 2,
-},
-eventTitle: {
-  fontSize: 17,
-  fontWeight: 'bold',
-  marginBottom: 6,
-  color: '#0F9997',
-},
-eventDetail: {
-  fontSize: 15,
-  marginBottom: 4,
-  color: '#333',
-},
-bold: {
-  fontWeight: '600',
-},
-modalCloseText: {
-  color: '#fff',
-  fontWeight: 'bold',
-  fontSize: 16,
-},
+  modalCloseText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
-

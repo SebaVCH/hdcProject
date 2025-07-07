@@ -32,6 +32,24 @@ type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Home'>;
 };
 
+type RiskMarker = {
+  latitude: number;
+  longitude: number;
+  description: string;
+  date?: string;
+  id?: string;
+};
+
+type HelpMarker = {
+  latitude: number;
+  longitude: number;
+  name?: string;
+  age?: number;
+  gender?: string;
+  date?: string;
+  id?: string;
+};
+
 export default function HomeScreen({ navigation }: Props) {
   // Estados principales
   const [menuVisible, setMenuVisible] = useState(false);
@@ -39,9 +57,9 @@ export default function HomeScreen({ navigation }: Props) {
   const [alertLog, setAlertLog] = useState<string[]>([]);
   const [alertModalVisible, setAlertModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
-
-  const [riskMarkers, setRiskMarkers] = useState<{ latitude: number; longitude: number; description: string }[]>([]);
-  const [helpMarkers, setHelpMarkers] = useState<{ latitude: number; longitude: number; description: string }[]>([]);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [riskMarkers, setRiskMarkers] = useState<RiskMarker[]>([]);
+  const [helpMarkers, setHelpMarkers] = useState<HelpMarker[]>([]);
   const [joinRouteVisible, setJoinRouteVisible] = useState(false);
   const [invitationCode, setInvitationCode] = useState('');
 
@@ -103,6 +121,11 @@ export default function HomeScreen({ navigation }: Props) {
     if (typeof id === "string") return id;
     if (typeof id === "object" && id.$oid) return id.$oid;
     return undefined;
+  };
+
+  const handleRiskDeleted = (id) => {
+    setRiskMarkers(risks => risks.filter(r => r.id !== id));
+    // No llames a fetchRisks() aquí
   };
 
   // Notificaciones
@@ -170,51 +193,62 @@ export default function HomeScreen({ navigation }: Props) {
 
   // Riesgos
   const fetchRisks = async () => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const res = await axios.get(`${backendUrl}/risk`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const risksArray = Array.isArray(res.data.message) ? res.data.message : [];
-      const formatted = risksArray.map((r: any) => ({
-        latitude: r.coords[0],
-        longitude: r.coords[1],
-        description: r.description || 'Riesgo sin descripción',
-      }));
-      setRiskMarkers(formatted);
-    } catch (err) {
-      console.error('Error al obtener riesgos:', err);
-    }
-  };
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.get(`${backendUrl}/risk`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const risksArray = Array.isArray(res.data.message) ? res.data.message : [];
+    const formatted = risksArray.map((r: any) => ({
+      latitude: r.coords[0],
+      longitude: r.coords[1],
+      description: r.description || 'Riesgo sin descripción',
+      date: r.date_register,
+      id: r._id,
+    }));
+    setRiskMarkers(formatted);
+  } catch (err) {
+    console.error('Error al obtener riesgos:', err);
+  }
+};
 
   // Puntos de ayuda
   const fetchHelpPoints = async () => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const res = await axios.get(`${backendUrl}/helping-point`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const helpArray = Array.isArray(res.data.message) ? res.data.message : [];
-      const formatted = helpArray.map((h: any) => ({
-        latitude: h.coords[0],
-        longitude: h.coords[1],
-        description: 'Punto de ayuda',
-      }));
-      setHelpMarkers(formatted);
-    } catch (err) {
-      console.error('Error al obtener puntos de ayuda:', err);
-    }
-  };
+  try {
+    const token = await AsyncStorage.getItem('accessToken');
+    const res = await axios.get(`${backendUrl}/helping-point`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const helpArray = Array.isArray(res.data.message) ? res.data.message : [];
+    const formatted = helpArray.map((h: any) => ({
+      latitude: h.coords[0],
+      longitude: h.coords[1],
+      name: h.people_helped?.name ?? '',
+      age: h.people_helped?.age ?? 0,
+      gender: h.people_helped?.gender ?? '',
+      date: h.people_helped?.date,           // <- la fecha del punto de ayuda
+      id: h._id,                             // <- el ID del punto de ayuda
+    }));
+    setHelpMarkers(formatted);
+  } catch (err) {
+    console.error('Error al obtener puntos de ayuda:', err);
+  }
+};
 
   // --- Efectos y focus ---
   useFocusEffect(
-    React.useCallback(() => {
+  React.useCallback(() => {
+    const fetchInitialData = async () => {
+      const role = await AsyncStorage.getItem('userRole');
+      setUserRole(role);
       fetchAllNotifications();
       fetchAlerts();
       fetchRisks();
       fetchHelpPoints();
-    }, [])
-  );
+    };
+    fetchInitialData();
+  }, [])
+);
 
   // --- Acciones ---
   const handleSendAlert = async () => {
@@ -247,7 +281,7 @@ export default function HomeScreen({ navigation }: Props) {
     { label: 'Eventos', route: 'Event' },
     { label: 'Rutas', route: 'Route' },
     { label: 'Historial', route: 'History' },
-    { label: 'Usuarios', route: 'Users' },
+     ...(userRole === 'admin' ? [{ label: 'Usuarios', route: 'Users' }] : []),
   ];
 
   const handleNavigate = (route: keyof RootStackParamList) => {
@@ -335,6 +369,7 @@ export default function HomeScreen({ navigation }: Props) {
           key={[...riskMarkers, ...helpMarkers].map(m => `${m.latitude}-${m.longitude}`).join(',')}
           riskMarkers={riskMarkers}
           helpMarkers={helpMarkers}
+          onRiskDeleted={handleRiskDeleted}
         />
       </View>
 

@@ -57,10 +57,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
     if (tokens?.accessToken) {
       try {
         const decoded: any = jwt_decode(tokens.accessToken);
+        console.log('DECODED JWT:', decoded);
         const userId = decoded.user_id;
+        const user_Role = decoded.user_role; // <--- así se obtiene el rol del JWT
 
         await AsyncStorage.setItem('accessToken', tokens.accessToken);
         await AsyncStorage.setItem('userId', userId);
+        await AsyncStorage.setItem('userRole', user_Role);
 
         navigation.navigate('Home');
       } catch (error) {

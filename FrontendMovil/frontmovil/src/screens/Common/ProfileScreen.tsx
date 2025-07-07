@@ -32,41 +32,62 @@ export default function ProfileScreen({ navigation }: Props) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [completedRoutes, setCompletedRoutes] = useState(0);
+
+  // Resumen actividad
   const [lastRouteDate, setLastRouteDate] = useState('');
   const [registerDate, setRegisterDate] = useState('');
   const [role, setRole] = useState('');
   const [institution, setInstitution] = useState('');
+  const [helpingPointsCount, setHelpingPointsCount] = useState(0);
+  const [routesCount, setRoutesCount] = useState(0);
 
   useEffect(() => {
-  const loadUserProfile = async () => {
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      const res = await axios.get(`${backendUrl}/user/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setName(res.data.message.name);
-      setPhone(res.data.message.phone);
-      setEmail(res.data.message.email);
-      setCompletedRoutes(res.data.message.completed_routes);
-      setRegisterDate(new Date(res.data.message.date_register).toLocaleDateString('es-CL'));
-      setRole(res.data.message.role); // <-- aquí
-      setInstitution(res.data.message.institution); // <-- aquí
+    const loadAllProfileData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        const res = await axios.get(`${backendUrl}/user/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      type Route = { date: string };
-      const list: Route[] = res.data.message.list_routes;
-      if (list.length > 0) {
-        const sorted = list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setLastRouteDate(new Date(sorted[0].date).toLocaleDateString('es-CL'));
+        setName(res.data.message.name || '');
+        setPhone(res.data.message.phone || '');
+        setEmail(res.data.message.email || '');
+        setRegisterDate(
+          res.data.message.date_register
+            ? new Date(res.data.message.date_register).toLocaleDateString('es-CL')
+            : ''
+        );
+        setRole(res.data.message.role || '');
+        setInstitution(res.data.message.institution || '');
+
+        // Buscar última ruta si existe
+        const list: { date: string }[] = res.data.message.list_routes || [];
+        if (list.length > 0) {
+          const sorted = list.sort(
+            (a, b) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+          setLastRouteDate(new Date(sorted[0].date).toLocaleDateString('es-CL'));
+        }
+
+        // Obtener datos de participación
+        const userId = res.data.message._id || res.data.message.id || res.data.message.user_id;
+        if (userId) {
+          const participationRes = await axios.get(
+            `${backendUrl}/route/participation/${userId}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setHelpingPointsCount(participationRes.data.message.total_helpingpoints || 0);
+          setRoutesCount(participationRes.data.message.total_routes || 0);
+        }
+      } catch (error) {
+        console.error('Error al cargar perfil o participación:', error);
+        Alert.alert('Error', 'No se pudo cargar tu perfil');
       }
-    } catch (error) {
-      console.error('Error al cargar perfil:', error);
-      Alert.alert('Error', 'No se pudo cargar tu perfil');
-    }
-  };
+    };
 
-  loadUserProfile();
-}, []);
+    loadAllProfileData();
+  }, []);
 
   const handleSave = async () => {
     try {
@@ -75,17 +96,13 @@ export default function ProfileScreen({ navigation }: Props) {
         Alert.alert('Error', 'Las contraseñas no coinciden');
         return;
       }
-
       const token = await AsyncStorage.getItem('accessToken');
-      const updateData: any = {
-        name,
-        phone,
-        email,
-      };
+      const updateData: any = { name, phone };
 
       if (currentPassword && newPassword && confirmPassword) {
-        updateData.old_password = currentPassword;
-        updateData.new_password = newPassword;
+        updateData.currentPassword = currentPassword;
+        updateData.newPassword = newPassword;
+        updateData.confirmNewPassword = confirmPassword;
       }
 
       await axios.put(`${backendUrl}/user/update`, updateData, {
@@ -99,14 +116,21 @@ export default function ProfileScreen({ navigation }: Props) {
       Alert.alert('Éxito', 'Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error al guardar perfil:', error);
-      Alert.alert('Error', 'No se pudo actualizar tu perfil');
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        Alert.alert('Error', error.response.data.error);
+      } else {
+        Alert.alert('Error', 'No se pudo actualizar tu perfil');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
@@ -124,11 +148,9 @@ export default function ProfileScreen({ navigation }: Props) {
 
           <Text style={styles.label}>Correo:</Text>
           <TextInput
-            style={[styles.input, !isEditing && styles.readOnly]}
+            style={[styles.input, styles.readOnly]}
             value={email}
-            onChangeText={setEmail}
-            editable={isEditing}
-            keyboardType="email-address"
+            editable={false}
           />
 
           <Text style={styles.label}>Teléfono:</Text>
@@ -140,7 +162,7 @@ export default function ProfileScreen({ navigation }: Props) {
             keyboardType="phone-pad"
           />
 
-         <Text style={styles.label}>Rol:</Text>
+          <Text style={styles.label}>Rol:</Text>
           <TextInput
             style={[styles.input, styles.readOnly]}
             value={role === 'admin' ? 'Admin' : 'Voluntario'}
@@ -153,6 +175,7 @@ export default function ProfileScreen({ navigation }: Props) {
             value={institution}
             editable={false}
           />
+
           {isEditing && (
             <>
               <Text style={styles.label}>Contraseña actual:</Text>
@@ -182,7 +205,6 @@ export default function ProfileScreen({ navigation }: Props) {
             </>
           )}
 
-          {/* Opción PRO: Solo muestra un botón relevante */}
           {isEditing ? (
             <TouchableOpacity
               style={[styles.button, { marginBottom: 30 }]}
@@ -211,7 +233,6 @@ export default function ProfileScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* SOLO MUESTRA EL RESUMEN SI NO ESTÁS EDITANDO */}
         {!isEditing && (
           <View style={styles.activitySummary}>
             <Text style={styles.summaryTitle}>Resumen de tu Actividad</Text>
@@ -220,8 +241,12 @@ export default function ProfileScreen({ navigation }: Props) {
               <Text style={styles.summaryValue}>{lastRouteDate || 'Sin rutas'}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>🛣️ Cantidad de Rutas Completadas</Text>
-              <Text style={styles.summaryValue}>{completedRoutes}</Text>
+              <Text style={styles.summaryLabel}>🛣️ Rutas en las que participaste</Text>
+              <Text style={styles.summaryValue}>{routesCount}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>👥 Personas Registradas</Text>
+              <Text style={styles.summaryValue}>{helpingPointsCount}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>🕒 Fecha de Creación</Text>

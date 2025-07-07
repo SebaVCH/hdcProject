@@ -21,15 +21,25 @@ const InitialScreen = ({ navigation }: InitialScreenProps) => {
   return (
     <View style={styles.outerContainer}>
       <View style={styles.innerContainer}>
-        <TouchableOpacity onPress={handleLogoPress}>
+        <View style={styles.logoContainer}>
           <Image
             source={require('../../assets/logoHdc.png')}
-            style={styles.logo}
+            style={styles.logoImage}
             resizeMode="contain"
           />
+          <Image
+            source={require('../../assets/LogoOficial.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+        </View>
+
+        <TouchableOpacity onPress={handleLogoPress}>
+          <Text style={styles.title}>Bienvenido a RED CALLE</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Bienvenido a RED CALLE</Text>
+
         <Text style={styles.subtitle}>Hecho con ❤️ por DevSync</Text>
+
         <TouchableOpacity
           style={styles.startButton}
           onPress={() => navigation.navigate('Login')}
@@ -58,10 +68,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 10,
   },
-  logo: {
-    width: 150,
-    height: 150,
+  logoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     marginBottom: 20,
+  },
+  logoSmall: {
+    width: 100,
+    height: 100,
   },
   title: {
     fontSize: 24,
@@ -82,10 +97,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   subtitle: {
-  fontSize: 16,
-  color: '#00796B',
-  marginBottom: 20,
+    fontSize: 16,
+    color: '#00796B',
+    marginBottom: 20,
   },
+  logoContainer: {
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: 20, 
+  marginBottom: 30,
+},
+logoImage: {
+  width: 120,
+  height: 120,
+},
 });
 
 export default InitialScreen;

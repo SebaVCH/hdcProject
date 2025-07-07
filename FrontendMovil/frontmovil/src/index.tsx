@@ -1,7 +1,7 @@
 import { createTheme, ThemeProvider } from '@rneui/themed';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootStackNavigation from './navigation/RootStack';
-import Toast from 'react-native-toast-message'; // <-- Importa el Toast
+import Toast from 'react-native-toast-message'; 
 
 const theme = createTheme({
   lightColors: {
@@ -24,7 +24,7 @@ const App = () => {
     <SafeAreaProvider>
       <ThemeProvider theme={theme}>
         <RootStackNavigation />
-        <Toast /> {/* <-- Agrega Toast aquí */}
+        <Toast /> 
       </ThemeProvider>
     </SafeAreaProvider>
   );

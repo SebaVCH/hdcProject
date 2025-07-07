@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -16,6 +17,7 @@ import Constants from 'expo-constants';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/RootStack';
+import Icon from 'react-native-vector-icons/FontAwesome'; // <--- IMPORTANTE
 
 const rawUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_URL_BACKEND || '';
 const backendUrl = Platform.OS === 'android' ? rawUrl.replace('localhost', '10.0.2.2') : rawUrl;
@@ -28,11 +30,13 @@ export default function HistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'day' | 'week' | 'month' | 'all'>('all');
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
   const [editedDescription, setEditedDescription] = useState('');
   const [editedStatus, setEditedStatus] = useState('');
   const [userId, setUserId] = useState('');
-  const [showOnlyMine, setShowOnlyMine] = useState(true); // ✅ Por defecto: solo mis rutas
+  const [role, setRole] = useState(''); // <--- GUARDAMOS ROL
+  const [showOnlyMine, setShowOnlyMine] = useState(true);
   const [expandedRoutes, setExpandedRoutes] = useState<{ [key: string]: boolean }>({});
   const [helpPointsByRoute, setHelpPointsByRoute] = useState<{ [key: string]: any[] }>({});
 
@@ -40,6 +44,9 @@ export default function HistoryScreen() {
     const init = async () => {
       const id = await AsyncStorage.getItem('userId');
       setUserId(id || '');
+      // Cargamos el rol si está en AsyncStorage
+      const userRole = await AsyncStorage.getItem('role');
+      setRole(userRole || '');
       fetchRoutes();
     };
     init();
@@ -60,20 +67,19 @@ export default function HistoryScreen() {
   };
 
   const fetchPeopleHelped = async (routeId: string) => {
-  try {
-    const token = await AsyncStorage.getItem('accessToken');
-    const res = await axios.get(`${backendUrl}/helping-point`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const filtered = res.data.message.filter(
-      (point: any) => point.route_id === routeId
-    );
-    setHelpPointsByRoute(prev => ({ ...prev, [routeId]: filtered }));
-  } catch (error) {
-    console.error('Error al obtener personas ayudadas:', error);
-  }
-};
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      const res = await axios.get(`${backendUrl}/helping-point`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const filtered = res.data.message.filter(
+        (point: any) => point.route_id === routeId
+      );
+      setHelpPointsByRoute(prev => ({ ...prev, [routeId]: filtered }));
+    } catch (error) {
+      console.error('Error al obtener personas ayudadas:', error);
+    }
+  };
 
   const applyFilter = () => {
     const now = new Date();
@@ -108,12 +114,31 @@ export default function HistoryScreen() {
   };
 
   const toggleExpand = (routeId: string) => {
-  const alreadyExpanded = expandedRoutes[routeId];
-  if (!alreadyExpanded && !helpPointsByRoute[routeId]) {
-    fetchPeopleHelped(routeId);
-  }
-  setExpandedRoutes(prev => ({ ...prev, [routeId]: !alreadyExpanded }));
-};
+    const alreadyExpanded = expandedRoutes[routeId];
+    if (!alreadyExpanded && !helpPointsByRoute[routeId]) {
+      fetchPeopleHelped(routeId);
+    }
+    setExpandedRoutes(prev => ({ ...prev, [routeId]: !alreadyExpanded }));
+  };
+
+  // --- ELIMINAR RUTA ---
+  const handleDelete = async () => {
+    if (!selectedRoute) return;
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      await axios.delete(`${backendUrl}/route/${selectedRoute._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setDeleteModalVisible(false);
+      setSelectedRoute(null);
+      await fetchRoutes();
+      Alert.alert('Ruta eliminada correctamente');
+    } catch (error: any) {
+      setDeleteModalVisible(false);
+      setSelectedRoute(null);
+      Alert.alert('Error al eliminar ruta', error?.response?.data?.error || 'Inténtalo nuevamente');
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -131,60 +156,78 @@ export default function HistoryScreen() {
       setEditModalVisible(false);
       setSelectedRoute(null);
       await fetchRoutes();
+      Alert.alert('Ruta editada correctamente');
     } catch (error) {
-      console.error('Error al guardar cambios:', error);
+      setEditModalVisible(false);
+      setSelectedRoute(null);
+      Alert.alert('Error al editar la ruta');
     }
   };
-
+  // --- ITEM CON BOTÓN BASURERO ---
   const renderItem = ({ item }: any) => (
-  <View style={styles.routeItem}>
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <Text style={styles.description}>📍 {item.description}</Text>
-      <TouchableOpacity
-        onPress={() => {
-          setSelectedRoute(item);
-          setEditedDescription(item.description);
-          setEditedStatus(item.status);
-          setEditModalVisible(true);
-        }}
-      >
-        <Text style={styles.options}>⋯</Text>
-      </TouchableOpacity>
-    </View>
-    <Text style={styles.detail}>
-      Fecha: {new Date(item.date_created).toLocaleString()}
-    </Text>
-    <Text style={styles.detail}>Código: {item.invite_code || 'N/A'}</Text>
-    <Text style={styles.detail}>Estado: {item.status}</Text>
-
-    {/* 🔽 FLECHA PARA EXPANDIR / COLAPSAR */}
-    <TouchableOpacity onPress={() => toggleExpand(item._id)}>
-      <Text style={{ color: '#4682B4', marginTop: 5 }}>
-        {expandedRoutes[item._id] ? '▲ Ocultar personas registradas' : '▼ Ver personas registradas'}
-      </Text>
-    </TouchableOpacity>
-
-    {/* 👥 PERSONAS REGISTRADAS */}
-    {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length > 0 && (
-      <View style={{ marginTop: 10 }}>
-        {helpPointsByRoute[item._id].map((point, index) => (
-          <View key={index} style={{ paddingLeft: 10, marginBottom: 5 }}>
-            <Text style={{ fontSize: 13 }}>👤 Edad: {point.people_helped.age} | Género: {point.people_helped.gender}</Text>
-            <Text style={{ fontSize: 12, color: '#666' }}>
-              Fecha: {new Date(point.date_register).toLocaleString()}
-            </Text>
-          </View>
-        ))}
+    <View style={styles.routeItem}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Text style={styles.description}>📍 {item.description}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {/* --- BOTÓN BASURERO SIEMPRE VISIBLE, o SOLO SI ADMIN --- */}
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedRoute(item);
+              setDeleteModalVisible(true);
+            }}
+            style={{ paddingHorizontal: 8 }}
+          >
+            <Icon name="trash" size={22} color="#FF5A00" />
+          </TouchableOpacity>
+          {/* Si también quieres dejar la edición, puedes dejar el lápiz aquí
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedRoute(item);
+              setEditedDescription(item.description);
+              setEditedStatus(item.status);
+              setEditModalVisible(true);
+            }}
+            style={{ paddingHorizontal: 8 }}
+          >
+            <Icon name="edit" size={22} color="#0F9997" />
+          </TouchableOpacity>
+          */}
+        </View>
       </View>
-    )}
-
-    {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length === 0 && (
-      <Text style={{ fontSize: 13, fontStyle: 'italic', color: '#999', marginTop: 5 }}>
-        No hay personas registradas en esta ruta.
+      <Text style={styles.detail}>
+        Fecha: {new Date(item.date_created).toLocaleString()}
       </Text>
-    )}
-  </View>
-);
+      <Text style={styles.detail}>Código: {item.invite_code || 'N/A'}</Text>
+      <Text style={styles.detail}>Estado: {item.status}</Text>
+
+      {/* 🔽 FLECHA PARA EXPANDIR / COLAPSAR */}
+      <TouchableOpacity onPress={() => toggleExpand(item._id)}>
+        <Text style={{ color: '#4682B4', marginTop: 5 }}>
+          {expandedRoutes[item._id] ? '▲ Ocultar personas registradas' : '▼ Ver personas registradas'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* 👥 PERSONAS REGISTRADAS */}
+      {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length > 0 && (
+        <View style={{ marginTop: 10 }}>
+          {helpPointsByRoute[item._id].map((point, index) => (
+            <View key={index} style={{ paddingLeft: 10, marginBottom: 5 }}>
+              <Text style={{ fontSize: 13 }}>👤 Edad: {point.people_helped.age} | Género: {point.people_helped.gender}</Text>
+              <Text style={{ fontSize: 12, color: '#666' }}>
+                Fecha: {new Date(point.date_register).toLocaleString()}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {expandedRoutes[item._id] && helpPointsByRoute[item._id]?.length === 0 && (
+        <Text style={{ fontSize: 13, fontStyle: 'italic', color: '#999', marginTop: 5 }}>
+          No hay personas registradas en esta ruta.
+        </Text>
+      )}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -208,7 +251,6 @@ export default function HistoryScreen() {
             </Text>
           </TouchableOpacity>
         ))}
-
         <TouchableOpacity
           style={[styles.filterButton, showOnlyMine && styles.filterButtonActive]}
           onPress={() => setShowOnlyMine(!showOnlyMine)}
@@ -234,7 +276,25 @@ export default function HistoryScreen() {
         <Text style={styles.backText}>Volver al Inicio</Text>
       </TouchableOpacity>
 
-      {/* Modal de edición */}
+      {/* MODAL DE CONFIRMACIÓN DE ELIMINAR */}
+      <Modal visible={deleteModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>¿Seguro que deseas eliminar esta ruta?</Text>
+            <Text style={{ color: '#555', marginBottom: 18 }}>{selectedRoute?.description}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleDelete}>
+                <Text style={styles.saveButton}>Eliminar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setDeleteModalVisible(false)}>
+                <Text style={styles.cancelButton}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de edición, si quieres mantenerlo */}
       {selectedRoute && (
         <Modal visible={editModalVisible} animationType="slide" transparent>
           <View style={styles.modalOverlay}>
