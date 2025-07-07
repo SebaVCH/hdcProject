@@ -81,7 +81,7 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
                             <ListItem 
                                 key={index} 
                                 sx={{ padding : 0}}
-                                secondaryAction={
+                                /*secondaryAction={
                                     <Fade in={selectedIndex === index}>
                                         <IconButton edge="end" aria-label="Editar Punto Ayuda" onClick={() => {
                                             if(selectedIndex === index) {
@@ -92,6 +92,7 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
                                         </IconButton>
                                     </Fade>
                                 }
+                                */
                             >
                                 <ListItemButton
                                     

@@ -13,7 +13,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
 import useSessionStore from '../../stores/useSessionStore';
 import { LocationMethod } from '../../Enums/LocationMethod';
-import { useCreateRisk } from '../../api/hooks/RiskHooks';
+import { useCreateRisk, useRisks } from '../../api/hooks/RiskHooks';
 import { RiskStatus } from '../../Enums/RiskStatus';
 import { useProfile } from '../../api/hooks/UserHooks';
 
@@ -51,6 +51,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
     const [ error, setError ] = useState<string | undefined>()
 
     const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useCreateRisk()
+    const { refetch } = useRisks()
 
 
     const handleCurrentLocation = async () => {
@@ -116,6 +117,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
 
     useEffect(() => {
         if(isSuccess) {
+            refetch()
             setTimeout(() => {
                 handleClose()
             }, 2000)   

@@ -9,7 +9,7 @@ import CloseDialogButton from '../Button/CloseDialogButton';
 import { useRiskUpdateDialog } from '../../context/RiskUpdateContext';
 import InputDescription from '../Input/InputDescription';
 import { RiskStatus } from '../../Enums/RiskStatus';
-import { useUpdateRisk } from '../../api/hooks/RiskHooks';
+import { useRisks, useUpdateRisk } from '../../api/hooks/RiskHooks';
 import { useEffect } from 'react';
 import { Alert, CircularProgress } from '@mui/material';
 
@@ -29,6 +29,7 @@ export default function DialogUpdateRisk() {
 
     const [ risk, setRisk ] = useRiskUpdateDialog() /*Context Provider */
     const { isSuccess, isPending, isError, isIdle, mutate, error, reset } = useUpdateRisk()
+    const { refetch } = useRisks()
     
     const clearStates = () => {
         reset()
@@ -46,6 +47,7 @@ export default function DialogUpdateRisk() {
 
     useEffect(() => {
         if(isSuccess) {
+            refetch()
             setTimeout(() => {
                 handleClose()
             }, 1000)
@@ -99,7 +101,7 @@ export default function DialogUpdateRisk() {
                         <CircularProgress size={70} />
                     </div>           
                     :
-                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='standard' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
                             {isSuccess ? 'Se modifico el riesgo exitosamente' : isError ? `Hubo un error al intentar modificar el riesgo: ${(error as any).error}` : 'Error desconocido'}
                     </Alert>        
                 }

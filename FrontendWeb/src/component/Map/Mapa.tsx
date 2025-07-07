@@ -106,11 +106,13 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                     <Marker key={helpPoint.id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
                         <Popup >
                             <div className="flex flex-col items-center justify-center gap-2">
+                                <b>Nombre: {helpPoint.peopleHelped.name === '' ? 'Sin Especificar' : helpPoint.peopleHelped.name}</b>
+                                <Divider className="w-full" />
                                 <b>Edad: {helpPoint.peopleHelped.age === -1 ? 'N/A' : helpPoint.peopleHelped.age}</b>
                                 <Divider className="w-full"  variant='middle'/>
                                 <b>Género: {helpPoint.peopleHelped?.gender ?? 'Sin Especificar'}</b>
                                 <Divider className="w-full"  variant='middle'/>
-                                <b>Fecha: {format(helpPoint.dateRegister, 'dddd-MM-YYYY', {locale : es}) ?? 'error'}</b>
+                                <b>Fecha: {format(helpPoint.dateRegister, 'dd-MM-yyyy', {locale : es}) ?? 'error'}</b>
                             </div>
                         </Popup>
                     </Marker>

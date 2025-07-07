@@ -13,7 +13,9 @@ import getCurrentLocation, { Position } from '../../utils/getCurrentLocation';
 import useSessionStore from '../../stores/useSessionStore';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { LocationMethod } from '../../Enums/LocationMethod';
-import { useCreateHelpPoint } from '../../api/hooks/HelpPointHooks';
+import { useCreateHelpPoint, useHelpPoints } from '../../api/hooks/HelpPointHooks';
+import { TUserRegister } from '../../pages/home';
+import { useProfile } from '../../api/hooks/UserHooks';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -30,22 +32,28 @@ export type DialogCreateAttendedProps = {
     stateOpen : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
     stateOnSelectLocationMap : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocationMethod : [ LocationMethod, React.Dispatch<React.SetStateAction<LocationMethod>> ]
+    stateAttended : [ TUserRegister, React.Dispatch<React.SetStateAction<TUserRegister>>]
     location : Position
 }
 
 
-export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationMap, location, stateLocationMethod } : DialogCreateAttendedProps) {
+export default function DialogCreateAttended({ stateAttended, stateOpen, stateOnSelectLocationMap, location, stateLocationMethod } : DialogCreateAttendedProps) {
 
-
+    const authorID = useProfile().data?.id
     const { accessToken, routeId } = useSessionStore()
     const [ open, setOpen ] = stateOpen
     const [ _, setOnSelectLocationMap ] = stateOnSelectLocationMap
 
-    const [ gender, setGender ] = useState<string>('Sin Especificar')
-    const [ name, setName ] = useState<string>('Sin Especificar')
-    const [ age, setAge ] = useState<number>(-1)
-    const [ city, setCity ] = useState<string>('Sin Especificar')
-    const [ nationality, setNationality ] = useState<string>('Sin Especificar') 
+    const [ attendedP, setAttendedP] = stateAttended
+
+    const gender = attendedP.gender
+    const name = attendedP.name
+    const age = attendedP.age
+
+    const setName = (name: string) => setAttendedP(prev => ({ ...prev, name }))
+    const setAge = (age: number) => setAttendedP(prev => ({ ...prev, age }))
+    const setGender = (gender: string) => setAttendedP(prev => ({ ...prev, gender }))
+
     const [ coords, setCoords ] = useState<number[]>([])
 
     const [ locationMethod, setLocationMethod ] = stateLocationMethod
@@ -53,6 +61,7 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
     const [ error, setError ] = useState<string | undefined>()
 
     const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useCreateHelpPoint()
+    const { refetch } = useHelpPoints()
 
 
 
@@ -88,16 +97,15 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
         }
     }, [coords])
 
+    useEffect(() => {
+        console.log(attendedP.name)
+    }, [])
+
 
 
 
     const clearStates = () => {
         reset()
-        setName('Sin Especificar')
-        setGender('Sin Especificar')
-        setAge(-1)
-        setCity('Sin Especificar')
-        setNationality('Sin Especificar')
         setCoords([])
         setCreateButtonDisable(true)
         setLocationMethod(LocationMethod.None)
@@ -113,6 +121,9 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
             alert('no hay coordenadas registradas')
             return
         }
+        if(!authorID) {
+            alert('ha ocurrido un error inesperado')
+        }
         mutate({
             routeID: (routeId as string), // cambiar luego
             coords: coords,
@@ -122,13 +133,15 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                 gender,
                 id: ''
             },
-            authorID: '',
+            authorID: authorID as string,
             disabled: false
         })
     }
 
     useEffect(() => {
         if(isSuccess) {
+            refetch()
+            setAttendedP({name: 'Sin Especificar', gender: 'Sin Especificar', age: -1})
             setTimeout(() => {
                 handleClose()
             }, 2000)
@@ -163,8 +176,8 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                                 fullWidth
                                 id="name" 
                                 variant='standard'
-                                defaultValue='Sin Especificar'
-                                onChange={(e) => {setName(e.target.value)}}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
                                 label='Nombre '
                                 slotProps={{
                                     inputLabel: {
@@ -181,6 +194,7 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                                 onChange={(e) => {setAge(Number(e.target.value))}}
                                 label='edad'
                                 type='number'
+                                value={age}
                                 slotProps={{
                                     inputLabel: {
                                         shrink: true,
@@ -192,29 +206,11 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                             <ComboBox 
                                 className='grow'
                                 label={'Género'} 
+                                value={gender}
                                 onChange={(e, value) => {setGender(value as string)}}
                                 options={['Hombre', 'Mujer', 'Sin Especificar']}  
                                 defaultValue={'Sin Especificar'}                          
                             />  
-                        </div>
-                        <div className='flex grow'>
-                            <ComboBox 
-                                className='grow'
-                                label={'Ciudad de Origen'} 
-                                onChange={(e, value) => {setCity(value as string)}}
-                                options={['Santiago', 'La Serena', 'Coquimbo']}  
-                                defaultValue={'Coquimbo'}                          
-                            
-                            />
-                        </div>
-                        <div className='flex grow'>
-                            <ComboBox
-                                className='grow'
-                                label='Nacionalidad'
-                                onChange={(e, value) => {setNationality(value as string)}}
-                                options={['Chile', 'Perú']}
-                                defaultValue={'Chile'}
-                            />
                         </div>
                         <div className='flex flex-col gap-2'>
                             <Typography>Seleccionar Ubicación</Typography>
@@ -253,7 +249,7 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
                                 </Button>
                             </div>
                             <Alert severity={error ? 'error' : coords.length != 0 ? 'success' : 'warning'}> 
-                                {error ? error : coords.length != 0 ? 'Ubicación Completada' : ' Necesitas Seleccionar un opción'}
+                                {error ? error : coords.length != 0 ? 'Ubicación Completada' : 'Selecciona una opción para establecer la ubicación'}
                             </Alert>
                         </div>
                     </form>

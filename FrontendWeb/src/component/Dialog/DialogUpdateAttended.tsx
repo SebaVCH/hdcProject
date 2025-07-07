@@ -35,7 +35,7 @@ export default function DialogUpdateAtended() {
     const [ nationality, setNationality ] = useState('') 
 
 
-    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useUpdateHelpPoint()
+    const { mutate, data, isError, isSuccess, isPending, isIdle, reset, error } = useUpdateHelpPoint()
 
 
     useEffect(() => {
@@ -148,28 +148,6 @@ export default function DialogUpdateAtended() {
                                 value={gender}                      
                             />  
                         </div>
-                        <div className='flex grow'>
-                            <ComboBox 
-                                className='grow'
-                                label={'Ciudad de Origen'} 
-                                options={['Santiago', 'La Serena', 'Coquimbo']}             
-                                onChange={(e, value) => {
-                                    setCity(value as string)
-                                }}     
-                                value={city}       
-                            />
-                        </div>
-                        <div className='flex grow'>
-                            <ComboBox
-                                className='grow'
-                                label='Nacionalidad'
-                                options={['Chile', 'Perú']}
-                                onChange={(e, value) => {
-                                    setNationality(value as string)
-                                }}
-                                value={nationality}
-                            />
-                        </div>
                     </div>
                     :
                     isPending ? 
@@ -178,7 +156,7 @@ export default function DialogUpdateAtended() {
                     </div>
                     :
                     <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
-                            {isSuccess ? 'Se Cambio el registro exitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
+                            {isSuccess ? 'Se Cambio el registro exitosamente' : isError ? 'Hubo un error al intentar finalizar '  : 'Error desconocido'}
                     </Alert>
                 }
                 

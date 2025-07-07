@@ -1,5 +1,5 @@
 import { Button, Divider, Paper, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DialogChangePassword from "../../component/Dialog/DialogChangePassword";
 import { TResumenActividad } from ".";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -11,6 +11,9 @@ import { useAuth } from "../../context/AuthContext";
 import { IUser } from "../../api/models/User";
 import { format } from "date-fns";
 import { useUserParticipation } from "../../api/hooks/UserHooks";
+import { useRoutesByUser } from "../../api/hooks/RouteHooks";
+import compareSort from "../../utils/compareDate";
+import { es } from "date-fns/locale";
 
 type TableProfileProps = {
      stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
@@ -20,11 +23,24 @@ type TableProfileProps = {
 
 export default function TableProfile({ stateUser, stateHasChanges, stateResumenActividad } : TableProfileProps ) {
 
+     const [ resumen, setResumenActividad ] = stateResumenActividad
      const { role, loading } = useAuth()
      const [ open, setOpen ] = useState(false)
      const [ user, setUser ] = stateUser
-     const [ resumen, setResumen ] = stateResumenActividad
      const [ , setHasChange ] = stateHasChanges
+     const useQueryRoutesByUser = useRoutesByUser(user.id, true)
+
+     useEffect(() => { // Calcular total rutas completadas & última fecha ruta
+          console.log(user.id)
+          if(useQueryRoutesByUser.data) {
+               const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
+               setResumenActividad({...resumen, 
+                    amountCompletedRoutes : routes.length, 
+                    lastRouteDate : routes.length != 0 ? format(routes[0].dateCreated, "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
+               })
+          } 
+     
+     }, [useQueryRoutesByUser.data])
 
      const helpPoints = useUserParticipation(user.id).data?.total_helpingpoints
 

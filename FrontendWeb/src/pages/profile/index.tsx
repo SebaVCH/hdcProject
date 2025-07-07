@@ -31,7 +31,7 @@ export default function Profile() {
     const [ resumenActividad, setResumenActividad ] = useState<TResumenActividad>({})
     
     const { data, isLoading, isSuccess, refetch, error } = useProfile()
-    const useQueryRoutesByUser = useRoutesByUser(user?.id, true)
+    
     const mutation = useUpdateUser()
 
     const clearStates = () => {
@@ -46,16 +46,7 @@ export default function Profile() {
         }
     }, [])
 
-    useEffect(() => { // Calcular total rutas completadas & última fecha ruta
-        if(useQueryRoutesByUser.data && user?.id) {
-            const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
-            setResumenActividad({...resumenActividad, 
-                amountCompletedRoutes : routes.length, 
-                lastRouteDate : routes.length != 0 ? format(routes[0].dateCreated, "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
-            })
-        } 
 
-    }, [useQueryRoutesByUser.data, user?.id])
 
     useEffect(() => {
         if(data) {

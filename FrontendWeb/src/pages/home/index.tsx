@@ -28,7 +28,11 @@ import { useHelpPoints } from "../../api/hooks/HelpPointHooks";
 
 
 
-
+export type TUserRegister = {
+    name : string
+    age : number 
+    gender: string
+}
 
 export default function Home() {
 
@@ -44,6 +48,11 @@ export default function Home() {
     const [ openDialogRisk, setOpenDialogRisk ] = useState(false)
 
     const stateDescriptionRisk = useState('')
+    const [ attendedP, setAttendedP ] = useState<TUserRegister>({
+        name: '',
+        age: -1,
+        gender : 'Sin especificar'
+    })
     const [ locationMethod, setLocationMethod ] = useState<LocationMethod>(LocationMethod.None)
 
     const [ risks, setRisks ] = useState<Risk[]>([])
@@ -144,6 +153,7 @@ export default function Home() {
                                     stateOpenDialogRoute={[ openDialogResumeRoute, setOpenDialogResumeRoute ]}
                                 >
                                     <DialogCreateAttended 
+                                        stateAttended={[attendedP, setAttendedP]}
                                         stateOpen={[openDialogAttended, setOpenDialogAttended]} 
                                         stateOnSelectLocationMap={[ onSelectLocationMap, setOnSelectLocationMap]} 
                                         stateLocationMethod={[locationMethod, setLocationMethod]}

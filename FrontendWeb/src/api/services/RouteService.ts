@@ -20,6 +20,7 @@ export class RouteService {
 
     static async FindAllRoute() : Promise<Route[]> {
         const { data } = await axiosInstance.get(`/${this.RESOURCE_NAME}`)
+        if(data?.message === null) return []
         return (data?.message as TRouteBackend[]).map(( route => (
             MapRouteFromBackend( route )
         )))
