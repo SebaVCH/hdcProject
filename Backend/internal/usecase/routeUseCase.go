@@ -163,11 +163,11 @@ func (r routeUseCase) GetMyParticipation(c *gin.Context) {
 		return
 	}
 
-	quantity, err := r.routeRepository.GetMyParticipation(userID)
+	participation, err := r.routeRepository.GetMyParticipation(userID)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al obtener participaciones"})
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, gin.H{"message": quantity})
+	c.IndentedJSON(http.StatusOK, gin.H{"message": participation})
 }

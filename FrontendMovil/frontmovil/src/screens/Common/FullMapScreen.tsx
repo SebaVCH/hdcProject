@@ -30,7 +30,10 @@ export default function FullMapScreen() {
   const [description, setDescription] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
+  const [name, setName] = useState('');
   const [mode, setMode] = useState<'risk' | 'help' | null>(null);
+  const [isFinishing, setIsFinishing] = useState(false);
+  const [routeFinished, setRouteFinished] = useState(false);
 
   const fetchAllMarkers = async () => {
     try {
@@ -74,12 +77,22 @@ export default function FullMapScreen() {
 
     if (mode === 'risk') {
       try {
+        const userId = await AsyncStorage.getItem('userId'); // ✅ recuperación
+
+        if (!userId) {
+          Alert.alert('Error', 'No se encontró el ID del usuario.');
+          return;
+        }
+
         await axios.post(`${backendUrl}/risk`, {
           coords: [latitude, longitude],
           description,
+          author_id: userId, // ✅ ahora sí definido
+          date_register: new Date().toISOString(),
         }, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setRiskMarkers(prev => [...prev, { latitude, longitude, description }]);
         Alert.alert('Riesgo registrado');
       } catch {
@@ -95,12 +108,19 @@ export default function FullMapScreen() {
           people_helped: {
             age: age ? parseInt(age) : undefined,
             gender: gender || undefined,
+            date: new Date().toISOString(), // fecha y hora actual
           }
         };
         await axios.post(`${backendUrl}/helping-point`, helpPoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setHelpMarkers(prev => [...prev, { latitude, longitude, description: 'Punto de ayuda' }]);
+        setHelpMarkers(prev => [...prev, {
+          latitude, longitude,
+          name: name || '',
+          age: age ? parseInt(age) : 0,
+          gender: gender || '',
+          date: new Date().toISOString()
+        }]);
         Alert.alert('Atención registrada');
       } catch (err : any) {
         console.log('❌ Error al registrar atención:', err.response?.data || err.message);
@@ -112,20 +132,27 @@ export default function FullMapScreen() {
     setHelpModalVisible(false);
     setModalVisible(false);
     setDescription('');
+    setName('');
     setAge('');
     setGender('');
   };
 
   const handleFinishRoute = async () => {
+    setIsFinishing(true);
     try {
       const token = await AsyncStorage.getItem('accessToken');
-      await axios.put(`${backendUrl}/route/${routeId}`, { status: 'cerrado' }, {
+      await axios.patch(`${backendUrl}/route/${routeId}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      Alert.alert('Ruta finalizada');
-      navigation.navigate('Home');
+      setRouteFinished(true);
+      setTimeout(() => {
+        setRouteFinished(false);
+        navigation.navigate('Home');
+      }, 2000); // muestra el modal 2 segundos
     } catch {
-      Alert.alert('Error al finalizar la ruta');
+      Alert.alert('Error', 'No se pudo finalizar la ruta');
+    } finally {
+      setIsFinishing(false);
     }
   };
 
@@ -143,13 +170,22 @@ export default function FullMapScreen() {
         helpMarkers={helpMarkers}
       />
 
-      <TouchableOpacity style={styles.finishButton} onPress={handleFinishRoute}>
-        <Text style={styles.finishButtonText}>Finalizar Ruta</Text>
-        <Icon name="check" size={16} color="#fff" style={{ marginLeft: 6 }} />
+      <TouchableOpacity
+        style={[styles.finishButton, isFinishing && { backgroundColor: '#ccc' }]}
+        onPress={handleFinishRoute}
+        disabled={isFinishing}
+      >
+        <Text style={styles.finishButtonText}>
+          {isFinishing ? 'Finalizando...' : 'Finalizar Ruta'}
+        </Text>
+        {!isFinishing && <Icon name="check" size={16} color="#fff" style={{ marginLeft: 6 }} />}
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-        <Icon name="plus" size={20} color="#fff" />
+      <TouchableOpacity
+        style={[styles.addButton, isFinishing && { backgroundColor: '#ccc' }]}
+        onPress={() => setModalVisible(true)}
+        disabled={isFinishing}
+      >
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="fade">
@@ -158,8 +194,7 @@ export default function FullMapScreen() {
             <Text style={styles.modalTitle}>¿Qué desea registrar?</Text>
             <TouchableOpacity onPress={() => {
               setMode('risk');
-              setModalVisible(false);
-              Alert.alert('Selecciona en el mapa el lugar del riesgo');
+              setModalVisible(true);
             }} style={styles.optionButton}>
               <Text style={styles.sendButtonText}>Registrar Riesgo</Text>
             </TouchableOpacity>
@@ -181,6 +216,7 @@ export default function FullMapScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>Registrar Atención</Text>
+            <TextInput placeholder="Nombre (opcional)" value={name} onChangeText={setName} style={styles.alertInput} />
             <TextInput placeholder="Edad (opcional)" value={age} onChangeText={setAge} keyboardType="numeric" style={styles.alertInput} />
             <TextInput placeholder="Género (opcional)" value={gender} onChangeText={setGender} style={styles.alertInput} />
             <TouchableOpacity
@@ -199,6 +235,47 @@ export default function FullMapScreen() {
           </View>
         </View>
       </Modal>
+       <Modal visible={mode === 'risk' && modalVisible} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalBox}>
+              <Text style={styles.modalTitle}>Registrar Riesgo</Text>
+              <TextInput
+                placeholder="Descripción del riesgo"
+                value={description}
+                onChangeText={setDescription}
+                style={styles.alertInput}
+              />
+              <TouchableOpacity
+                onPress={() => {
+                  if (!description.trim()) {
+                    Alert.alert('Por favor ingresa una descripción.');
+                    return;
+                  }
+                  setModalVisible(false);
+                  Alert.alert('Selecciona en el mapa el lugar del riesgo');
+                }}
+                style={styles.optionButton}
+              >
+                <Text style={styles.sendButtonText}>Seleccionar en el mapa</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                setModalVisible(false);
+                setMode(null);
+                setDescription('');
+              }} style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        {routeFinished && (
+        <View style={styles.successOverlay}>
+          <View style={styles.successBox}>
+            <Icon name="check-circle" size={48} color="#2E8B57" />
+            <Text style={styles.successText}>¡Ruta finalizada con éxito!</Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -210,13 +287,57 @@ const styles = StyleSheet.create({
   finishButton: {
     position: 'absolute', top: 50, right: 5,
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#000', paddingHorizontal: 15, paddingVertical: 10,
+    backgroundColor: '#FF5A00', paddingHorizontal: 15, paddingVertical: 10,
     borderRadius: 30, zIndex: 10,
   },
   finishButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
-  addButton: {
-    position: 'absolute', bottom: 20, left: 20,
-    backgroundColor: '#000', padding: 12, borderRadius: 30, zIndex: 10,
+    addButton: {
+    position: 'absolute',
+    bottom: 25,
+    left: 25,
+    backgroundColor: '#0F9997', // verde azulado fuerte
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 10,
+  },
+  optionButton: {
+    backgroundColor: '#FF5A00', // naranja
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginVertical: 8,
+    alignItems: 'center',
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#0F9997', // verde azulado para cancelar
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  alertInput: {
+    borderWidth: 1,
+    borderColor: '#0F9997',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 10,
+    backgroundColor: '#B2DFDB', // fondo suave
   },
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center',
@@ -225,15 +346,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', borderRadius: 10, padding: 20, width: '85%',
   },
   modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  alertInput: {
-    borderWidth: 1, borderColor: '#ccc', borderRadius: 10,
-    padding: 10, fontSize: 16, marginBottom: 10,
-  },
-  optionButton: {
-    backgroundColor: '#000', padding: 10,
-    borderRadius: 8, marginVertical: 5, alignItems: 'center',
-  },
-  sendButtonText: { color: '#fff', fontWeight: '600', fontSize: 16 },
-  cancelButton: { marginTop: 10, alignItems: 'center' },
-  cancelButtonText: { color: '#4682B4', fontSize: 16, fontWeight: 'bold' },
+  successOverlay: {
+  position: 'absolute',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 20,
+},
+successBox: {
+  backgroundColor: '#fff',
+  padding: 24,
+  borderRadius: 12,
+  alignItems: 'center',
+},
+successText: {
+  marginTop: 12,
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#2E8B57',
+},
 });

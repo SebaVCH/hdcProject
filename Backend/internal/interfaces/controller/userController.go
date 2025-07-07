@@ -30,3 +30,7 @@ func (u *userController) GetUserProfile(c *gin.Context) {
 func (u *userController) GetUserByID(c *gin.Context) {
 	u.userUseCase.GetUserByID(c)
 }
+
+func (u *userController) GetNameByID(c *gin.Context) {
+	u.userUseCase.GetNameByID(c)
+}

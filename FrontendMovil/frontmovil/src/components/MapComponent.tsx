@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, Modal } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region, Circle } from 'react-native-maps';
-
 
 type RiskMarker = {
   latitude: number;
@@ -12,7 +11,10 @@ type RiskMarker = {
 type HelpMarker = {
   latitude: number;
   longitude: number;
-  description: string;
+  name?: string;
+  age?: number;
+  gender?: string;
+  date?: string; // ISO string
 };
 
 type Props = {
@@ -36,6 +38,7 @@ export default function MapComponent({
 
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState(initialRegion);
+  const [selectedHelp, setSelectedHelp] = useState<HelpMarker | null>(null);
 
   const handleZoom = (zoomIn: boolean) => {
     const factor = zoomIn ? 0.5 : 2;
@@ -94,8 +97,7 @@ export default function MapComponent({
                 longitude: help.longitude,
               }}
               pinColor="lightgreen"
-              title="Punto de Ayuda"
-              description={help.description}
+              onPress={() => setSelectedHelp(help)}
             />
             <Circle
               center={{
@@ -118,6 +120,25 @@ export default function MapComponent({
           <Text style={styles.zoomText}>−</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        visible={!!selectedHelp}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedHelp(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>🆘 Punto de Ayuda</Text>
+            {selectedHelp?.name && <Text>👤 Nombre: {selectedHelp.name}</Text>}
+            {selectedHelp?.age !== undefined && <Text>🎂 Edad: {selectedHelp.age}</Text>}
+            {selectedHelp?.gender && <Text>🚻 Género: {selectedHelp.gender}</Text>}
+            {selectedHelp?.date && <Text>📅 Fecha: {new Date(selectedHelp.date).toLocaleString()}</Text>}
+            <TouchableOpacity onPress={() => setSelectedHelp(null)} style={styles.modalClose}>
+              <Text style={{ color: 'white' }}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -156,4 +177,29 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+modalContent: {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  width: '80%',
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
+modalClose: {
+  marginTop: 20,
+  backgroundColor: '#333',
+  padding: 10,
+  alignItems: 'center',
+  borderRadius: 5,
+},
+
 });

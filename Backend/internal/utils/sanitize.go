@@ -12,7 +12,7 @@ func IsValidEmail(email string) bool {
 }
 
 func IsValidString(str string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z0-9\s\-\_\.\,\@áéíóúÁÉÍÓÚñÑ]+$`)
+	re := regexp.MustCompile(`^[a-zA-Z0-9\s\-\_\.\,\@:áéíóúÁÉÍÓÚñÑ]+$`)
 	return re.MatchString(str)
 }
 

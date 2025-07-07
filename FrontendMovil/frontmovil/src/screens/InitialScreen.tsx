@@ -29,6 +29,7 @@ const InitialScreen = ({ navigation }: InitialScreenProps) => {
           />
         </TouchableOpacity>
         <Text style={styles.title}>Bienvenido a RED CALLE</Text>
+        <Text style={styles.subtitle}>Hecho con ❤️ por DevSync</Text>
         <TouchableOpacity
           style={styles.startButton}
           onPress={() => navigation.navigate('Login')}
@@ -79,6 +80,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  subtitle: {
+  fontSize: 16,
+  color: '#00796B',
+  marginBottom: 20,
   },
 });
 
