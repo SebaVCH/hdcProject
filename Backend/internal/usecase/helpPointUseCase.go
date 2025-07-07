@@ -39,6 +39,10 @@ func (h helpingPointUseCase) GetAllPoints(c *gin.Context) {
 func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 	var helpPoint domain.PuntoAyuda
 
+	claims, _ := c.Get("user")
+	userClaims := claims.(jwt.MapClaims)
+	userID := userClaims["user_id"].(string)
+
 	if err := c.ShouldBindJSON(&helpPoint); err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
 		return
@@ -49,7 +53,7 @@ func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 		return
 	}
 
-	err := h.helpingPointRepository.CreateHelpingPoint(helpPoint)
+	err := h.helpingPointRepository.CreateHelpingPoint(helpPoint, userID)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Error al crear punto de ayuda"})
 		return
@@ -70,7 +74,7 @@ func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 	userID := userClaims["user_id"].(string)
 
 	if err := h.helpingPointRepository.FindByIDAndUserID(helpingPointID, userID); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err})
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 

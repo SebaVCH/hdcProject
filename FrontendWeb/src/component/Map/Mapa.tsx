@@ -1,6 +1,6 @@
 import L, { LatLngExpression } from "leaflet";
 import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { Button, Divider } from "@mui/material";
+import { Button, Divider, Switch, FormControlLabel, Box} from "@mui/material";
 import { format } from 'date-fns';
 import { Position } from "../../utils/getCurrentLocation";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ import { HelpPoint } from "../../api/models/HelpPoint";
 import { Risk } from "../../api/models/Risk";
 import { es } from "date-fns/locale";
 import { RiskStatus } from "../../Enums/RiskStatus";
+import 'leaflet.heat'
 
 var greenIcon = new L.Icon({
     iconUrl: 'marker-icon-2x-green.png',
@@ -46,7 +47,59 @@ const iconsMap = {
     [RiskStatus.Enviroment]: new L.Icon({ iconUrl : 'warning-alert-enviroment.svg', iconSize: [30, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowAnchor: [41, 41]}),
 } satisfies Record<RiskStatus, L.Icon>;
 
+function HeatmapLayer({ helpPoints, showHeatmap }: { helpPoints: HelpPoint[], showHeatmap: boolean }) {
+    const map = useMap();
+    const [heatmapLayer, setHeatmapLayer] = useState<any>(null);
 
+    useEffect(() => {
+
+        if (heatmapLayer) {
+            map.removeLayer(heatmapLayer);
+            setHeatmapLayer(null);
+        }
+
+        if (showHeatmap && helpPoints.length > 0) {
+            const heatData = helpPoints
+                .filter(hp => !hp.disabled)
+                .map(hp => [hp.coords[0], hp.coords[1], 1]);
+
+            const heat = (L as any).heatLayer(heatData, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 17,
+                max: 1.0,
+                gradient: {
+                    0.1: 'blue',
+                    0.2: 'cyan',
+                    0.4: 'lime',
+                    0.6: 'yellow',
+                    0.8: 'orange',
+                    1.0: 'red'
+                }
+            });
+
+            map.addLayer(heat);
+            setHeatmapLayer(heat);
+        }
+
+        return () => {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+                setHeatmapLayer(null);
+            }
+        };
+    }, [map, helpPoints, showHeatmap]);
+
+    useEffect(() => {
+        return () => {
+            if (heatmapLayer) {
+                map.removeLayer(heatmapLayer);
+            }
+        };
+    }, [heatmapLayer, map]);
+
+    return null;
+}
 
 type MapaProps = {
     stateCurrentLocation : [ Position, React.Dispatch<React.SetStateAction<Position>> ]
@@ -61,7 +114,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
     const [ currentLocation,  ] = stateCurrentLocation
     const [ mapTracedLineRoute, setMapTracedLineRoute ] = useState<Map<string, LatLngExpression[]>>(new Map<string, LatLngExpression[]>())
-
+    const [ showHeatmap, setShowHeatmap ] = useState(false)
 
     useEffect(() => {
 
@@ -85,6 +138,18 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
     
     return (
         <>
+            <Box className="absolute top-12 left-1/2 transform -translate-x-1/2 z-10 bg-white p-2 rounded shadow">
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={showHeatmap}
+                            onChange={(e) => setShowHeatmap(e.target.checked)}
+                            color="primary"
+                        />
+                    }
+                    label="Vista de Calor"
+                />
+            </Box>
             <MapContainer 
                 center={ [currentLocation.latitude || -29.959003986327698, currentLocation.longitude || -71.34176826076656] } 
                 zoom={ 30 } 
@@ -100,8 +165,9 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                 />
                 
                 <ZoomHandler />
+                <HeatmapLayer helpPoints={helpPoints} showHeatmap={showHeatmap} />
 
-                {helpPoints.map((helpPoint, index) => (
+                {!showHeatmap && helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 
                     <Marker key={helpPoint.id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
                         <Popup >
@@ -118,7 +184,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                     </Marker>
                 ))}
 
-                { Array.from(mapTracedLineRoute.entries()).map(([routeId, coords ], index) => (
+                {!showHeatmap && Array.from(mapTracedLineRoute.entries()).map(([routeId, coords ], index) => (
                     <Polyline 
                         key={index}
                         pathOptions={{

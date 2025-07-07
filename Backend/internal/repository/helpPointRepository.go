@@ -11,7 +11,7 @@ import (
 
 type HelpPointRepository interface {
 	GetAllPoints() ([]domain.PuntoAyuda, error)
-	CreateHelpingPoint(helpPoint domain.PuntoAyuda) error
+	CreateHelpingPoint(helpPoint domain.PuntoAyuda, userID string) error
 	UpdateHelpingPoint(data map[string]interface{}) (domain.PuntoAyuda, error)
 	DeleteHelpingPoint(id string) error
 	FindByIDAndUserID(id string, userID string) error
@@ -29,9 +29,10 @@ func NewHelpPointRepository(helpPointCollection *mongo.Collection, peopleHelpedC
 	}
 }
 
-func (h *helpPointRepository) CreateHelpingPoint(helpPoint domain.PuntoAyuda) error {
+func (h *helpPointRepository) CreateHelpingPoint(helpPoint domain.PuntoAyuda, userID string) error {
 	helpPoint.ID = bson.NewObjectID()
 	helpPoint.DateRegister = time.Now()
+	helpPoint.AuthorID, _ = bson.ObjectIDFromHex(userID)
 	_, err := h.HelpPointCollection.InsertOne(context.Background(), helpPoint)
 	if err != nil {
 		return err
