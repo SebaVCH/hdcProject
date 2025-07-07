@@ -1,19 +1,18 @@
-import { Button, CircularProgress, ClickAwayListener, Divider, Fade, Skeleton, useMediaQuery, useTheme } from "@mui/material"
+import { Button, CircularProgress, ClickAwayListener, Divider, Fade, useMediaQuery, useTheme } from "@mui/material"
 import CustomDrawer from "../../component/CustomDrawer"
-import { UserAdapter } from "../../api/adapters/UserAdapter"
-import useSessionStore from "../../stores/useSessionStore"
-import { TProfileRequest, TProfileResponse } from "../../api/services/UserService"
 import { useEffect, useState } from "react"
-import ListIconHome from "../../component/ListIconHome"
 import DrawerList from "../../component/DrawerList"
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import TableProfile from "./TableProfile"
-import { RouteAdapter } from "../../api/adapters/RouteAdapter"
 import compareSort from "../../utils/compareDate"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import Sidebar from "../../component/Sidebar"
+import { IUser } from "../../api/models/User"
+import { useProfile, useUpdateUser } from "../../api/hooks/UserHooks"
+import { useRoutesByUser } from "../../api/hooks/RouteHooks"
+import { TUpdateUserRequest } from "../../api/adapters/User.adapter";
 
 
 export type TResumenActividad = {
@@ -26,14 +25,14 @@ export type TResumenActividad = {
 
 export default function Profile() {
 
-    const { accessToken } = useSessionStore()
-    const [ user, setUser ] = useState<TProfileResponse>()
+
+    const [ user, setUser ] = useState<IUser>()
     const [ hasChange, setHasChange ] = useState(false)
     const [ resumenActividad, setResumenActividad ] = useState<TResumenActividad>({})
     
-    const { data, isLoading, isSuccess, refetch } = UserAdapter.useGetProfile(accessToken, true)
-    const useQueryRoutesByUser = RouteAdapter.useGetRouteByUserID(user?._id, accessToken, true)
-    const mutation = UserAdapter.useUpdateProfile( accessToken as string)
+    const { data, isLoading, isSuccess, refetch, error } = useProfile()
+    const useQueryRoutesByUser = useRoutesByUser(user?.id, true)
+    const mutation = useUpdateUser()
 
     const clearStates = () => {
         setUser(undefined)
@@ -41,38 +40,33 @@ export default function Profile() {
         setResumenActividad({})
     }
 
-
     useEffect(() => {
-        refetch()
         return () => {
             clearStates()
         }
     }, [])
 
-
-
     useEffect(() => { // Calcular total rutas completadas & última fecha ruta
-        if(useQueryRoutesByUser.data && user?._id) {
+        if(useQueryRoutesByUser.data && user?.id) {
             const routes = useQueryRoutesByUser.data.sort((a, b) => compareSort(a, b))
             setResumenActividad({...resumenActividad, 
                 amountCompletedRoutes : routes.length, 
-                lastRouteDate : routes.length != 0 ? format(new Date(routes[0].completedAt as string), "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
+                lastRouteDate : routes.length != 0 ? format(routes[0].dateFinished, "d 'de' MMMM 'de' yyyy ", { locale: es}) : 'Sin realizar aún'
             })
         } 
 
-    }, [useQueryRoutesByUser.data, user?._id])
+    }, [useQueryRoutesByUser.data, user?.id])
 
     useEffect(() => {
-        console.log("aca en cambio de dato")
         if(data) {
-            setUser({...data})
+            setUser(data)
         }
     }, [data])
 
     const onSubmitChanges = () => {
         if(mutation.isSuccess)
             return 
-        mutation.mutate(user as TProfileRequest)
+        mutation.mutate(user as TUpdateUserRequest)
     }
 
     const handleClickAway = (e : MouseEvent | TouchEvent) => {

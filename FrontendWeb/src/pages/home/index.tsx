@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DrawerList from "../../component/DrawerList";
 import CustomDrawer from "../../component/CustomDrawer";
-import { Backdrop, Card, Dialog, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Backdrop, Card, Typography, useMediaQuery, useTheme } from "@mui/material";
 import MensajesFijados from "../../component/MensajesFijados";
 import DialogCreateRoute from "../../component/Dialog/DialogCreateRoute";
 import useSessionStore from "../../stores/useSessionStore";
@@ -11,11 +11,6 @@ import { Position } from "../../utils/getCurrentLocation";
 import DialogCreateAttended from "../../component/Dialog/DialogCreateAttended";
 import DialogCreateRisk from "../../component/Dialog/DialogCreateRisk";
 import DialogResumeRoute from "../../component/Dialog/DialogResumeRoute";
-import { LocationMethod } from "../../api/interfaces/Enums";
-import { RiskAdapter } from "../../api/adapters/RiskAdapter";
-import { THelpPoint } from "../../api/services/HelpPointService";
-import { HelpPointAdapter } from "../../api/adapters/HelpPointAdapter";
-import { TRisk } from "../../api/services/RiskService";
 import MapEvents from "../../component/Map/MapEvents";
 import Mapa from "../../component/Map/Mapa";
 import ButtonCurrentLocation from "../../component/Map/ButtonCurrentLocation";
@@ -25,6 +20,11 @@ import DialogJoinRoute from "../../component/Dialog/DialogJoinRoute";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../component/Sidebar";
 import DialogUpdateRisk from "../../component/Dialog/DialogUpdateRisk";
+import { LocationMethod } from "../../Enums/LocationMethod";
+import { Risk } from "../../api/models/Risk";
+import { HelpPoint } from "../../api/models/HelpPoint";
+import { useRisks } from "../../api/hooks/RiskHooks";
+import { useHelpPoints } from "../../api/hooks/HelpPointHooks";
 
 
 
@@ -43,15 +43,14 @@ export default function Home() {
     const [ openDialogAttended, setOpenDialogAttended] = useState(false) 
     const [ openDialogRisk, setOpenDialogRisk ] = useState(false)
 
-
     const stateDescriptionRisk = useState('')
     const [ locationMethod, setLocationMethod ] = useState<LocationMethod>(LocationMethod.None)
 
-    const [ risks, setRisks ] = useState<TRisk[]>([])
-    const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([])
+    const [ risks, setRisks ] = useState<Risk[]>([])
+    const [ helpPoints, setHelpPoints ] = useState<HelpPoint[]>([])
 
-    const riskQuery = RiskAdapter.useGetRisks( accessToken )
-    const helpPointQuery = HelpPointAdapter.useGetHelpPoints( accessToken )
+    const riskQuery = useRisks()
+    const helpPointQuery = useHelpPoints()
 
 
     const [ location, setLocation ] = useState<Position>({latitude : 0, longitude : 0})

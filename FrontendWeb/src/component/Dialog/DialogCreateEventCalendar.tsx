@@ -8,12 +8,12 @@ import { Alert, CircularProgress, TextField, Typography } from '@mui/material';
 import InputDescription from '../Input/InputDescription';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import useSessionStore from '../../stores/useSessionStore';
-import { CalendarAdapter } from '../../api/adapters/CalendarAdapter';
 import { useEffect, useState } from 'react';
-import { TCalendarEvent } from '../../api/services/CalendarService';
 import { DateSelectArg } from '@fullcalendar/core/index.js';
 import ComboBox from '../Button/ComboBox';
 import { timeSlots } from '../../utils/calendar';
+import { CalendarEvent } from '../../api/models/Calendar';
+import { useCreateCalendarEvent } from '../../api/hooks/CalendarEventHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -39,10 +39,13 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
     const [ startTime, setStartTime] = useState<string>();
     const [ endTime, setEndTime] = useState<string>();
     const [ listEndTime, setListEndTime] = useState<string[]>([]);
-    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<TCalendarEvent, '_id'| 'authorId'>>({
+    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<CalendarEvent, 'id'| 'authorId' | 'authorName'>>({
         title : '',
         description : '',
-        dateStart : ''
+        DateStart : new Date(),
+        authorID : '',
+        timeStart : '',
+        timeEnd : ''
     }) 
     const [ formErrors, setFormErrors ] = useState({
         errorTitle : '',
@@ -61,7 +64,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
         setStartTime(undefined)
         setEndTime(undefined)
         setListEndTime([])
-        setFormCalendarEvent({title : '', description : '', dateStart : ''})
+        setFormCalendarEvent({title : '', description : '', DateStart : new Date(), authorID : '', timeEnd : '' , timeStart : ''})
         setFormErrors({errorDateStart : '', errorDescription : '', errorTitle : '', errorStartTime : '', errorEndTime : ''})
         reset()
     }
@@ -71,7 +74,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
         setOpen(false)
     }
 
-    const { isIdle, isPending, isSuccess, isError, mutate, reset } = CalendarAdapter.useAddEventCalendarMutation(accessToken)
+    const { isIdle, isPending, isSuccess, isError, mutate, reset } = useCreateCalendarEvent()
     
     const handleOnChangeTitle = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormCalendarEvent(prev => ({...prev, title : e.target.value}))
@@ -101,7 +104,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
             errors.errorTitle = 'El título es obligatorio'
             isValid = false
         }
-        if(!formCalendarEvent.dateStart) {
+        if(!formCalendarEvent.DateStart) {
             errors.errorDateStart = 'La fecha es obligatoria'
             isValid = false
         }

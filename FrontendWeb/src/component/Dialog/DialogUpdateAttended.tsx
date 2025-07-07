@@ -7,10 +7,10 @@ import DialogActions from '@mui/material/DialogActions';
 import { Alert, CircularProgress, TextField } from '@mui/material';
 import ComboBox from '../Button/ComboBox';
 import { useEffect, useState } from 'react';
-import { HelpPointAdapter } from '../../api/adapters/HelpPointAdapter';
 import useSessionStore from '../../stores/useSessionStore';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { useHelpPointUpdateDialog } from '../../context/HelpPointUpdateContext';
+import { useUpdateHelpPoint } from '../../api/hooks/HelpPointHooks';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -35,18 +35,15 @@ export default function DialogUpdateAtended() {
     const [ nationality, setNationality ] = useState('') 
 
 
-    const { accessToken } = useSessionStore()
-    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = HelpPointAdapter.useUpdateHelpPointMutation( accessToken )
+    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useUpdateHelpPoint()
 
 
     useEffect(() => {
         console.log(helpPoint)
-        if(helpPoint?.helpedPerson) {
-            setName(helpPoint.helpedPerson.name ?? '')
-            setAge(helpPoint.helpedPerson.age ?? 0)
-            setGender(helpPoint.helpedPerson.gender ?? '')
-            setCity(helpPoint.helpedPerson.city ?? '')
-            setNationality(helpPoint.helpedPerson.nationality ?? '')
+        if(helpPoint?.peopleHelped) {
+            setName(helpPoint.peopleHelped.name ?? '')
+            setAge(helpPoint.peopleHelped.age ?? 0)
+            setGender(helpPoint.peopleHelped.gender ?? '')
         }
     }, [helpPoint])
 
@@ -62,12 +59,11 @@ export default function DialogUpdateAtended() {
     const handleSubmit = () => {
         if(!helpPoint) return
 
-        mutate({...helpPoint, helpedPerson : {
+        mutate({...helpPoint, peopleHelped : {
             name,
             age,
             gender,
-            city,
-            nationality
+            id: ''
         }})
     }
 
@@ -101,7 +97,7 @@ export default function DialogUpdateAtended() {
             <CloseDialogButton handleClose={handleClose} />
 
             <DialogContent>
-                {   helpPoint?.helpedPerson === undefined ?
+                {   helpPoint?.peopleHelped === undefined ?
                     <CircularProgress />
                     :
                     isIdle ?

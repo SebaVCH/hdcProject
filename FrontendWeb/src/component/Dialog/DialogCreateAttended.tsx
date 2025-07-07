@@ -10,10 +10,10 @@ import { Alert, CircularProgress, TextField, Typography, Zoom } from '@mui/mater
 import ComboBox from '../Button/ComboBox';
 import { useEffect, useState } from 'react';
 import getCurrentLocation, { Position } from '../../utils/getCurrentLocation';
-import { LocationMethod } from '../../api/interfaces/Enums';
-import { HelpPointAdapter } from '../../api/adapters/HelpPointAdapter';
 import useSessionStore from '../../stores/useSessionStore';
 import CloseDialogButton from '../Button/CloseDialogButton';
+import { LocationMethod } from '../../Enums/LocationMethod';
+import { useCreateHelpPoint } from '../../api/hooks/HelpPointHooks';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -52,7 +52,7 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
     const [ createButtonDisable, setCreateButtonDisable ] = useState(true)
     const [ error, setError ] = useState<string | undefined>()
 
-    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = HelpPointAdapter.usePostHeplPointMutation( accessToken )
+    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useCreateHelpPoint()
 
 
 
@@ -114,15 +114,16 @@ export default function DialogCreateAttended({ stateOpen, stateOnSelectLocationM
             return
         }
         mutate({
-            routeId : (routeId as string), // cambiar luego
-            coords  : coords,
-            helpedPerson : {
+            routeID: (routeId as string), // cambiar luego
+            coords: coords,
+            peopleHelped: {
                 name,
                 age,
-                nationality,
-                city,
-                gender
-            }
+                gender,
+                id: ''
+            },
+            authorID: '',
+            disabled: false
         })
     }
 

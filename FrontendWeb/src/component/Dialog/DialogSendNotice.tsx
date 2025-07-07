@@ -9,9 +9,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Checkbox, FormControlLabel, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
-import { NoticeAdapter } from '../../api/adapters/NoticeAdapter';
-import { TNotice } from '../../api/services/NoticeService';
-import { UserAdapter } from '../../api/adapters/UserAdapter';
+import { useCreateNotice } from '../../api/hooks/NoticeHooks';
+import { Notice } from '../../api/models/Notice';
+import { useProfile } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,13 +25,13 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 export default function DialogSendAviso({ open, setOpen } : { open : boolean, setOpen: (ar : boolean) => void}) {
 
-    const { accessToken } = useSessionStore()
-    const [ notice, setNotice ] = useState<TNotice>({})
-    const { isError, mutate, data } = NoticeAdapter.usePostNoticeMutation( notice , accessToken)
-    const useQueryResult = UserAdapter.useGetProfile( accessToken )
-
-
-
+    const [ notice, setNotice ] = useState<Omit<Notice, 'id' | 'createdAt' | 'authorName'>>({
+        description : '',
+        authorID : '',
+        sendEmail : false
+    })
+    const { isError, mutate, data } = useCreateNotice()
+    const useQueryResult = useProfile()
 
     const onChangeTextField = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault()
@@ -43,7 +43,7 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
     }
 
     const onPostNotice = () => {
-        mutate()
+        mutate(notice)
         handleClose()
     }
 
@@ -52,11 +52,10 @@ export default function DialogSendAviso({ open, setOpen } : { open : boolean, se
     }, [data])
 
     useEffect(() => {
-        console.log("hola: ", useQueryResult.data)
         if(useQueryResult.data) {
             setNotice(prev => ({
                 ...prev,
-                authorId: useQueryResult.data._id
+                authorId: useQueryResult.data.id
             }))
         }
     }, [useQueryResult.data])

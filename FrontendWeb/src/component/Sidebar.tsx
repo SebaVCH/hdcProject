@@ -9,10 +9,10 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import HistoryIcon from '@mui/icons-material/History';
 import EventIcon from '@mui/icons-material/Event';  
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Role } from "../api/interfaces/Enums";
 import LogoutIcon from '@mui/icons-material/Logout';
 import useSessionStore from "../stores/useSessionStore";
 import DialogLogout from "./Dialog/DialogLogout";
+import { Role } from "../Enums/Role";
 
 
 const hoverStyles = {

@@ -1,6 +1,5 @@
-import { Button, Divider, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { Button, Divider, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { TProfileResponse } from "../../api/services/UserService";
 import DialogChangePassword from "../../component/Dialog/DialogChangePassword";
 import { TResumenActividad } from ".";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -9,10 +8,11 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ResumeItem from "./ResumeItem";
 import { useAuth } from "../../context/AuthContext";
+import { IUser } from "../../api/models/User";
 
 type TableProfileProps = {
      stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
-     stateUser : [TProfileResponse , React.Dispatch<React.SetStateAction<TProfileResponse | undefined>> ]
+     stateUser : [IUser , React.Dispatch<React.SetStateAction<IUser | undefined>> ]
      stateHasChanges : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
 } 
 
@@ -33,7 +33,6 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
           setHasChange(true)
           setUser({ ...user, phone })
      }
-
 
      return (
           <div className="flex flex-col grow w-full items-center justify-center">
@@ -138,7 +137,6 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                               activityValue={<Typography variant="body1" color='info'>20-03-2025</Typography>}
                          />                                              
                     </Paper>
-                    
                </div>
           </div>
     )

@@ -1,61 +1,22 @@
+import { MapCalendarEventFromBackend, TCalendarEventBackend, TCalendarEventCreateRequest } from "../adapters/CalendarEvent.adapter"
+import { CalendarEvent } from "../models/Calendar"
 import { axiosInstance } from "./axiosInstance"
 
-
-export type TCalendarEvent = {
-    _id : string
-    authorId: string
-    title : string 
-    description : string 
-    dateStart : string 
-    timeStart ?: string
-    timeEnd ?: string     
-}
 
 export class CalendarService {
 
     public static readonly RESOURCE_NAME = 'calendar-event'
 
-
-    static async GetEvents( token ?: string) : Promise<TCalendarEvent[]> {
-
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
-
-        return (data as any[]).map((value, _) => ({
-            _id : value?._id,
-            authorId : value?.author_id,
-            title : value?.title,
-            description : value?.description,
-            dateStart : value?.date_start,
-            timeStart : value?.time_start,
-            timeEnd : value?.time_end
-        }))
+    static async GetEvents() : Promise<CalendarEvent[]> {
+        const { data } = await axiosInstance.get(`/${this.RESOURCE_NAME}`)
+        return await Promise.all((data?.message as TCalendarEventBackend[]).map(async (event, _) => (
+           await MapCalendarEventFromBackend(event as TCalendarEventBackend) 
+        )))
     }
 
-    static async AddEvent( event : Omit<TCalendarEvent, '_id' | 'authorId'>, token ?: string) : Promise<TCalendarEvent> {
-
-        console.log(event)
-        const body = {
-            ...event,
-            date_start : new Date(event.dateStart)
-        }
-
-        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, body, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
-        return {
-            ...event, 
-            _id : data?.message?._id,
-            authorId : data?.message?.author_id
-        }
+    static async AddEvent( event : TCalendarEventCreateRequest) : Promise<CalendarEvent> {
+        const { data } = await axiosInstance.post(`/${this.RESOURCE_NAME}`, event)
+        return await MapCalendarEventFromBackend(data?.message as TCalendarEventBackend)
     }
-
-    
-
 
 } 

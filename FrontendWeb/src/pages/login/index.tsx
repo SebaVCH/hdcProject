@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { UserAdapter } from "../../api/adapters/UserAdapter";
 import { useNavigate } from "react-router-dom";
 import useSessionStore from "../../stores/useSessionStore";
 import { Box, Button, Card, Divider, FormControl, FormLabel, TextField, Typography } from "@mui/material";
 import { isValidEmail } from "../../utils/verifyInput";
 import { sxInput } from "../../style/sxInput";
-
-
-
+import { useLogin } from "../../api/hooks/UserHooks";
 
 
 export default function Login() {
@@ -18,9 +15,8 @@ export default function Login() {
     const [ emailError, setEmailError ] = useState<string>('')
     const [ password, setPassword ] = useState<string>('')
     const [ passwordError, setPasswordError ] = useState<string>('')
-
     const { accessToken } = useSessionStore()
-    const { mutate, isSuccess, error } = UserAdapter.useLoginMutation(email, password)
+    const { mutate, isSuccess, error } = useLogin()
 
     const validateInputs = () => {
       
@@ -40,12 +36,10 @@ export default function Login() {
     
     const onSubmitForm = (e :React.FormEvent) => {
       e.preventDefault()
-      console.log("jasnadkln")
       if(emailError !== '' || passwordError !== '') {
         return
       }
-      console.log("jasnaqdkln")
-      mutate()
+      mutate({ email, password })
     }
     
     useEffect(() => {
@@ -56,7 +50,6 @@ export default function Login() {
 
     useEffect(() => {
       if(isSuccess) {
-        console.log("jasnadkln")
         navigate('/')
       }
     }, [isSuccess, navigate])

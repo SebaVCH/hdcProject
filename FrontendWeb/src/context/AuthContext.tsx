@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { createContext, useState, useContext } from 'react';
-import { UserAdapter } from '../api/adapters/UserAdapter';
 import useSessionStore from '../stores/useSessionStore';
+import { useProfile } from '../api/hooks/UserHooks';
 
 
 type AuthContextProps = {
@@ -17,7 +17,7 @@ export function AuthProvider({ children } : { children : React.ReactNode}) {
     const [ role, setRole ] = useState('')
  
     const { accessToken } = useSessionStore()
-    const { isLoading, data, isSuccess, isError, error,  } = UserAdapter.useGetProfile(accessToken)
+    const { isLoading, data, isSuccess, isError, error,  } = useProfile()
     
     useEffect(() => {
         if(isSuccess) {

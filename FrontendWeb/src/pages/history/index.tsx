@@ -1,24 +1,23 @@
-import { Divider, Paper, useMediaQuery, useTheme } from "@mui/material";
+import { Paper, useMediaQuery, useTheme } from "@mui/material";
 import CustomDrawer from "../../component/CustomDrawer";
 import DrawerList from "../../component/DrawerList";
-import ListIconHome from "../../component/ListIconHome";
 import Mapa from "../../component/Map/Mapa";
 import { Position } from "../../utils/getCurrentLocation";
-import { THelpPoint } from "../../api/services/HelpPointService";
 import { useEffect, useState } from "react";
 import ListHistory from "./ListHistory";
-import { TRoute } from "../../api/services/RouteService";
-import { RouteAdapter } from "../../api/adapters/RouteAdapter";
 import useSessionStore from "../../stores/useSessionStore";
-import { HelpPointAdapter } from "../../api/adapters/HelpPointAdapter";
 import HandlerLocationHistory from "./handlerLocationHistory";
 import { endOfWeek, format, startOfWeek } from "date-fns";
 import { es } from 'date-fns/locale';
-import { UserAdapter } from "../../api/adapters/UserAdapter";
 import DialogUpdateAtended from "../../component/Dialog/DialogUpdateAttended";
 import compareSort from "../../utils/compareDate";
-import { RouteStatus } from "../../api/interfaces/Enums";
 import Sidebar from "../../component/Sidebar";
+import { Route } from "../../api/models/Route";
+import { HelpPoint } from "../../api/models/HelpPoint";
+import { useProfile } from "../../api/hooks/UserHooks";
+import { useRoutes, useRoutesByUser } from "../../api/hooks/RouteHooks";
+import { useHelpPoints } from "../../api/hooks/HelpPointHooks";
+import { RouteStatus } from "../../Enums/RouteStatus";
 
 
 function getFormatDate(a : Date, opt : string) {
@@ -37,19 +36,19 @@ export default function RouteHistory() {
 
     const { accessToken } = useSessionStore()
     const [ currentLocation, setCurrentLocation ] = useState<Position>({latitude : -29.959003986327698, longitude : -71.34176826076656})
-    const [ mapRoutes, setMapRoutes ] = useState<Map<string, TRoute[]>>(new Map())
-    const [ helpPoints, setHelpPoints ] = useState<THelpPoint[]>([])
+    const [ mapRoutes, setMapRoutes ] = useState<Map<string, Route[]>>(new Map())
+    const [ helpPoints, setHelpPoints ] = useState<HelpPoint[]>([])
     const [ HPLocation, setHPLocation ] = useState<number[]>([])
     const [ showLocation, setShowLocation ] = useState(false) 
     const [ opFecha, setOPFecha ] = useState('Día')
 
     const [ onlyUser, setOnlyUser ] = useState(false)
-    const [ routes, setRoutes ] = useState<TRoute[]>([])
+    const [ routes, setRoutes ] = useState<Route[]>([])
 
-    const userID = UserAdapter.useGetProfile(accessToken).data?._id
-    const useQueryRouteAll = RouteAdapter.useGetRoutes(accessToken)
-    const useQueryRouteByUserID = RouteAdapter.useGetRouteByUserID( userID, accessToken)
-    const useQueryHP= HelpPointAdapter.useGetHelpPoints(accessToken)
+    const userID = useProfile().data?.id
+    const useQueryRouteAll = useRoutes()
+    const useQueryRouteByUserID = useRoutesByUser(userID)
+    const useQueryHP= useHelpPoints()
 
 
     useEffect(() => {
@@ -76,15 +75,15 @@ export default function RouteHistory() {
 
     useEffect(() => {
 
-        const map = routes.reduce<Map<string, TRoute[]>>((acc : Map<string, TRoute[]>, route) => {
-            if(!route.completedAt || route.status != RouteStatus.Completed) return acc 
-            const format = getFormatDate(new Date(route.completedAt), opFecha)
+        const map = routes.reduce<Map<string, Route[]>>((acc : Map<string, Route[]>, route) => {
+            if(!route.dateFinished || route.status != RouteStatus.Completed) return acc 
+            const format = getFormatDate(new Date(route.dateFinished), opFecha)
             if(!acc.has(format)) {
                 acc.set(format, [])
             }
-            acc.set(format, [...(acc.get(format) as TRoute[]), route])
+            acc.set(format, [...(acc.get(format) as Route[]), route])
             return acc
-        }, new Map<string, TRoute[]>())
+        }, new Map<string, Route[]>())
         setMapRoutes(map)
 
     }, [opFecha, routes])

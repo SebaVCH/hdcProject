@@ -9,15 +9,15 @@ import { Paper, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
-import { RouteAdapter } from '../../api/adapters/RouteAdapter';
-import { TRoute } from '../../api/services/RouteService';
-import { RouteStatus } from '../../api/interfaces/Enums';
 import InputDescription from '../Input/InputDescription';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { TCreateRoute } from '../../api/adapters/Route.adapter';
+import { useCreateRoute } from '../../api/hooks/RouteHooks';
+import { Route } from '../../api/models/Route';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -38,17 +38,15 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
     const [ open, setOpen ] = stateOpen
     const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
     const [ acept, setAcept ] = useState(false)
+    const [ inviteCode, setInviteCode ] = useState('')
     const [ confirmation, setConfirmation ] = useState(false)
-    const [ route, setRoute ] = useState<TRoute>({
-        _id : '',
+    const [ route, setRoute ] = useState<Pick<Route, 'title' | 'description' | 'routeLeader'>>({
         title : `Ruta ${format(new Date(), "'del' dd 'de' MMMM", { locale : es})}`,
         description : '',
         routeLeader : '',
-        status : RouteStatus.Active
     })
     const [ copySuccess, setCopySuccess ] = useState<boolean | undefined>()
-
-    const { data, mutate } = RouteAdapter.usePostRouteMutation(route, accessToken)
+    const { data, mutate } = useCreateRoute()
 
 
     const handleClose = () => {
@@ -70,23 +68,23 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
     const handleAcept = () => {
         setAcept(true)
         setTimeout(() => {
-            mutate()
+            mutate(route)
         }, 300)
     }
 
     useEffect(() => {
         if(data) {
-            setRoute(data)
+            setInviteCode(data.inviteCode)
             setAcept(true)
             setConfirmation(true)
-            setRouteId(data._id)
+            setRouteId(data.id)
         }
     }, [data])
 
 
     const onClickContentCopy = async () => {
         try {
-            await  navigator.clipboard.writeText(route.inviteCode as string)
+            await  navigator.clipboard.writeText(inviteCode)
             setCopySuccess(true)
         } catch(e) {
             setCopySuccess(false)
@@ -149,7 +147,7 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                                 </Typography>
                                 <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
                                     <Typography>
-                                        {route.inviteCode}
+                                        {inviteCode}
                                     </Typography>
                                     <IconButton onClick={onClickContentCopy}>
                                         { copySuccess ? <DoneIcon /> : <ContentCopyIcon />}

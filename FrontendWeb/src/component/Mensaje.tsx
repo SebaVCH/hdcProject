@@ -1,14 +1,14 @@
 import { ListItem, ListItemText, Typography } from "@mui/material";
-import { TNotice } from "../api/services/NoticeService";
 import { useState } from "react";
 import { formatRelative } from "date-fns";
 import { es } from "date-fns/locale";
+import { Notice } from "../api/models/Notice";
 
 
 
 
 
-export default function Mensaje({ value, index } : { value : TNotice, index : number }) {
+export default function Mensaje({ value, index } : { value : Notice, index : number }) {
 
   const MAX_LENGTH = 100
   const [ msg, setMsg ] = useState(value.description as string)
@@ -37,7 +37,7 @@ export default function Mensaje({ value, index } : { value : TNotice, index : nu
                         variant="caption"
                         sx={{ color : '#757575', textAlign : 'end', my : 0.05}}
                     >
-                        {formatRelative(new Date(value.createdAt as string), new Date(), { locale : es })}
+                        {formatRelative(value.createdAt, new Date(), { locale : es })}
                     </Typography>
                 </div>
         }

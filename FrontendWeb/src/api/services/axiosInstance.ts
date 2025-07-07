@@ -1,5 +1,6 @@
 import axios, { AxiosError, isAxiosError } from 'axios'
 import { NavigateFunction } from 'react-router-dom'
+import useSessionStore from '../../stores/useSessionStore'
 
 
 
@@ -8,11 +9,19 @@ export const axiosInstance = axios.create({
     timeout: 3000,
     headers: {
         'Content-Type': 'application/json',
-        Accept: 'applicacion/json',
+        Accept: 'applicacion/json'
     }
 })
 
 let isDone = false
+
+axiosInstance.interceptors.request.use(config => {
+  const token = useSessionStore.getState().accessToken;
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const interceptorResponse = (navigate : NavigateFunction,  clearSesion : () => void) => {
 

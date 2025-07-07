@@ -8,14 +8,14 @@ import { Button, IconButton, Popover, Tooltip, Typography, useMediaQuery, useThe
 import esLocale from '@fullcalendar/core/locales/es';
 import { isSingleDaySelection } from '../utils/calendar'
 import DialogCreateEventCalendar from './Dialog/DialogCreateEventCalendar'
-import { CalendarAdapter } from '../api/adapters/CalendarAdapter'
 import useSessionStore from '../stores/useSessionStore'
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { TCalendarEvent } from '../api/services/CalendarService'
+import { useCalendarEvents } from '../api/hooks/CalendarEventHooks'
+import { CalendarEvent } from '../api/models/Calendar'
 
 export default function Calendar() {
 
@@ -28,9 +28,9 @@ export default function Calendar() {
         setOpen(true)
     };
 
-    const { isError, isPending, isSuccess, data, error} = CalendarAdapter.useGetEventCalendar(accessToken)
+    const { isError, isPending, isSuccess, data, error} = useCalendarEvents()
     
-    const [ eventClicked, setEventClicked ] = useState<TCalendarEvent | undefined>(undefined)
+    const [ eventClicked, setEventClicked ] = useState<CalendarEvent | undefined>(undefined)
     const [ anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const openPopover = Boolean(anchorEl)
     const id =  openPopover ? 'view-event-popover' : undefined
@@ -51,7 +51,7 @@ export default function Calendar() {
     const handleEventClick = (clickInfo : EventClickArg) => {
         setAnchorEl(clickInfo.el)
         if(isSuccess) {
-            const index_event = data.findIndex((ev) => ( ev._id === clickInfo.event.id ))
+            const index_event = data.findIndex((ev) => ( ev.id === clickInfo.event.id ))
             if(index_event !== -1) {
                 setEventClicked(data[index_event])
             }
@@ -80,8 +80,8 @@ export default function Calendar() {
                     unselectAuto
                     locale={esLocale}
                     events={data?.map((event, index) => ({
-                        id : event._id,
-                        date : new Date(event.dateStart),
+                        id : event.id,
+                        date : event.DateStart,
                         title : ((computerDevice || event.title.length < 5) ? event.title : event.title.slice(0, 5) + '...'),
                         allDay : true,
                     }))}
@@ -151,7 +151,7 @@ export default function Calendar() {
                                 {eventClicked.title}
                             </Typography>
                             <Typography variant='inherit'>
-                                {format(eventClicked.dateStart, "EEEE, dd 'de' MMMM", { locale : es})}
+                                {format(eventClicked.DateStart, "EEEE, dd 'de' MMMM", { locale : es})}
                                 <Typography variant='caption' fontSize={12}>
                                     {`, a las ${eventClicked.timeStart} hasta ${eventClicked.timeEnd}`}
                                 </Typography>

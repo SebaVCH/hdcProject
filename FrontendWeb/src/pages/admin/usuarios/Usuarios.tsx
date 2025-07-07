@@ -1,39 +1,45 @@
-import { Button, Divider, IconButton, InputBase, Paper, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { IUser } from "../../../api/interfaces/IUser";
+import { Button, IconButton, InputBase, Paper, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import CustomDrawer from "../../../component/CustomDrawer";
 import TableUser from "../../../component/TableUser";
 import SearchIcon from '@mui/icons-material/Search';
 import DrawerList from "../../../component/DrawerList";
-import ListIconHome from "../../../component/ListIconHome";
 import { useEffect, useState } from "react";
-import { UserAdapter } from "../../../api/adapters/UserAdapter";
 import useSessionStore from "../../../stores/useSessionStore";
 import DialogCreateUser from "../../../component/Dialog/DialogCreateUser";
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import Sidebar from "../../../component/Sidebar";
+import { IUser } from "../../../api/models/User";
+import { useUsers } from "../../../api/hooks/UserHooks";
+import DialogCreateInstitution from "../../../component/Dialog/DialogCreateInstitution";
+import { useInstitutions } from "../../../api/hooks/InstitutionHooks";
+import { Institution } from "../../../api/models/Institution";
 
 
 export default function Usuarios() {
 
 
     const [ users, setUsers ] = useState<IUser[]>([])
+    const [ institutions, setInstitutions ] = useState<Institution[]>([])
     const { accessToken } = useSessionStore()
-    const {isError, isSuccess, data} = UserAdapter.useFindAllUsers(accessToken)
-
-
-
-
+    const {isError, isSuccess, data} = useUsers()
+    const useQuery = useInstitutions()
 
     useEffect(() => {
-        console.log(data)
         if(data) {
             setUsers(data)
         }
     }, [data])
 
+    useEffect(() => {
+        if(useQuery.data) {
+            setInstitutions(useQuery.data)
+        }
+    }, [useQuery.data])
+
 
     const [ prefix, setPrefix ] = useState<string>('')   
     const [ open, setOpen ] = useState(false) 
+    const [ openAddInstitution, setOpenAddInstitution ] = useState(false)
 
     const handleExport = async () => {
         fetch(`${import.meta.env.VITE_URL_BACKEND}/export-data/people-helped`, {
@@ -80,7 +86,7 @@ export default function Usuarios() {
                     <></>
                 }
                 <div className="flex flex-col gap-5 min-w-11/12">
-                    <div className={"flex flex-row gap-5 "}>
+                    <div className={"flex gap-5 " + (computerDevice ? "flex-row " : "flex-col" )}>
                         <Paper
                             component="form"
                             className={"px-0.5 py-1 flex items-center " + (computerDevice ? 'w-100' : 'grow')}
@@ -98,26 +104,21 @@ export default function Usuarios() {
                         </Paper>
                         <Button size="small" variant="contained" onClick={()=>{setOpen(true)}}>
                             Agregar Usuario
-                        </Button>  
-                                                <Tooltip title={'exportar datos'}>
-                            <Button color='info' variant="contained" onClick={handleExport}>
-                                <FileDownloadIcon fontSize="large" />
-                            </Button>    
-                        </Tooltip>
-                    </div>
-                    { isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix}/> : <p>Cargando...</p>}
-                </div>
-            </div>
-            <DialogCreateUser open={open} setOpen={setOpen} />
-        </div>
-    )
-};
-
-
-/*
+                        </Button> 
+                        <Button size="small" variant="contained" onClick={() => {setOpenAddInstitution(true)}}>
+                            Agregar Institución    
+                        </Button> 
                         <Tooltip title={'exportar datos'}>
                             <Button color='info' variant="contained" onClick={handleExport}>
                                 <FileDownloadIcon fontSize="large" />
                             </Button>    
                         </Tooltip>
-*/
+                    </div>
+                    { isSuccess && useQuery.isSuccess ? <TableUser users={users} setUsers={setUsers} prefixSearch={prefix} institutions={institutions} setInstitutions={setInstitutions}/>: <p>Cargando...</p>}
+                </div>
+            </div>
+            <DialogCreateUser open={open} setOpen={setOpen} />
+            <DialogCreateInstitution stateOpen={[openAddInstitution, setOpenAddInstitution]} />
+        </div>
+    )
+};
