@@ -18,6 +18,7 @@ export default {
       supportsTablet: true
     },
     android: {
+      package: "com.winterohh.frontmovil",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff"
@@ -27,6 +28,9 @@ export default {
       favicon: "./assets/favicon.png"
     },
     extra: {
+       eas: {
+        projectId: "0933227c-dbc3-4072-a39b-63cd6dd40e46"
+      },
       EXPO_PUBLIC_URL_BACKEND: process.env.EXPO_PUBLIC_URL_BACKEND,
       GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
     }
