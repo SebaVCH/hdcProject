@@ -9,10 +9,17 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import HistoryIcon from '@mui/icons-material/History';
 import EventIcon from '@mui/icons-material/Event';  
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Role } from "../api/interfaces/Enums";
 import LogoutIcon from '@mui/icons-material/Logout';
 import useSessionStore from "../stores/useSessionStore";
 import DialogLogout from "./Dialog/DialogLogout";
+import { Role } from "../Enums/Role";
+
+
+const hoverStyles = {
+  '&:hover svg': {
+    color: '#5865F2', 
+  }
+};
 
 export default function Sidebar() {
 
@@ -50,17 +57,17 @@ export default function Sidebar() {
 
     return (
         <div className="flex flex-col shadow-[4px_0_6px_-1px_rgba(0,0,0,0.25)]">
-            <Tooltip title={"Home"}><IconButton onClick={onClickHome} sx={{ p : 2}}><HomeIcon htmlColor="#374151" sx={{ fontSize: 40 }} /></IconButton></Tooltip>
+            <Tooltip title={"Home"}><IconButton  onClick={onClickHome} sx={{ p : 2, ...hoverStyles }}><HomeIcon htmlColor="#374151" sx={{ fontSize: 40 }} /></IconButton></Tooltip>
             <Divider variant="middle"/>
             <div className="flex flex-col py-5 gap-7 justify-start items-center">
-                <Tooltip title="Perfil"><IconButton onClick={onClickProfile}><AccountBoxIcon htmlColor="#374151" fontSize="large"/></IconButton></Tooltip>
-                <Tooltip title="Historial"><IconButton onClick={onClickHistory}><HistoryIcon htmlColor="#374151" fontSize="large" /></IconButton></Tooltip>
-                <Tooltip title="Agendar ruta"><IconButton onClick={onClickSchedule}><EventIcon htmlColor="#374151" fontSize="large"/></IconButton></Tooltip>
-                <Tooltip title="Enviar aviso"><IconButton onClick={handleClickOpen}><CampaignIcon htmlColor="#374151" fontSize="large" /></IconButton></Tooltip>
+                <Tooltip title="Perfil"><IconButton onClick={onClickProfile} sx={{ ...hoverStyles }}><AccountBoxIcon htmlColor="#374151" fontSize="large"/></IconButton></Tooltip>
+                <Tooltip title="Historial"><IconButton onClick={onClickHistory} sx={{ ...hoverStyles }}><HistoryIcon htmlColor="#374151" fontSize="large" /></IconButton></Tooltip>
+                <Tooltip title="Agendar ruta"><IconButton onClick={onClickSchedule} sx={{ ...hoverStyles }}><EventIcon htmlColor="#374151" fontSize="large"/></IconButton></Tooltip>
+                <Tooltip title="Enviar aviso"><IconButton onClick={handleClickOpen} sx={{ ...hoverStyles }}><CampaignIcon htmlColor="#374151" fontSize="large" /></IconButton></Tooltip>
                 { role === Role.admin  ?
 
                     <Tooltip title="Gestionar Usuarios">
-                        <IconButton onClick={onClickUsers}>
+                        <IconButton onClick={onClickUsers}  sx={{ ...hoverStyles }}>
                             <PeopleAltIcon htmlColor='#374151' fontSize='large'/>
                         </IconButton>
                     </Tooltip>

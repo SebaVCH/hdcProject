@@ -1,19 +1,20 @@
-import { Button, Divider, IconButton, InputAdornment, Paper, TextField, Typography } from "@mui/material";
+import { Button, Divider, Paper, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { TProfileResponse } from "../../api/services/UserService";
 import DialogChangePassword from "../../component/Dialog/DialogChangePassword";
 import { TResumenActividad } from ".";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import RouteIcon from '@mui/icons-material/Route';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import CrisisAlertIcon from '@mui/icons-material/CrisisAlert';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ResumeItem from "./ResumeItem";
 import { useAuth } from "../../context/AuthContext";
+import { IUser } from "../../api/models/User";
+import { format } from "date-fns";
+import { useUserParticipation } from "../../api/hooks/UserHooks";
 
 type TableProfileProps = {
      stateResumenActividad : [ TResumenActividad, React.Dispatch<React.SetStateAction<TResumenActividad>> ]
-     stateUser : [TProfileResponse , React.Dispatch<React.SetStateAction<TProfileResponse | undefined>> ]
+     stateUser : [IUser , React.Dispatch<React.SetStateAction<IUser | undefined>> ]
      stateHasChanges : [ boolean, React.Dispatch<React.SetStateAction<boolean>>]
 } 
 
@@ -25,6 +26,8 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
      const [ resumen, setResumen ] = stateResumenActividad
      const [ , setHasChange ] = stateHasChanges
 
+     const helpPoints = useUserParticipation(user.id).data?.total_helpingpoints
+
      const onChangeName = (name : string) => {
           setHasChange(true)
           setUser({ ...user, name }) 
@@ -34,7 +37,6 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
           setHasChange(true)
           setUser({ ...user, phone })
      }
-
 
      return (
           <div className="flex flex-col grow w-full items-center justify-center">
@@ -117,35 +119,28 @@ export default function TableProfile({ stateUser, stateHasChanges, stateResumenA
                     <Paper elevation={2} className="flex items-start justify-start py-4 flex-col gap-4 border border-neutral-300">
                          <ResumeItem 
                               icon={<EventAvailableIcon color="action" />} 
-                              activityDescription={<Typography variant="button" color="textSecondary"> última Ruta realizada</Typography>}
+                              activityDescription={<Typography variant="button" color="textSecondary">Última ruta realizada</Typography>}
                               activityValue={<Typography variant="button" color="info">{resumen.lastRouteDate}</Typography>}
                          />
                          <Divider className="w-full" />
                          <ResumeItem
                               icon={<RouteIcon color='secondary' />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Rutas Completadas</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Rutas completadas</Typography>}
                               activityValue={<Typography variant="body1" color='info'>{resumen.amountCompletedRoutes}</Typography>}
                          />
                          <Divider  className="w-full" /> 
                          <ResumeItem
                               icon={<QuestionAnswerIcon color="info" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Registros Completados</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>2</Typography>}
-                         />
-                         <Divider className="w-full" />    
-                         <ResumeItem
-                              icon={<CrisisAlertIcon color="warning" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Cantidad de Riesgos Notificados</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>10</Typography>}
-                         />
+                              activityDescription={<Typography variant='button' color='textSecondary'>Puntos de ayuda registrados</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>{helpPoints}</Typography>}
+                         />  
                          <Divider className="w-full" />   
                          <ResumeItem
                               icon={<HowToRegIcon color="success" />}
-                              activityDescription={<Typography variant='button' color='textSecondary'>Fecha Creación de la cuenta</Typography>}
-                              activityValue={<Typography variant="body1" color='info'>20-03-2025</Typography>}
+                              activityDescription={<Typography variant='button' color='textSecondary'>Miembro desde</Typography>}
+                              activityValue={<Typography variant="body1" color='info'>{format(user.dateRegister, 'dd-MM-yyyy')}</Typography>}
                          />                                              
                     </Paper>
-                    
                </div>
           </div>
     )

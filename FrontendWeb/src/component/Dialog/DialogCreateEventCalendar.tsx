@@ -8,12 +8,13 @@ import { Alert, CircularProgress, TextField, Typography } from '@mui/material';
 import InputDescription from '../Input/InputDescription';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import useSessionStore from '../../stores/useSessionStore';
-import { CalendarAdapter } from '../../api/adapters/CalendarAdapter';
 import { useEffect, useState } from 'react';
-import { TCalendarEvent } from '../../api/services/CalendarService';
 import { DateSelectArg } from '@fullcalendar/core/index.js';
 import ComboBox from '../Button/ComboBox';
 import { timeSlots } from '../../utils/calendar';
+import { CalendarEvent } from '../../api/models/Calendar';
+import { useCalendarEvents, useCreateCalendarEvent } from '../../api/hooks/CalendarEventHooks';
+import { useProfile } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -32,17 +33,19 @@ export type DialogCreateRiskProps = {
 
 export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo } : DialogCreateRiskProps) {
 
-    const { accessToken } = useSessionStore()
-
+    const authorID = useProfile().data?.id
     const [ open, setOpen ] = stateOpen
     const [ selectInfo, setSelectInfo ] = stateSelectInfo
     const [ startTime, setStartTime] = useState<string>();
     const [ endTime, setEndTime] = useState<string>();
     const [ listEndTime, setListEndTime] = useState<string[]>([]);
-    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<TCalendarEvent, '_id'| 'authorId'>>({
+    const [ formCalendarEvent, setFormCalendarEvent ] = useState<Omit<CalendarEvent, 'id' | 'authorName' | 'colorInstitution'>>({
         title : '',
         description : '',
-        dateStart : ''
+        dateStart : new Date(),
+        authorID : '',
+        timeStart : '',
+        timeEnd : ''
     }) 
     const [ formErrors, setFormErrors ] = useState({
         errorTitle : '',
@@ -61,7 +64,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
         setStartTime(undefined)
         setEndTime(undefined)
         setListEndTime([])
-        setFormCalendarEvent({title : '', description : '', dateStart : ''})
+        setFormCalendarEvent({title : '', description : '', dateStart : new Date(), authorID : '', timeEnd : '' , timeStart : ''})
         setFormErrors({errorDateStart : '', errorDescription : '', errorTitle : '', errorStartTime : '', errorEndTime : ''})
         reset()
     }
@@ -71,7 +74,8 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
         setOpen(false)
     }
 
-    const { isIdle, isPending, isSuccess, isError, mutate, reset } = CalendarAdapter.useAddEventCalendarMutation(accessToken)
+    const { refetch } = useCalendarEvents()
+    const { isIdle, isPending, isSuccess, isError, mutate, reset } = useCreateCalendarEvent()
     
     const handleOnChangeTitle = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormCalendarEvent(prev => ({...prev, title : e.target.value}))
@@ -113,6 +117,9 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
             errors.errorEndTime = 'Escoge una hora estimada de finalización'
             isValid = false
         }
+        if(!authorID) {
+            isValid = false
+        }
         setFormErrors(errors)
         return isValid
     }
@@ -121,9 +128,12 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
     const handleSubmit = () => {
         if(!validateForm()) return 
 
-        const newEvent = {
+        const newEvent : Omit<CalendarEvent, 'id' | 'authorName' | 'colorInstitution'>= {
             ...formCalendarEvent,
-            title: `${startTime} - ${endTime} | ${formCalendarEvent.title}`
+            title: formCalendarEvent.title,
+            authorID: authorID as string,
+            timeStart: startTime as string,
+            timeEnd: endTime as string
         }
         if(selectInfo) {
             console.log(selectInfo.startStr)
@@ -137,6 +147,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
             })
             selectInfo.view.calendar.unselect();
         }
+        console.log(newEvent)
 
         mutate(newEvent)
     }
@@ -144,6 +155,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
 
     useEffect(() => {
         if(isSuccess) {
+            refetch()
             setTimeout(() => {
                 handleClose()
             }, 1000)
@@ -154,7 +166,7 @@ export default function DialogCreateEventCalendar({ stateOpen, stateSelectInfo }
     useEffect(() => {
        if(open) {
             if(selectInfo) {
-                setFormCalendarEvent(prev => ({...prev, dateStart : selectInfo.startStr}))
+                setFormCalendarEvent(prev => ({...prev, dateStart : new Date(selectInfo.startStr)}))
             } else {
                 setOpen(false)
                 alert('error: date nulltype')

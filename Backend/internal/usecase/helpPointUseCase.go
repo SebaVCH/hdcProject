@@ -95,7 +95,7 @@ func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 }
 
 func (h helpingPointUseCase) DeleteHelpingPoint(c *gin.Context) {
-	helpingPointID := c.Param("helpingPointID")
+	helpingPointID := c.Param("id")
 	if helpingPointID == "" {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de punto de ayuda no proporcionado"})
 		return

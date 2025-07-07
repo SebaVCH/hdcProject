@@ -4,11 +4,11 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import { Alert, AlertColor, AlertPropsColorOverrides, TextField } from '@mui/material';
+import { Alert, AlertColor, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { UserAdapter } from '../../api/adapters/UserAdapter';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import useSessionStore from '../../stores/useSessionStore';
+import { useUpdateUser } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -32,7 +32,7 @@ export default function DialogChangePassword({ open, setOpen, email} : { open : 
     const [ messageAlert, setMessageAlert] = useState('')
     const [ severity, setSeverity ] = useState<AlertColor>('info')  
 
-    const { isError, mutate, isSuccess, isPending, error} = UserAdapter.useUpdateProfile(accessToken as string)
+    const { isError, mutate, isSuccess, isPending, error} = useUpdateUser()
 
     const onChangeOldPassword = (e : React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         e.preventDefault()
@@ -81,9 +81,9 @@ export default function DialogChangePassword({ open, setOpen, email} : { open : 
             return 
         }
         mutate({
-            currentPassword : oldPassword,
-            newPassword : newPassword,
-            confirmNewPassword : verifyNewPassword
+            currentPassword: oldPassword,
+            newPassword: newPassword,
+            confirmNewPassword: verifyNewPassword
         })
     }
 

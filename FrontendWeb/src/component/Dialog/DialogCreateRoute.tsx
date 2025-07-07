@@ -9,15 +9,15 @@ import { Paper, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
-import { RouteAdapter } from '../../api/adapters/RouteAdapter';
-import { TRoute } from '../../api/services/RouteService';
-import { RouteStatus } from '../../api/interfaces/Enums';
 import InputDescription from '../Input/InputDescription';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useCreateRoute } from '../../api/hooks/RouteHooks';
+import { Route } from '../../api/models/Route';
+import { useProfile } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -37,21 +37,44 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
 
     const [ open, setOpen ] = stateOpen
     const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
+    const  leaderID  = useProfile().data?.id
     const [ acept, setAcept ] = useState(false)
+    const [ inviteCode, setInviteCode ] = useState('')
     const [ confirmation, setConfirmation ] = useState(false)
-    const [ route, setRoute ] = useState<TRoute>({
-        _id : '',
+    const [ route, setRoute ] = useState<Pick<Route, 'title' | 'description' | 'routeLeader'>>({
         title : `Ruta ${format(new Date(), "'del' dd 'de' MMMM", { locale : es})}`,
         description : '',
         routeLeader : '',
-        status : RouteStatus.Active
     })
-    const [ copySuccess, setCopySuccess ] = useState<boolean | undefined>()
 
-    const { data, mutate } = RouteAdapter.usePostRouteMutation(route, accessToken)
+    const [ routeError, setRouteError ] = useState({
+        title : '',
+        description: '',
+        routeLeaderError: ''
+    })
+
+    const [ copySuccess, setCopySuccess ] = useState<boolean | undefined>()
+    const { data, mutate } = useCreateRoute()
+
+
+
+    const clearStates = () => {
+        setRoute({
+            title : `Ruta ${format(new Date(), "'del' dd 'de' MMMM", { locale : es})}`,
+            description : '',
+            routeLeader : '',
+        })
+        setRouteError({
+            title : '',
+            description: '',
+            routeLeaderError: ''
+        })
+    }
+
 
 
     const handleClose = () => {
+        clearStates()
         if(confirmation) {
             setRouteStatus(true)
         }
@@ -67,26 +90,48 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
         setRoute({...route, title : e.target.value})
     }
 
+
+    const validateForm = () => {
+        if(route.description === '') {
+            setRouteError({...routeError, description: 'La descripción no debe estar vacia'})
+            return false
+        }
+        if(route.title === '') {
+            setRouteError({...routeError, title: 'El título no debe estar vacio'})
+            return false
+        }
+        if(!leaderID) {
+            setRouteError({...routeError, routeLeaderError: 'Error inesperado en obtener el leader de la ruta'})
+            return false
+        }
+        setRouteError({ description: '', title: '', routeLeaderError: ''})
+        return true
+    } 
+
+
+
     const handleAcept = () => {
+        if(!validateForm()) return 
+        
         setAcept(true)
         setTimeout(() => {
-            mutate()
+            mutate({...route, routeLeader: leaderID as string})
         }, 300)
     }
 
     useEffect(() => {
         if(data) {
-            setRoute(data)
+            setInviteCode(data.inviteCode)
             setAcept(true)
             setConfirmation(true)
-            setRouteId(data._id)
+            setRouteId(data.id)
         }
     }, [data])
 
 
     const onClickContentCopy = async () => {
         try {
-            await  navigator.clipboard.writeText(route.inviteCode as string)
+            await  navigator.clipboard.writeText(inviteCode)
             setCopySuccess(true)
         } catch(e) {
             setCopySuccess(false)
@@ -110,30 +155,33 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                 <DialogContent className='flex flex-col gap-5'>
                     {!acept ? 
                         <>
-                            <Typography variant='body1'>
-                                Estás a punto de crear una nueva ruta social, en la que podrás hacer: <br /> <br/>
-                                - Poder registrar a las personas en situación de calle. <br />
-                                - Poder registrar riesgos que existen en algunos sectores. <br /> <br/>
-                                    
-                                Podrás finalizar la ruta en cualquier momento
+                            <Typography variant="body1">
+                            Estás a punto de crear una nueva ruta social, durante la cual podrás: <br /><br />
+                            - Registrar a personas en situación de calle. <br />
+                            - Reportar riesgos presentes en ciertos sectores. <br /><br />
+                            Puedes finalizar la ruta en cualquier momento.
                             </Typography>
+
                             <TextField 
                                 variant='standard'
                                 label="Ingresa el Título de la Ruta"
                                 value={route.title}
+                                error={routeError.title !== ''}
+                                helperText={routeError.title}
                                 required
                                 onChange={handleTitleInput}
                             />
                             <InputDescription
                                 variant='standard'
                                 required 
+                                error={routeError.description !== ''}
+                                helperText={routeError.description}
                                 label='Descripción de la ruta'
                                 placeholder='Ingresa la descripción'
                                 value={route.description}
-                                maxLength={50}
+                                maxLength={100}
                                 onChange={handleDescriptionInput}
                             />
-                            
                         </>
                     :
                         !confirmation ? 
@@ -149,7 +197,7 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                                 </Typography>
                                 <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
                                     <Typography>
-                                        {route.inviteCode}
+                                        {inviteCode}
                                     </Typography>
                                     <IconButton onClick={onClickContentCopy}>
                                         { copySuccess ? <DoneIcon /> : <ContentCopyIcon />}

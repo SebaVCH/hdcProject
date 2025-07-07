@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 
-
+.leaflet-popup-content {
+  min-width: 200px;
+}
 
 html, body {
     height: 100%;
@@ -74,10 +76,6 @@ html, body {
     margin: 4px 0;
   }
   
-
-  
-
-  
   .fc .fc-button {
     padding: 4px 8px;
     font-size: 0.8rem;
@@ -88,7 +86,5 @@ html, body {
     padding: 0 2px;
     font-size: 0.7rem;
     line-height: 1.2;
-  }
-  
-  
+  }  
 }

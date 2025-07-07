@@ -1,164 +1,60 @@
-import compareSort, { compareSortNotices } from "../../utils/compareDate"
-import { sleep } from "../../utils/sleep"
+import { compareSortNotices } from "../../utils/compareDate"
+import { MapNoticeFromBackend, TNoticeBackend, TNoticeCreateRequest, TNoticeUpdateRequest } from "../adapters/Notice.adapter"
+import { Notice } from "../models/Notice"
 import { axiosInstance } from "./axiosInstance"
-import { UserService } from "./UserService"
 
-
-
-
-export type TNoticeResponse = {
-    _id ?: string 
-    description ?: string
-    createdAt ?: string 
-    authorId ?: string
-    authorName ?: string
-} 
-
-export type TNoticeDeleteResponse = {
-    message : string 
-}
-
-export type TNotice = TNoticeResponse
-
-
-type TNoticeRequest = {
-    description : string,
-    author_id : string
-}
 
 export class NoticeService {
 
     private static readonly RESOURCE_NAME = 'notification'
 
-
-    static async MarkAsReadNotices( unreadNotices: TNoticeResponse[], accessToken : string ) : Promise<boolean> {
-        
+    static async MarkAsReadNotices( unreadNotices: Notice[] ) : Promise<boolean> {
         Promise.all(unreadNotices.map(async (notice , _ ) => (
-            await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/read/${notice._id}`, {}, {
-                headers : {
-                    Authorization : `Bearer ${accessToken}`
-                }
-            })
+            await axiosInstance.put(`/${NoticeService.RESOURCE_NAME}/read/${notice.id}`)
         )))
         return true
     }
 
-
-    static async GetNoticesWithAuthorName( data : TNoticeResponse[], accessToken : string ) : Promise<TNoticeResponse[]> {
-
-        const notices =  await Promise.all(data.map(async (notice, _) => {
-        
-            let name = 'Usuario Eliminado'
-            try {
-                name = (await UserService.FindUserById(notice.authorId as string, accessToken)).name
-            } catch(e) {
-                console.log(e)
-            }
-            
-            return ({
-                ...notice,
-                authorName : name
-            })
-        }))
+    static async GetReadNotices() : Promise<Notice[]> {
+        const { data } = await axiosInstance.get(`/${NoticeService.RESOURCE_NAME}/read`)
+        if( data?.message === null) return []
+        const notices : Notice[] = await Promise.all((data?.message as TNoticeBackend[]).map(async (notice, _) => (
+            await MapNoticeFromBackend(notice)
+        )))
         return notices.sort(compareSortNotices)
     }
 
-
-    static async GetReadNotices(accessToken ?: string) : Promise<TNoticeResponse[]> {
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/read`, {
-            headers : {
-                Authorization : `Bearer ${accessToken}`
-            }
-        })
+    static async GetUnReadNotices() : Promise<Notice[]> {
+        const { data } = await axiosInstance.get(`/${NoticeService.RESOURCE_NAME}/unread`)
         if( data?.message === null) return []
-
-        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
-                _id : value?._id,
-                type : value?.type,
-                description : value?.description,
-                createdAt : value?.created_at,
-                authorId : value?.author_id,
-        }))
-        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
+        const notices : Notice[] = await Promise.all((data?.message as TNoticeBackend[]).map(async (notice, _) => (
+            await MapNoticeFromBackend(notice)
+        )))
+        return notices.sort(compareSortNotices)
     }
 
-    static async GetUnReadNotices(accessToken ?: string) : Promise<TNoticeResponse[]> {
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/unread`, {
-            headers : {
-                Authorization : `Bearer ${accessToken}`
-            }
-        })
+    static async GetNotices() : Promise<Notice[]>{
+        const { data } = await axiosInstance.get(`/${NoticeService.RESOURCE_NAME}`) 
         if( data?.message === null) return []
-
-        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
-                _id : value?._id,
-                type : value?.type,
-                description : value?.description,
-                createdAt : value?.created_at,
-                authorId : value?.author_id,
-        }))
-        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
+        const notices : Notice[] = await Promise.all((data?.message as TNoticeBackend[]).map(async (notice, _) => (
+            await MapNoticeFromBackend(notice)
+        )))
+        return notices.sort(compareSortNotices)
     }
 
-    static async GetNotices(accessToken ?: string) : Promise<TNoticeResponse[]>{
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        }) 
-        if( data?.message === null) return []
-
-        const notices : TNoticeResponse[] = (data?.message as any[]).map((value, _) => ({
-            _id : value?._id,
-            type : value?.type,
-            description : value?.description,
-            createdAt : value?.created_at,
-            authorId : value?.author_id,
-        }))
-        return await NoticeService.GetNoticesWithAuthorName( notices, accessToken as string)
+    static async PostNotice( body : TNoticeCreateRequest ) : Promise<Notice> {
+        const { data } = await axiosInstance.post(`/${NoticeService.RESOURCE_NAME}`, body)
+        return await MapNoticeFromBackend(data?.message as TNoticeBackend)
     }
 
-    static async PostNotice( body : TNoticeRequest, accessToken ?: string ) : Promise<TNoticeResponse> {
-        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}`, body, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
-        console.log("En Post Notice" ,data)
-        return {
-            _id : data?.Aviso?._id,
-            description : data?.Aviso?.description,
-            createdAt : data?.Aviso?.created_at,
-            authorId : data?.Aviso?.author_id,
-        }
+    static async DeleteNotice( _id : string ) : Promise<string> {
+        const { data } = await axiosInstance.delete(`/${NoticeService.RESOURCE_NAME}/${_id}`)
+        return data?.message
     }
 
-
-    static async DeleteNotice( _id : string, accessToken ?: string ) : Promise<TNoticeDeleteResponse> {
-        const { data } = await axiosInstance.delete(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/${_id}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
-        console.log("En delete Notice: ", data)
-        return {
-            message : data?.message
-        }
-    }
-
-    static async UpdateNotice( body : TNotice, accessToken ?: string ) : Promise<TNoticeResponse> {
-        const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/${NoticeService.RESOURCE_NAME}/${body._id}`, body, {
-            headers : {
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
-        console.log("En update Notice: ", data)
-        return {
-            _id : data?.message?._id,
-            description : data?.message?.description,
-            createdAt : data?.message?.created_at,
-            authorId : data?.message?.author_id,
-        }
+    static async UpdateNotice( body : TNoticeUpdateRequest ) : Promise<Notice> {
+        const { data } = await axiosInstance.put(`/${NoticeService.RESOURCE_NAME}/${body._id}`, body)
+        return await MapNoticeFromBackend(data?.message as TNoticeBackend)
     } 
 
 }

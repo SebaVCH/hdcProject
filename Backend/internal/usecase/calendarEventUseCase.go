@@ -60,7 +60,7 @@ func (ce calendarEventUseCase) CreateCalendarEvent(c *gin.Context) {
 }
 
 func (ce calendarEventUseCase) DeleteCalendarEvent(c *gin.Context) {
-	eventID := c.Param("eventID")
+	eventID := c.Param("id")
 
 	if eventID == "" {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "ID de evento no proporcionado"})

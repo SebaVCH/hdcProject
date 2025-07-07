@@ -8,8 +8,8 @@ import { Alert,  Typography } from '@mui/material';
 import { useEffect } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CircularProgress from '@mui/material/CircularProgress';
-import { RouteAdapter } from '../../api/adapters/RouteAdapter';
 import CloseDialogButton from '../Button/CloseDialogButton';
+import { useFinishRoute, useRoute } from '../../api/hooks/RouteHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -25,8 +25,8 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
 
    
     const { setRouteStatus, routeId, setRouteId, accessToken } = useSessionStore()
-    const dataRoute = RouteAdapter.useGetRouteByID( routeId as string, accessToken).data
-    const { mutate, isSuccess, isError, isIdle, isPending } = RouteAdapter.useFinishRouteMutation(accessToken)
+    const dataRoute = useRoute( routeId as string).data
+    const { mutate, isSuccess, isError, isIdle, isPending } = useFinishRoute()
 
     useEffect(() => {
         if(isSuccess) {
@@ -70,7 +70,7 @@ export default function DialogFinishRoute({ open, setOpen } : { open : boolean, 
                         isPending ? 
                         <CircularProgress />
                         :
-                        <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                        <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='standard' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
                             {isSuccess ? 'Se Finalizo la ruta éxitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
                         </Alert>
                     }

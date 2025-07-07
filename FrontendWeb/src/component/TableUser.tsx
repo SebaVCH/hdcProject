@@ -1,15 +1,17 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Divider, Checkbox, alpha, Box, IconButton, TableSortLabel, Toolbar, Tooltip, Typography, FormControlLabel, Switch, TablePagination, useMediaQuery, useTheme } from "@mui/material";
-import { IUser } from "../api/interfaces/IUser";
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Divider, Checkbox, alpha, Box, IconButton, TableSortLabel, Toolbar, Tooltip, Typography, useMediaQuery, useTheme, CircularProgress } from "@mui/material";
 import { visuallyHidden } from '@mui/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
 import React, { useEffect } from "react";
 import { Order, getComparator } from "../utils/utilsSort";
+import { IUser } from "../api/models/User";
+import { useInstitution } from "../api/hooks/InstitutionHooks";
+import { Institution } from "../api/models/Institution";
 
-
+type SortableUserKeys = keyof Omit<IUser, 'listRoutes' | 'dateRegister' | 'completedRoutes'>;
 
 interface HeadCell {
   disablePadding: boolean;
-  id: keyof IUser;
+  id: SortableUserKeys
   label: string;
   align: "center" | "left" | "right" | "justify" | "inherit";
 }
@@ -27,18 +29,28 @@ const headCells: readonly HeadCell[] = [
     align: 'left',
     disablePadding: false,
     label: 'Email',
+  }, {
+    id: 'institutionID',
+    align : 'left',
+    disablePadding : false,
+    label: 'Institución'
   },
   {
-    id: 'phone',
+    id: 'role',
     align: 'center',
     disablePadding: false,
-    label: 'Teléfono',
+    label: 'Rol',
+  }, {
+    id : 'phone',
+    align : 'center',
+    disablePadding : false,
+    label: 'Teléfono'
   }
 ];
 
 interface EnhancedTableProps {
   numSelected: number;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof IUser) => void;
+  onRequestSort: (event: React.MouseEvent<unknown>, property: SortableUserKeys) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
   order: Order;
   orderBy: string;
@@ -51,7 +63,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
   const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
     props;
   const createSortHandler =
-    (property: keyof IUser) => (event: React.MouseEvent<unknown>) => {
+    (property: SortableUserKeys) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
@@ -137,11 +149,15 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
         </div>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={onDeleteUsers}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
+        <>
+        {/*
+          <Tooltip title="Delete">
+            <IconButton onClick={onDeleteUsers}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        */}
+        </>
       ) : (
         <>
         </>
@@ -150,16 +166,16 @@ function EnhancedTableToolbar(props: EnhancedTableToolbarProps) {
   );
 }
 
-export default function TableUser({ users, setUsers, prefixSearch } : { users : IUser[], setUsers : (newUsers : IUser[]) => void, prefixSearch : string }) {
+export default function TableUser({ users, setUsers, prefixSearch, institutions, setInstitutions } : { users : IUser[], setUsers : (newUsers : IUser[]) => void, prefixSearch : string, institutions : Institution[], setInstitutions : (instutions : Institution[]) => void }) {
   
   const [order, setOrder] = React.useState<Order>('asc');
-  const [orderBy, setOrderBy] = React.useState<keyof IUser>('email');
+  const [orderBy, setOrderBy] = React.useState<SortableUserKeys>('email');
   const [selected, setSelected] = React.useState<readonly string[]>([]);
-      const theme = useTheme();
-    const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
+  const theme = useTheme();
+  const computerDevice = useMediaQuery(theme.breakpoints.up('sm'));
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
-    property: keyof IUser,
+    property: SortableUserKeys,
   ) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -231,7 +247,8 @@ export default function TableUser({ users, setUsers, prefixSearch } : { users : 
               {visibleRows.map((row, index) => {
                 const isItemSelected = selected.includes(row.email);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
+                const institution = institutions.find(v => v.id === row.institutionID) ??   { name : 'Institución eliminada', color: '#000000'}
+            
                 return (
                   <TableRow
                     hover
@@ -260,8 +277,39 @@ export default function TableUser({ users, setUsers, prefixSearch } : { users : 
                     >
                       {row.name}
                     </TableCell>
-                    <TableCell align={'left'}>{row.email}</TableCell>
+                    <TableCell align="left" sx={{ 
+                      maxWidth: 200,         
+                      whiteSpace: 'nowrap',   
+                      overflow: 'hidden',     
+                      textOverflow: 'ellipsis'                     
+                      }}>
+                      {row.email}
+                    </TableCell>
+                    <TableCell align={'justify'} onClick={(e) => {
+                      e.stopPropagation()
+                    }}>
+                      <div className="flex flex-row items-center gap-2">
+                        <Box  
+                          sx={{
+                          width: 24,
+                          height: 24,
+                          bgcolor: institution.color || '#ccc',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s, box-shadow 0.2s',
+                          '&:hover': {
+                              transform: 'scale(1.05)',
+                              boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+                          },
+                          }}
+                        />
+                        {institution.name}
+                      </div>
+                    </TableCell>
+                    <TableCell align={'center'}>{row.role}</TableCell>
                     <TableCell align={("center")}>{row.phone}</TableCell>
+                    
                   </TableRow>
                 );
               })}

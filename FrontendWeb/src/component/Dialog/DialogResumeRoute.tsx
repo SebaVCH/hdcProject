@@ -11,7 +11,7 @@ import { useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneIcon from '@mui/icons-material/Done';
 import useSessionStore from '../../stores/useSessionStore';
-import { RouteAdapter } from '../../api/adapters/RouteAdapter';
+import { useRoute } from '../../api/hooks/RouteHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -36,10 +36,7 @@ export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps)
     const [ open, setOpen ] = stateOpen
     const [ copySuccess, setCopySuccess ] = useState<undefined | boolean>()
 
-    const { isSuccess, isError, isPending, data } = RouteAdapter.useGetRouteByID( routeId as string, accessToken, true)
-
-
-    
+    const { isSuccess, isError, isPending, data } = useRoute( routeId as string, true)
 
     const handleClose = () => {
         setCopySuccess(false)

@@ -8,7 +8,7 @@ import { useState } from 'react';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import DialogSendNotice from './Dialog/DialogSendNotice';
 import { useAuth } from '../context/AuthContext';
-import { Role } from '../api/interfaces/Enums';
+import { Role } from '../Enums/Role';
 
 
 export default function ListIconHome() {

@@ -9,11 +9,13 @@ import { useEffect, useState } from 'react';
 import getCurrentLocation, { Position } from '../../utils/getCurrentLocation';
 import InputDescription from '../Input/InputDescription';
 import CloseDialogButton from '../Button/CloseDialogButton';
-import { LocationMethod } from '../../api/interfaces/Enums';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
-import { RiskAdapter } from '../../api/adapters/RiskAdapter';
 import useSessionStore from '../../stores/useSessionStore';
+import { LocationMethod } from '../../Enums/LocationMethod';
+import { useCreateRisk } from '../../api/hooks/RiskHooks';
+import { RiskStatus } from '../../Enums/RiskStatus';
+import { useProfile } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -35,9 +37,10 @@ export type DialogCreateRiskProps = {
 
 export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, location, stateLocationMethod, stateDescription } : DialogCreateRiskProps) {
 
-    const { accessToken } = useSessionStore()
     const [ open, setOpen ] = stateOpen
     const [ , setOnSelectLocationMap ] = stateOnSelectLocationMap 
+
+    const authorID = useProfile().data?.id
 
 
     const [ description, setDescription ] = stateDescription
@@ -47,7 +50,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
     const [ locationMethod, setLocationMethod ] = stateLocationMethod
     const [ error, setError ] = useState<string | undefined>()
 
-    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = RiskAdapter.usePostRiskMutation( accessToken )
+    const { mutate, data, isError, isSuccess, isPending, isIdle, reset } = useCreateRisk()
 
 
     const handleCurrentLocation = async () => {
@@ -99,11 +102,15 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
         if(coords.length != 2) {
             return 
         }
+        if(!authorID) {
+            return
+        }
 
         mutate({
             description,
             coords,
-            createdAt : (new Date()).toISOString()
+            authorID: authorID,
+            status : RiskStatus.Enviroment
         })
     }
 
@@ -201,7 +208,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
                         <CircularProgress size={70} />
                     </div>    
                     :
-                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='filled' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
+                    <Alert sx={{ mt: 2, width: '100%', minHeight: '80px', display: 'flex', alignItems: 'center', fontSize: '1rem' }} variant='standard' severity={ isSuccess ? 'success' : isError ? 'error' : 'info'}>
                             {isSuccess ? 'Se Creo el riesgo exitosamente' : isError ? 'Hubo un error al intentar finalizar' : 'Error desconocido'}
                     </Alert>
                 }

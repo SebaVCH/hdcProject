@@ -3,11 +3,12 @@ package repository
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/SebaVCH/hdcProject/internal/domain"
 	"github.com/SebaVCH/hdcProject/internal/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
-	"time"
 )
 
 type RouteRepository interface {
@@ -63,6 +64,8 @@ func (r *routeRepository) FindByID(routeId string) (domain.Route, error) {
 
 func (r *routeRepository) CreateRoute(route *domain.Route) error {
 	route.ID = bson.NewObjectID()
+	route.DateCreated = time.Now()
+	route.Status = "on progress"
 	route.InviteCode = utils.NewInviteCode()
 	if route.Team == nil {
 		route.Team = []bson.ObjectID{}

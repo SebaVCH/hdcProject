@@ -7,10 +7,8 @@ import DialogActions from '@mui/material/DialogActions';
 import { Alert, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
-import { RouteAdapter } from '../../api/adapters/RouteAdapter';
-import { TRoute } from '../../api/services/RouteService';
-import { RouteStatus } from '../../api/interfaces/Enums';
 import CloseDialogButton from '../Button/CloseDialogButton';
+import { useJoinRoute } from '../../api/hooks/RouteHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -32,7 +30,7 @@ export default function DialogJoinRoute({ stateOpen } : DialogJoinRouteProps) {
     const { accessToken, routeStatus, setRouteStatus, routeId, setRouteId } = useSessionStore()
     const [ acept, setAcept ] = useState(false)
     const [ inviteCode, setInviteCode ] = useState('')
-    const { isSuccess, isError, isIdle, data, mutate, error } = RouteAdapter.useJoinRouteMutation(accessToken)
+    const { isSuccess, isError, isIdle, data, mutate, error } = useJoinRoute()
 
 
     const handleClose = () => {
@@ -57,7 +55,7 @@ export default function DialogJoinRoute({ stateOpen } : DialogJoinRouteProps) {
     useEffect(() => {
         if(isSuccess) {
             setAcept(true)
-            setRouteId(data._id)
+            setRouteId(data.id)
         }
     }, [isSuccess]) 
 

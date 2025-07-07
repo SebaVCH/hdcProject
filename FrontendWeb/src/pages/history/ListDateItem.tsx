@@ -2,17 +2,17 @@ import { useEffect, useState } from "react"
 import { ListItemButton, ListItemText, Collapse, List, Divider, ListItemButtonProps } from "@mui/material"
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { TRoute } from "../../api/services/RouteService";
 import ListRouteItem from "./ListRouteItem";
-import { THelpPoint } from "../../api/services/HelpPointService";
+import { Route } from "../../api/models/Route";
+import { HelpPoint } from "../../api/models/HelpPoint";
 
 
 type ListRouteItemProps = {
     date : string
     children ?: React.ReactNode
     defaultOpen ?: boolean
-    routes : TRoute[]
-    stateHelpPoints : [ THelpPoint[], React.Dispatch<React.SetStateAction<THelpPoint[]>> ]
+    routes : Route[]
+    stateHelpPoints : [ HelpPoint[], React.Dispatch<React.SetStateAction<HelpPoint[]>> ]
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocation : [ number[], React.Dispatch<React.SetStateAction<number[]>> ] 
     onlyUser : boolean
@@ -37,7 +37,7 @@ export default function ListDateItem({ date, defaultOpen = false, routes, stateH
 
     useEffect(() => {
         setHelpPoints(prev => prev.map((hp) => {
-            if(routes.findIndex((r) => r._id === hp.routeId) !== -1) {
+            if(routes.findIndex((r) => r.id === hp.routeID) !== -1) {
                 hp.disabled = !open
             }
             return hp

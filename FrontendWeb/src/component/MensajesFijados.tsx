@@ -4,8 +4,8 @@ import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNone
 import useSessionStore from "../stores/useSessionStore";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import { NoticeAdapter } from "../api/adapters/NoticeAdapter";
 import Mensaje from "./Mensaje";
+import { useMarkNotices, useNoticesMap } from "../api/hooks/NoticeHooks";
 
 export default function MensajesFijados() {
 
@@ -20,7 +20,7 @@ export default function MensajesFijados() {
     const open = Boolean(anchorEl)
     const id = open ? "notification-popover" : undefined
 
-    const { isSuccess, isError, isLoading, data, refetch} = NoticeAdapter.useGetNoticesMap(accessToken)
+    const { isSuccess, isError, isLoading, data, refetch} = useNoticesMap()
 
     useEffect(() => {
         if(data) {
@@ -30,7 +30,7 @@ export default function MensajesFijados() {
     }, [data])
 
 
-    const mutationMarkNotice = NoticeAdapter.useMarkNoticesMutation(accessToken as string) 
+    const mutationMarkNotice = useMarkNotices() 
 
     const onClearNotices = () => {
         if(!data?.unread || data?.unread.length === 0) return 
@@ -102,30 +102,24 @@ export default function MensajesFijados() {
                 isSuccess ? 
                     
                     <div>
-                        <ListItem sx={{ display : 'flex', flexDirection : 'column', alignItems : 'start', justifyItems: 'start', gap: 3}}>
-                            <div>
-                                <Typography>Avisos nuevos</Typography>
-                                {  data.unread.length !== 0 ?
-                                    data.unread.map((value, index) => (
-                                    <div key={index}>
-                                        <Mensaje value={value} index={index} />
-                                    </div>
-                                    ))
-                                    :
-                                    <ListItem>
-                                        <ListItemText
-                                            primary = {
-                                                <Typography variant="caption" color="gray">
-                                                    Sin notificaciones nuevas
-                                                </Typography>
-                                            }
-                                        />
-                                    </ListItem>
-                                }
-                            </div>
-                        </ListItem>
+                        { data.unread.length !== 0 ? 
+                            <ListItem sx={{ display : 'flex', flexDirection : 'column', alignItems : 'start', justifyItems: 'start', gap: 3, bgcolor: '#E3F2FD'}}>
+                                <div>
+                                    <Typography>Avisos nuevos</Typography>
+                                    {  
+                                        data.unread.map((value, index) => (
+                                        <div key={index}>
+                                            <Mensaje value={value} index={index} />
+                                        </div>
+                                        ))
+                                    }
+                                </div>
+                            </ListItem>
+                            :
+                            <></>
+                        }
                         <Divider />
-                        <ListItem>
+                        <ListItem sx={{ bgcolor: '#F5F5F5'}}>
                             <div>
                                 <Typography>Avisos antiguos</Typography>
                                 { data.read.length !== 0 ?

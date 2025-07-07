@@ -16,6 +16,7 @@ import { ZoomProvider } from './context/ZoomContext'
 import RouteHistory from './pages/history'
 import { HelpPointUpdateProvider } from './context/HelpPointUpdateContext'
 import { AuthProvider } from './context/AuthContext'
+import { RiskUpdateProvider } from './context/RiskUpdateContext'
 
 const queryClient = new QueryClient()
 
@@ -45,25 +46,27 @@ function App() {
  
   return (
   <QueryClientProvider client={queryClient}>    
-      <AuthProvider>
-        <ZoomProvider>
-          <ThemeProvider theme={customQuery}>
-              <Routes>
-                  <Route path='/' element={<Home/>} />
-                  <Route path='/login' element={<Login />} />
-                  <Route path='/profile' element={<Profile />} />
-                  <Route path='/schedule' element={<Schedule />} />
-                  <Route path='/admin/usuarios' element={<Usuarios />} />
-                  <Route path='/history' element={
-                    <HelpPointUpdateProvider>
-                      <RouteHistory />
-                    </HelpPointUpdateProvider>
-                    } 
-                  />
-              </Routes>
-          </ThemeProvider>
-        </ZoomProvider>
-      </AuthProvider>
+      <RiskUpdateProvider>
+        <AuthProvider>
+          <ZoomProvider>
+            <ThemeProvider theme={customQuery}>
+                <Routes>
+                    <Route path='/' element={<Home/>} />
+                    <Route path='/login' element={<Login />} />
+                    <Route path='/profile' element={<Profile />} />
+                    <Route path='/schedule' element={<Schedule />} />
+                    <Route path='/admin/usuarios' element={<Usuarios />} />
+                    <Route path='/history' element={
+                      <HelpPointUpdateProvider>
+                        <RouteHistory />
+                      </HelpPointUpdateProvider>
+                      } 
+                    />
+                </Routes>
+            </ThemeProvider>
+          </ZoomProvider>
+        </AuthProvider>
+      </RiskUpdateProvider>
   </QueryClientProvider>
   )
 }

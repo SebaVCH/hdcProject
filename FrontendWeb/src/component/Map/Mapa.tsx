@@ -1,12 +1,15 @@
-import L, { LatLngExpression, svg } from "leaflet";
-import { Circle, CircleMarker, LayerGroup, MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
-import { Divider, radioClasses, TextField, Zoom } from "@mui/material";
+import L, { LatLngExpression } from "leaflet";
+import { MapContainer, Marker, Polyline, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
+import { Button, Divider } from "@mui/material";
 import { format } from 'date-fns';
-import { THelpPoint } from "../../api/services/HelpPointService";
-import { TRisk } from "../../api/services/RiskService";
 import { Position } from "../../utils/getCurrentLocation";
 import { useEffect, useState } from "react";
 import ZoomHandler from "./ZoomHandler";
+import { useRiskUpdateDialog } from "../../context/RiskUpdateContext";
+import { HelpPoint } from "../../api/models/HelpPoint";
+import { Risk } from "../../api/models/Risk";
+import { es } from "date-fns/locale";
+import { RiskStatus } from "../../Enums/RiskStatus";
 
 var greenIcon = new L.Icon({
     iconUrl: 'marker-icon-2x-green.png',
@@ -28,18 +31,27 @@ var redIcon = new L.Icon({
 
 
 var alertIcon = new L.Icon({
-    iconUrl: 'warning-alert.svg',
+    iconUrl: 'warning-alert-green.svg',
     iconSize: [30, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
 })
+
+
+const iconsMap = {
+    [RiskStatus.Severe]: new L.Icon({ iconUrl : 'warning-alert-severe.svg', iconSize: [30, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowAnchor: [41, 41]}),
+    [RiskStatus.Warning]: new L.Icon({ iconUrl : 'warning-alert-warning.svg', iconSize: [30, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowAnchor: [41, 41]}),
+    [RiskStatus.Completed]: new L.Icon({ iconUrl : 'warning-alert-completed.svg', iconSize: [41,61], iconAnchor: [12, 41], popupAnchor: [8, -34], shadowAnchor: [41, 41]}),
+    [RiskStatus.Enviroment]: new L.Icon({ iconUrl : 'warning-alert-enviroment.svg', iconSize: [30, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowAnchor: [41, 41]}),
+} satisfies Record<RiskStatus, L.Icon>;
+
 
 
 type MapaProps = {
     stateCurrentLocation : [ Position, React.Dispatch<React.SetStateAction<Position>> ]
-    helpPoints : THelpPoint[]
-    risks : TRisk[]
+    helpPoints : HelpPoint[]
+    risks : Risk[]
     children ?: React.ReactNode
     enableTraceLine ?: boolean
 } 
@@ -57,16 +69,19 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
             const map = helpPoints.reduce<Map<string, LatLngExpression[]>>((acc : Map<string, LatLngExpression[]>, hp) => {
                 if(hp.disabled) return acc 
 
-                if(!acc.has(hp.routeId)) {
-                    acc.set(hp.routeId, [])
+                if(!acc.has(hp.routeID)) {
+                    acc.set(hp.routeID, [])
                 }
-                acc.set(hp.routeId, [...(acc.get(hp.routeId) as LatLngExpression[]), [hp.coords[0], hp.coords[1]] ])
+                acc.set(hp.routeID, [...(acc.get(hp.routeID) as LatLngExpression[]), [hp.coords[0], hp.coords[1]] ])
                 return acc
             }, new Map<string, LatLngExpression[]>())
             setMapTracedLineRoute(map)
         } 
     }, [enableTraceLine, helpPoints])
 
+
+
+    const [ _, setRiskUpdate] = useRiskUpdateDialog()
     
     return (
         <>
@@ -88,14 +103,14 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
 
                 {helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 
-                    <Marker key={helpPoint._id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
+                    <Marker key={helpPoint.id ?? index} icon={redIcon} position={(helpPoint.coords as L.LatLngExpression)} >
                         <Popup >
                             <div className="flex flex-col items-center justify-center gap-2">
-                                <b>Edad: {helpPoint.helpedPerson?.age === -1 ? 'N/A' : helpPoint.helpedPerson?.age}</b>
+                                <b>Edad: {helpPoint.peopleHelped.age === -1 ? 'N/A' : helpPoint.peopleHelped.age}</b>
                                 <Divider className="w-full"  variant='middle'/>
-                                <b>Género: {helpPoint.helpedPerson?.gender ?? 'Sin Especificar'}</b>
+                                <b>Género: {helpPoint.peopleHelped?.gender ?? 'Sin Especificar'}</b>
                                 <Divider className="w-full"  variant='middle'/>
-                                <b>Fecha: {helpPoint.createdAt ?? 'error'}</b>
+                                <b>Fecha: {format(helpPoint.dateRegister, 'dddd-MM-YYYY', {locale : es}) ?? 'error'}</b>
                             </div>
                         </Popup>
                     </Marker>
@@ -115,17 +130,26 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                 ))}
 
                 {risks.map((risk, index) => (
-                    <Marker key={risk._id ?? index} icon={alertIcon} position={(risk.coords as L.LatLngExpression)}>
+                    <Marker key={risk.id ?? index} icon={iconsMap[risk.status]} position={(risk.coords as L.LatLngExpression)}>
                         <Popup>
-                            <div className="flex flex-col items-center justify-center gap-2">
-                                <b>{risk.description}</b>
-                                <Divider className="w-full" variant="middle"/>
-                                <b>Fecha: {format(new Date(risk.createdAt), 'dd-MM-yyyy')}</b>
+                            <div className="flex flex-col items-start justify-center gap-2">
+                                <b className="text-sm">{risk.description}</b>
+                                <Divider className="w-full" variant="fullWidth"/>
+                                <p className="text-xs p-0 !m-0">Última modificación: {format(new Date(risk.createdAt), 'dd-MM-yyyy')}</p>
+                                <Button variant="contained" sx={{
+                                    alignSelf : 'left',
+                                    fontSize : 12,
+                                    p: 0,
+                                }} onClick={() => {
+                                    setRiskUpdate(risk)
+                                }}>
+                                    Editar
+                                </Button>
                             </div>
                         </Popup>
+                        
                     </Marker>
                 ))}
-
                 {children}
             </MapContainer>
         </>

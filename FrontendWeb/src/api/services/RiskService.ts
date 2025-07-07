@@ -1,76 +1,34 @@
-import { sleep } from "../../utils/sleep"
+import { MapRiskFromBackend, TCreateRisk, TRiskBackend, TUpdateRisk } from "../adapters/Risk.adapter"
+import { Risk } from "../models/Risk"
 import { axiosInstance } from "./axiosInstance"
 
 
-export type TRisk = {
-    _id ?: string 
-    coords : number[]
-    createdAt : string
-    description : string 
-}
 
 export class RiskService {
 
     private static readonly RESOURCE_NAME = 'risk'
 
-    static async CreateRisk( body ?: TRisk, token ?: string ) : Promise<TRisk> {
-
-        await sleep(1000) // para pruebas
-
-        if(!body) {
-            throw Error('body must be not null')
-        }
-
-        const { data } = await axiosInstance.post(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, body, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
-        return {
-            _id : data?.message?._id,
-            coords : data?.message?.coords,
-            createdAt : data?.message?.date_register,
-            description : data?.message?.description
-        }
+    static async CreateRisk( body : TCreateRisk ) : Promise<Risk> {
+        const { data } = await axiosInstance.post(`/${this.RESOURCE_NAME}`, body)
+        console.log(data)
+        return MapRiskFromBackend(data?.message as TRiskBackend)
     }
 
-    static async FindAll( token ?: string ) : Promise<TRisk[]> {
-
-        const { data } = await axiosInstance.get(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}`, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
-        return (data?.message as any[]).map((risk, _) => ({
-            _id : risk?._id,
-            coords : risk?.coords,
-            createdAt : risk?.date_register,
-            description : risk?.description
-        }))
+    static async FindAll() : Promise<Risk[]> {
+        const { data } = await axiosInstance.get(`/${this.RESOURCE_NAME}`)
+        return (data?.message as TRiskBackend[]).map( risk => (
+            MapRiskFromBackend(risk)
+        ))
     }
 
-    static async UpdateRisk( body: TRisk, token ?: string) : Promise<TRisk> {
-
-        const { data } = await axiosInstance.put(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}/${body._id}`, body, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
-        return {
-            _id : data?.message?._id,
-            coords : data?.message?.coords,
-            createdAt : data?.message?.date_register,
-            description : data?.message?.description
-        }
+    static async UpdateRisk( body: TUpdateRisk) : Promise<Risk> {
+        console.log(body)
+        const { data } = await axiosInstance.put(`/${this.RESOURCE_NAME}/${body._id}`, body)
+        return MapRiskFromBackend(data?.message as TRiskBackend)
     }
 
-    static async DeleteRisk( riskId : string, token ?: string) : Promise<string> {
-
-        const { data } = await axiosInstance.delete(`${import.meta.env.VITE_URL_BACKEND}/${this.RESOURCE_NAME}/${riskId}`, {
-            headers : {
-                Authorization : `Bearer ${token}`
-            }
-        })
+    static async DeleteRisk( riskId : string ) : Promise<string> {
+        const { data } = await axiosInstance.delete(`/${this.RESOURCE_NAME}/${riskId}`)
         return data?.message
     }
 } 
