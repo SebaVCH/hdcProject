@@ -14,30 +14,29 @@ export default function DrawerList() {
     const { clearSession } = useSessionStore()
 
     const onClickProfile = () => {
-        console.log("enviado")
-        navigate('/profile')
+        navigate(`${import.meta.env.VITE_BASE_URL}/perfil`)
     }
 
     const onClickUsuarios = () => {
-        navigate('/admin/usuarios')
+        navigate(`${import.meta.env.VITE_BASE_URL}/admin/usuarios`)
     }
 
     const onClickCerrarSesion = () => {
         clearSession()
-        navigate('/login')
+        navigate(`${import.meta.env.VITE_BASE_URL}/login`)
     }
 
     const onClickHome = () => {
-        navigate('/')
+        navigate(`${import.meta.env.VITE_BASE_URL}/`)
     }
 
-        const onClickHistory = () => {
-        navigate('/history')
+    const onClickHistory = () => {
+        navigate(`${import.meta.env.VITE_BASE_URL}/historial`)
     }
 
 
     const onClickSchedule = () => {
-        navigate('/schedule')
+        navigate(`${import.meta.env.VITE_BASE_URL}/calendario`)
     }
 
     const color = '#28bdc8'

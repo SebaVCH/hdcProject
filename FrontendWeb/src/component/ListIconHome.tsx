@@ -22,19 +22,19 @@ export default function ListIconHome() {
     }
 
     const onClickProfile = () => {
-        navigate('/profile')
+        navigate(`${import.meta.env.VITE_BASE_URL}/perfil`)
     }
 
     const onClickHistory = () => {
-        navigate('/history')
+        navigate(`${import.meta.env.VITE_BASE_URL}/historial`)
     }
 
     const onClickUsers = () => {
-        navigate('/admin/usuarios')
+        navigate(`${import.meta.env.VITE_BASE_URL}/admin/usuarios`)
     }
 
     const onClickSchedule = () => {
-        navigate('/schedule')
+        navigate(`${import.meta.env.VITE_BASE_URL}/calendario`)
     }
 
     return(

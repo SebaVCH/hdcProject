@@ -17,6 +17,7 @@ import RouteHistory from './pages/history'
 import { HelpPointUpdateProvider } from './context/HelpPointUpdateContext'
 import { AuthProvider } from './context/AuthContext'
 import { RiskUpdateProvider } from './context/RiskUpdateContext'
+import NotFound from './component/NotFound'
 
 const queryClient = new QueryClient()
 
@@ -51,17 +52,18 @@ function App() {
           <ZoomProvider>
             <ThemeProvider theme={customQuery}>
                 <Routes>
-                    <Route path='/' element={<Home/>} />
-                    <Route path='/login' element={<Login />} />
-                    <Route path='/profile' element={<Profile />} />
-                    <Route path='/schedule' element={<Schedule />} />
-                    <Route path='/admin/usuarios' element={<Usuarios />} />
-                    <Route path='/history' element={
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/`} element={<Home/>} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/login`} element={<Login />} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/perfil`} element={<Profile />} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/calendario`} element={<Schedule />} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/admin/usuarios`} element={<Usuarios />} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/historial`} element={
                       <HelpPointUpdateProvider>
                         <RouteHistory />
                       </HelpPointUpdateProvider>
                       } 
                     />
+                    <Route path='*' element={ <NotFound />} />
                 </Routes>
             </ThemeProvider>
           </ZoomProvider>
