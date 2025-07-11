@@ -7,7 +7,6 @@ import DialogActions from '@mui/material/DialogActions';
 import ComboBox from '../Button/ComboBox';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import InputDescription from '../Input/InputDescription';
-import { useRisks } from '../../api/hooks/RiskHooks';
 import { useEffect, useState } from 'react';
 import { Alert, CircularProgress, TextField } from '@mui/material';
 import { useEventCalendarUpdateDialog } from '../../context/EventCalendarUpdateContext';
