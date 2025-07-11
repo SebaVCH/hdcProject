@@ -17,6 +17,7 @@ export type TCalendarEventCreateRequest = Omit<
     '_id'
 >
 
+
 export type TCalendarEventUpdateRequest = TCalendarEventBackend
 
 export async function MapCalendarEventFromBackend(

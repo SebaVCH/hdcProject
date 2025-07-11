@@ -1,4 +1,4 @@
-import { MapCalendarEventFromBackend, TCalendarEventBackend, TCalendarEventCreateRequest } from "../adapters/CalendarEvent.adapter"
+import { MapCalendarEventFromBackend, TCalendarEventBackend, TCalendarEventCreateRequest, TCalendarEventUpdateRequest } from "../adapters/CalendarEvent.adapter"
 import { CalendarEvent } from "../models/Calendar"
 import { axiosInstance } from "./axiosInstance"
 
@@ -22,6 +22,12 @@ export class CalendarService {
 
     static async DeleteEvent( eventID : string) : Promise<string> {
         const { data } = await axiosInstance.delete(`/${this.RESOURCE_NAME}/${eventID}`)
+        return data?.message
+    }
+
+    static async UpdateEvent( eventUpdate : TCalendarEventUpdateRequest) : Promise<string> {
+        console.log(eventUpdate)
+        const { data } = await axiosInstance.put(`/${this.RESOURCE_NAME}/${eventUpdate._id}`, eventUpdate)
         return data?.message
     }
 
