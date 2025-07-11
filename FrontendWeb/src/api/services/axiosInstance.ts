@@ -33,7 +33,7 @@ export const interceptorResponse = (navigate : NavigateFunction,  clearSesion : 
         }, (error) => {
             if(isAxiosError(error) && ((error as AxiosError).status == 401)) {
                 clearSesion()
-                navigate('/login')
+                navigate(`${import.meta.env.VITE_BASE_URL}/login`)
             }
 
             if (error.response && error.response.data) {
