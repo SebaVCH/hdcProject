@@ -131,8 +131,8 @@ export default function Login() {
                     <Typography variant='body2' alignSelf={'center'} textAlign={'center'} color="error">
                       {error ? (error as any).error : ''}
                     </Typography>
-
-                    <Typography alignSelf={'center'}
+                
+                    {/*<Typography alignSelf={'center'}
                       component={'a'}
                       href="/change-password"
                       sx={{
@@ -142,10 +142,10 @@ export default function Login() {
                         xs : '0.75rem',
                         sm : '0.75rem',
                         md : '1rem'
-                      }}
+                      }
                     >
                       ¿Se te olvidó la contraseña?
-                    </Typography>
+                    </Typography>*/}
                   </div>
                   <div className="flex w-1/2 md:w-1/2 flex-col items-center justify-center">
                       <img src="https://aportes.hogardecristo.cl/wp-content/uploads/2021/08/HDC_RGB_full-color-horizontal.png.webp" loading="lazy"/>
