@@ -35,7 +35,7 @@ export default function DialogLogout({ stateOpen } : DialogLogoutProps) {
 
     const onClickLogout = () => {
         clearSession()
-        navigator('/login')
+        navigator(`${import.meta.env.VITE_BASE_URL}/login`)
     }
     
     return (
