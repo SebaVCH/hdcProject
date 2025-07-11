@@ -119,9 +119,13 @@ func (h *helpPointRepository) FindByIDAndUserID(id string, userID string) error 
 	if err != nil {
 		return errors.New("ID de punto de ayuda inválido")
 	}
+	userObjID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return errors.New("ID de usuario inválido")
+	}
 
 	var puntoAyuda domain.PuntoAyuda
-	filter := bson.M{"_id": objID, "author_id": userID}
+	filter := bson.M{"_id": objID, "author_id": userObjID}
 	err = h.HelpPointCollection.FindOne(context.Background(), filter).Decode(&puntoAyuda)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

@@ -20,6 +20,11 @@ import (
 // @host localhost:8080
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Se debe proporcionar un token JWT válido con el prefijo "Bearer" en el header de autorización para acceder a las rutas protegidas.
+
 func main() {
 
 	if err := app.StartBackend(); err != nil {
