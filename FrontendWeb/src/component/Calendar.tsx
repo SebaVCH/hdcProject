@@ -9,17 +9,27 @@ import esLocale from '@fullcalendar/core/locales/es';
 import { isSingleDaySelection } from '../utils/calendar'
 import DialogCreateEventCalendar from './Dialog/DialogCreateEventCalendar'
 import DeleteIcon from '@mui/icons-material/Delete';
-//import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useCalendarEvents, useDeleteCalendarEvent } from '../api/hooks/CalendarEventHooks'
 import { CalendarEvent } from '../api/models/Calendar'
+import { useEventCalendarUpdateDialog } from '../context/EventCalendarUpdateContext'
+import DialogUpdateEventCalendar from './Dialog/DialogUpdateEventCalendar'
+import { useProfile } from '../api/hooks/UserHooks'
+import { useAuth } from '../context/AuthContext'
+import { Role } from '../Enums/Role'
 
 export default function Calendar() {
 
+    const userID = useProfile().data?.id
+    const { role } = useAuth()
     const [selectInfo, setSelectInfo] = useState<DateSelectArg | null>(null)
     const [open, setOpen] = useState(false)
+    const [ eventCalendar, setEventCalendar ] = useEventCalendarUpdateDialog()
+
+
     
     const handleDateSelect = (selectInfo: DateSelectArg) => {
         setSelectInfo(selectInfo)
@@ -37,6 +47,9 @@ export default function Calendar() {
     const id =  openPopover ? 'view-event-popover' : undefined
 
     const handleCloseEventView = () => {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
         setAnchorEl(null)
         setTimeout(() => {
             setEventClicked(undefined)
@@ -107,9 +120,7 @@ export default function Calendar() {
                     
                 />
             </div>
-            <DialogCreateEventCalendar stateOpen={[open, setOpen]} stateSelectInfo={[selectInfo, setSelectInfo]}  />
             <Popover
-            
                 id={id}
                 open={openPopover}
                 anchorEl={anchorEl}
@@ -136,23 +147,29 @@ export default function Calendar() {
                 <div className="flex flex-row justify-end items-center py-3 px-5">
                     <div className='flex flex-row gap-5'>
                         <div className='flex flex-row gap-1'>
-                            {
-                            /*
-                            <Tooltip title={'Editar Evento'}>
-                                <IconButton>
-                                    <EditIcon htmlColor="black" fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                            */
+                            { (role === Role.admin) || (userID === eventClicked?.authorID) ?
+                                <div>
+                                    <Tooltip title={'Editar Evento'}>
+                                        <IconButton onClick={() => {
+                                            if(eventClicked === undefined) return 
+                                            setEventCalendar(eventClicked)
+                                        }}>
+                                            <EditIcon htmlColor="black" fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title={'Eliminar Evento'}>
+                                        <IconButton onClick={() => {
+                                            if(eventClicked === undefined) return
+                                            mutate(eventClicked.id)
+                                        }}>
+                                            <DeleteIcon htmlColor="black" fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                                :
+                                <>
+                                </>
                             }
-                            <Tooltip title={'Eliminar Evento'}>
-                                <IconButton onClick={() => {
-                                    if(eventClicked === undefined) return
-                                    mutate(eventClicked.id)
-                                }}>
-                                    <DeleteIcon htmlColor="black" fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
                         </div>
                         <Tooltip title={'Cerrar'}>
                             <IconButton onClick={handleCloseEventView}>
@@ -195,6 +212,8 @@ export default function Calendar() {
                     }
                 </div>
             </Popover>
+            <DialogUpdateEventCalendar />
+            <DialogCreateEventCalendar stateOpen={[open, setOpen]} stateSelectInfo={[selectInfo, setSelectInfo]}  />
         </div>
     )  
 };

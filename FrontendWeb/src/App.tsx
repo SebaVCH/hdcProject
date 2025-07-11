@@ -18,6 +18,7 @@ import { HelpPointUpdateProvider } from './context/HelpPointUpdateContext'
 import { AuthProvider } from './context/AuthContext'
 import { RiskUpdateProvider } from './context/RiskUpdateContext'
 import NotFound from './component/NotFound'
+import { EventCalendarUpdateProvider } from './context/EventCalendarUpdateContext'
 
 const queryClient = new QueryClient()
 
@@ -55,7 +56,12 @@ function App() {
                     <Route path={`${import.meta.env.VITE_BASE_URL}/`} element={<Home/>} />
                     <Route path={`${import.meta.env.VITE_BASE_URL}/login`} element={<Login />} />
                     <Route path={`${import.meta.env.VITE_BASE_URL}/perfil`} element={<Profile />} />
-                    <Route path={`${import.meta.env.VITE_BASE_URL}/calendario`} element={<Schedule />} />
+                    <Route path={`${import.meta.env.VITE_BASE_URL}/calendario`} element={
+                      <EventCalendarUpdateProvider>
+                        <Schedule />
+                      </EventCalendarUpdateProvider>
+                      } 
+                    />
                     <Route path={`${import.meta.env.VITE_BASE_URL}/admin/usuarios`} element={<Usuarios />} />
                     <Route path={`${import.meta.env.VITE_BASE_URL}/historial`} element={
                       <HelpPointUpdateProvider>

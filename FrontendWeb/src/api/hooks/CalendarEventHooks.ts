@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { MapCalendarEventToCreateRequest } from "../adapters/CalendarEvent.adapter"
+import { MapCalendarEventToCreateRequest, MapCalendarEventToUpdateRequest } from "../adapters/CalendarEvent.adapter"
 import { CalendarService } from "../services/CalendarService"
 import { CalendarEvent } from "../models/Calendar"
 
@@ -27,6 +27,12 @@ export function useCreateCalendarEvent() {
 export function useDeleteCalendarEvent() {
     return useMutation({
         mutationFn: ( calendarID : string) => CalendarService.DeleteEvent(calendarID)
+    })
+}
+
+export function useUpdateCalendarEvent() {
+    return useMutation({
+        mutationFn: ( event : CalendarEvent ) => CalendarService.UpdateEvent(MapCalendarEventToUpdateRequest(event)) 
     })
 }
     
