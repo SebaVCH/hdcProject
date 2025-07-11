@@ -44,13 +44,13 @@ export default function Login() {
     
     useEffect(() => {
       if(accessToken) {
-        navigate('/')
+        navigate(`${import.meta.env.VITE_BASE_URL}/`)
       }
     }, [accessToken])
 
     useEffect(() => {
       if(isSuccess) {
-        navigate('/')
+        navigate(`${import.meta.env.VITE_BASE_URL}/`)
       }
     }, [isSuccess, navigate])
 

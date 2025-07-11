@@ -50,7 +50,7 @@ export default function Sidebar() {
     }
 
     const onClickHome = () => {
-        navigate('/')
+        navigate(`${import.meta.env.VITE_BASE_URL}/`)
     }
     const onClickCerrarSesion = () => {
         setOpenLogout(true)
