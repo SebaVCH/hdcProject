@@ -9,8 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupExportDataRouter configura las rutas para la exportación de datos.
+// Crea el repositorio de exportación de datos, el caso de uso y el controlador, y define las rutas para exportar datos de personas ayudadas.
 func SetupExportDataRouter(r *gin.Engine) {
-
 	exportDataRepo := repository.NewExportDataRepository(database.Client.Database("pip").Collection("people_helped"))
 	exportDataUseCase := usecase.NewExportDataUseCase(exportDataRepo)
 	exportDataController := controller.NewExportDataController(exportDataUseCase)

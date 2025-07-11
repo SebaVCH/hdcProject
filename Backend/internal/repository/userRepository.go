@@ -9,22 +9,30 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
+// UserRepository define la interfaz para las operaciones relacionadas con usuarios.
+// Contiene métodos para obtener, actualizar y eliminar usuarios, así como obtener información pública.
 type UserRepository interface {
 	GetUserByID(id string) (domain.Usuario, error)
 	GetUserProfile(userID string) (domain.Usuario, error)
 	UpdateUserInfo(userID bson.ObjectID, userData map[string]interface{}) (domain.Usuario, error)
 	GetAllUsers() ([]domain.Usuario, error)
-	GetNameByID(id string) (map[string]string, error)
+	GetPublicInfoByID(id string) (map[string]string, error)
 }
 
+// userRepository implementa la interfaz UserRepository.
+// Contiene una colección de usuarios para interactuar con la base de datos.
 type userRepository struct {
 	UserCollection *mongo.Collection
 }
 
+// NewUserRepository crea una nueva instancia de userRepository.
+// Recibe una colección de usuarios y retorna una instancia de UserRepository.
 func NewUserRepository(userCollection *mongo.Collection) UserRepository {
 	return &userRepository{UserCollection: userCollection}
 }
 
+// GetAllUsers obtiene todos los usuarios de la base de datos.
+// Retorna un slice de usuarios o un error si ocurre algún problema.
 func (u *userRepository) GetAllUsers() ([]domain.Usuario, error) {
 	cursor, err := u.UserCollection.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -39,7 +47,9 @@ func (u *userRepository) GetAllUsers() ([]domain.Usuario, error) {
 	return users, nil
 }
 
-func (u *userRepository) GetNameByID(id string) (map[string]string, error) {
+// GetPublicInfoByID obtiene información pública de un usuario por su ID.
+// Recibe el ID como string, lo convierte a ObjectID y busca en la colección.
+func (u *userRepository) GetPublicInfoByID(id string) (map[string]string, error) {
 	var user domain.Usuario
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -50,9 +60,11 @@ func (u *userRepository) GetNameByID(id string) (map[string]string, error) {
 	if err != nil {
 		return map[string]string{"name": ""}, err
 	}
-	return map[string]string{"name": user.Name}, nil
+	return map[string]string{"name": user.Name, "institutionID": user.InstitutionID.String(), "phone": user.Phone}, nil
 }
 
+// GetUserByID obtiene un usuario por su ID.
+// Recibe el ID como string, lo convierte a ObjectID y busca en la colección.
 func (u *userRepository) GetUserByID(id string) (domain.Usuario, error) {
 	var user domain.Usuario
 	objID, err := bson.ObjectIDFromHex(id)
@@ -67,10 +79,14 @@ func (u *userRepository) GetUserByID(id string) (domain.Usuario, error) {
 	return user, nil
 }
 
+// GetUserProfile obtiene el perfil de un usuario por su ID.
+// Utiliza el método GetUserByID para obtener la información del usuario.
 func (u *userRepository) GetUserProfile(userID string) (domain.Usuario, error) {
 	return u.GetUserByID(userID)
 }
 
+// UpdateUserInfo actualiza la información de un usuario.
+// Recibe el ID del usuario y un mapa con los datos a actualizar.
 func (u *userRepository) UpdateUserInfo(userID bson.ObjectID, userData map[string]interface{}) (domain.Usuario, error) {
 	var currentUser domain.Usuario
 	err := u.UserCollection.FindOne(context.Background(), bson.M{"_id": userID}).Decode(&currentUser)

@@ -8,6 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
+// CalendarEventRepository define la interfaz para las operaciones relacionadas con eventos de calendario.
+// Contiene métodos para obtener, crear, eliminar, actualizar eventos de calendario y buscar por ID y usuario.
 type CalendarEventRepository interface {
 	GetAllCalendarEvents() ([]domain.EventoCalendario, error)
 	CreateCalendarEvent(event domain.EventoCalendario, userID string) error
@@ -16,16 +18,22 @@ type CalendarEventRepository interface {
 	FindByIDAndUserID(id string, userID string) error
 }
 
+// calendarEventRepository implementa la interfaz CalendarEventRepository.
+// Contiene una colección de eventos de calendario para interactuar con la base de datos.
 type calendarEventRepository struct {
 	CalendarEventCollection *mongo.Collection
 }
 
+// NewCalendarEventRepository crea una nueva instancia de calendarEventRepository.
+// Recibe una colección de eventos de calendario y retorna una instancia de CalendarEventRepository.
 func NewCalendarEventRepository(calendarEventCollection *mongo.Collection) CalendarEventRepository {
 	return &calendarEventRepository{
 		CalendarEventCollection: calendarEventCollection,
 	}
 }
 
+// GetAllCalendarEvents obtiene todos los eventos de calendario de la base de datos.
+// Retorna un slice de eventos de calendario o un error si ocurre algún problema.
 func (c calendarEventRepository) GetAllCalendarEvents() ([]domain.EventoCalendario, error) {
 	var events []domain.EventoCalendario
 	cursor, err := c.CalendarEventCollection.Find(context.Background(), bson.M{})
@@ -49,6 +57,8 @@ func (c calendarEventRepository) GetAllCalendarEvents() ([]domain.EventoCalendar
 	return events, nil
 }
 
+// CreateCalendarEvent crea un nuevo evento de calendario en la base de datos.
+// Asigna un nuevo ID al evento, establece el ID del autor y lo inserta en la colección.
 func (c calendarEventRepository) CreateCalendarEvent(event domain.EventoCalendario, userID string) error {
 	event.ID = bson.NewObjectID()
 	event.AuthorID, _ = bson.ObjectIDFromHex(userID)
@@ -56,6 +66,8 @@ func (c calendarEventRepository) CreateCalendarEvent(event domain.EventoCalendar
 	return err
 }
 
+// DeleteCalendarEvent elimina un evento de calendario por su ID.
+// Convierte el ID de cadena a ObjectID y elimina el documento correspondiente de la colección.
 func (c calendarEventRepository) DeleteCalendarEvent(id string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -65,6 +77,8 @@ func (c calendarEventRepository) DeleteCalendarEvent(id string) error {
 	return err
 }
 
+// UpdateCalendarEvent actualiza un evento de calendario existente en la base de datos.
+// Recibe un mapa de datos a actualizar, extrae el ID del evento y realiza la actualización en la colección.
 func (c calendarEventRepository) UpdateCalendarEvent(updateData map[string]interface{}) (domain.EventoCalendario, error) {
 	idStr, ok := updateData["_id"].(string)
 	if !ok {
@@ -90,6 +104,8 @@ func (c calendarEventRepository) UpdateCalendarEvent(updateData map[string]inter
 	return updatedEvent, nil
 }
 
+// FindByIDAndUserID busca un evento de calendario por su ID y el ID del usuario.
+// Convierte el ID de cadena a ObjectID y verifica si el evento pertenece al usuario especificado.
 func (c calendarEventRepository) FindByIDAndUserID(id string, userID string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {

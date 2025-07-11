@@ -8,6 +8,9 @@ import (
 	"net/http"
 )
 
+// PeopleHelpedUseCase define la interfaz para las operaciones relacionadas con personas ayudadas.
+// Contiene métodos para obtener, crear, eliminar y actualizar personas ayudadas.
+// Tambien se encuentra "obsoleta" y se recomienda utilizar la nueva implementación de HelpingPointUseCase.
 type PeopleHelpedUseCase interface {
 	GetAllPeopleHelped(c *gin.Context)
 	CreatePersonHelped(c *gin.Context)
@@ -15,16 +18,20 @@ type PeopleHelpedUseCase interface {
 	UpdatePersonHelped(c *gin.Context)
 }
 
+// peopleHelpedUseCase implementa la interfaz PeopleHelpedUseCase.
 type peopleHelpedUseCase struct {
 	peopleHelpedRepository repository.PeopleHelpedRepository
 }
 
+// NewPeopleHelpedUseCase crea una nueva instancia de peopleHelpedUseCase.
+// Recibe un repositorio de personas ayudadas y retorna una instancia de PeopleHelpedUseCase.
 func NewPeopleHelpedUseCase(peopleHelpedRepository repository.PeopleHelpedRepository) PeopleHelpedUseCase {
 	return &peopleHelpedUseCase{
 		peopleHelpedRepository: peopleHelpedRepository,
 	}
 }
 
+// GetAllPeopleHelped maneja la solicitud para obtener todas las personas ayudadas.
 func (p peopleHelpedUseCase) GetAllPeopleHelped(c *gin.Context) {
 	peopleHelped, err := p.peopleHelpedRepository.GetPeopleHelped()
 	if err != nil {
@@ -34,6 +41,7 @@ func (p peopleHelpedUseCase) GetAllPeopleHelped(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": peopleHelped})
 }
 
+// CreatePersonHelped maneja la solicitud para crear una nueva persona ayudada.
 func (p peopleHelpedUseCase) CreatePersonHelped(c *gin.Context) {
 	var person domain.PersonaAyudada
 	if err := c.ShouldBindJSON(&person); err != nil {
@@ -48,6 +56,7 @@ func (p peopleHelpedUseCase) CreatePersonHelped(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": person})
 }
 
+// DeletePersonHelped maneja la solicitud para eliminar una persona ayudada por su ID.
 func (p peopleHelpedUseCase) DeletePersonHelped(c *gin.Context) {
 	id := c.Param("id")
 	err := p.peopleHelpedRepository.DeletePersonHelped(id)
@@ -58,6 +67,7 @@ func (p peopleHelpedUseCase) DeletePersonHelped(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Persona ayudada eliminada correctamente"})
 }
 
+// UpdatePersonHelped maneja la solicitud para actualizar una persona ayudada existente.
 func (p peopleHelpedUseCase) UpdatePersonHelped(c *gin.Context) {
 	personID := c.Param("id")
 	if personID == "" {

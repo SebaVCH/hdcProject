@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// RiskRepository define la interfaz para las operaciones relacionadas con riesgos.
+// Contiene métodos para obtener, crear, eliminar y actualizar riesgos.
 type RiskRepository interface {
 	GetRisks() ([]domain.Riesgo, error)
 	CreateRisk(risk domain.Riesgo) error
@@ -16,16 +18,22 @@ type RiskRepository interface {
 	UpdateRisk(updateData map[string]interface{}) (domain.Riesgo, error)
 }
 
+// riskRepository implementa la interfaz RiskRepository.
+// Contiene una colección de riesgos para interactuar con la base de datos.
 type riskRepository struct {
 	RiskCollection *mongo.Collection
 }
 
+// NewRiskRepository crea una nueva instancia de riskRepository.
+// Recibe una colección de riesgos y retorna una instancia de RiskRepository.
 func NewRiskRepository(riskCollection *mongo.Collection) RiskRepository {
 	return &riskRepository{
 		RiskCollection: riskCollection,
 	}
 }
 
+// GetRisks obtiene todos los riesgos de la base de datos.
+// Retorna un slice de riesgos o un error si ocurre algún problema.
 func (r *riskRepository) GetRisks() ([]domain.Riesgo, error) {
 	cursor, err := r.RiskCollection.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -44,6 +52,8 @@ func (r *riskRepository) GetRisks() ([]domain.Riesgo, error) {
 	return risks, nil
 }
 
+// CreateRisk crea un nuevo riesgo en la base de datos.
+// Asigna un ID y una fecha de registro al riesgo.
 func (r *riskRepository) CreateRisk(risk domain.Riesgo) error {
 	risk.ID = bson.NewObjectID()
 	risk.DateRegister = time.Now()
@@ -51,6 +61,8 @@ func (r *riskRepository) CreateRisk(risk domain.Riesgo) error {
 	return err
 }
 
+// DeleteRisk elimina un riesgo de la base de datos por su ID.
+// Recibe el ID como string, lo convierte a ObjectID y elimina el documento correspondiente.
 func (r *riskRepository) DeleteRisk(id string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -60,6 +72,8 @@ func (r *riskRepository) DeleteRisk(id string) error {
 	return err
 }
 
+// UpdateRisk actualiza un riesgo en la base de datos.
+// Recibe un mapa de datos a actualizar, verifica el ID del riesgo y actualiza los campos correspondientes.
 func (r *riskRepository) UpdateRisk(updateData map[string]interface{}) (domain.Riesgo, error) {
 	idStr, ok := updateData["_id"].(string)
 	if !ok {

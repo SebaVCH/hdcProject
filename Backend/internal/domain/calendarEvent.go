@@ -1,3 +1,5 @@
+// Package domain contiene todas las structs a utilizar del dominio de la aplicación.
+// Se incluyen tags para JSON y BSON (MongoDB).
 package domain
 
 import (
@@ -6,6 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
+// EventoCalendario representa un evento en el calendario de la aplicación.
+// Incluye campos para el título, descripción, fecha de inicio, autor, hora de inicio y hora de finalización.
 type EventoCalendario struct {
 	ID          bson.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	Title       string        `bson:"title" json:"title"`

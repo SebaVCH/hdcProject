@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// HelpPointRepository define la interfaz para las operaciones relacionadas con puntos de ayuda.
+// Contiene métodos para obtener, crear, actualizar y eliminar puntos de ayuda, así como buscar por ID y usuario.
 type HelpPointRepository interface {
 	GetAllPoints() ([]domain.PuntoAyuda, error)
 	CreateHelpingPoint(helpPoint domain.PuntoAyuda, userID string) error
@@ -17,11 +19,15 @@ type HelpPointRepository interface {
 	FindByIDAndUserID(id string, userID string) error
 }
 
+// helpPointRepository implementa la interfaz HelpPointRepository.
+// Contiene colecciones de puntos de ayuda y personas ayudadas para interactuar con la base de datos.
 type helpPointRepository struct {
 	HelpPointCollection     *mongo.Collection
 	PeopleHelpedCollections *mongo.Collection
 }
 
+// NewHelpPointRepository crea una nueva instancia de helpPointRepository.
+// Recibe colecciones de puntos de ayuda y personas ayudadas y retorna una instancia de HelpPointRepository.
 func NewHelpPointRepository(helpPointCollection *mongo.Collection, peopleHelpedCollection *mongo.Collection) HelpPointRepository {
 	return &helpPointRepository{
 		HelpPointCollection:     helpPointCollection,
@@ -29,6 +35,8 @@ func NewHelpPointRepository(helpPointCollection *mongo.Collection, peopleHelpedC
 	}
 }
 
+// CreateHelpingPoint crea un nuevo punto de ayuda en la base de datos.
+// Asigna un ID nuevo, la fecha de registro y el ID del autor antes de insertar el documento.
 func (h *helpPointRepository) CreateHelpingPoint(helpPoint domain.PuntoAyuda, userID string) error {
 	helpPoint.ID = bson.NewObjectID()
 	helpPoint.DateRegister = time.Now()
@@ -47,6 +55,8 @@ func (h *helpPointRepository) CreateHelpingPoint(helpPoint domain.PuntoAyuda, us
 	return nil
 }
 
+// UpdateHelpingPoint actualiza un punto de ayuda en la base de datos.
+// Recibe un mapa de datos a actualizar, verifica el ID del punto de ayuda y actualiza los campos correspondientes.
 func (h *helpPointRepository) UpdateHelpingPoint(data map[string]interface{}) (domain.PuntoAyuda, error) {
 	idStr, ok := data["_id"].(string)
 	if !ok {
@@ -72,6 +82,8 @@ func (h *helpPointRepository) UpdateHelpingPoint(data map[string]interface{}) (d
 	return updatedHelpPoint, nil
 }
 
+// DeleteHelpingPoint elimina un punto de ayuda por su ID.
+// Convierte el ID de cadena a ObjectID y elimina el documento correspondiente de la colección.
 func (h *helpPointRepository) DeleteHelpingPoint(id string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -81,6 +93,7 @@ func (h *helpPointRepository) DeleteHelpingPoint(id string) error {
 	return err
 }
 
+// GetAllPoints obtiene todos los puntos de ayuda de la base de datos.
 func (h *helpPointRepository) GetAllPoints() ([]domain.PuntoAyuda, error) {
 	cursor, err := h.HelpPointCollection.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -99,6 +112,8 @@ func (h *helpPointRepository) GetAllPoints() ([]domain.PuntoAyuda, error) {
 	return helpPoints, nil
 }
 
+// FindByIDAndUserID busca un punto de ayuda por su ID y el ID del usuario.
+// Convierte el ID de cadena a ObjectID y verifica si el punto de ayuda pertenece al usuario especificado.
 func (h *helpPointRepository) FindByIDAndUserID(id string, userID string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {

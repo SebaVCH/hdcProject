@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+// RoleMiddleware es un middleware de Gin que verifica si el usuario tiene uno de los roles permitidos.
+// Si el usuario tiene un rol permitido, se permite el acceso a la ruta; de lo contrario, se devuelve un error 401 Unauthorized.
 func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claims, exists := c.Get("user")

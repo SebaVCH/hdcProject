@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// GenerateToken crea un token JWT para un usuario dado su ID y rol.
+// El token tiene una validez de 2 horas y contiene los claims user_id y user_role.
 func GenerateToken(userID string, userRol string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":   userID,

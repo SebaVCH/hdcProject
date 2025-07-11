@@ -10,6 +10,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// HelpingPointUseCase define la interfaz para las operaciones relacionadas con puntos de ayuda.
+// Contiene métodos para obtener, crear, actualizar y eliminar puntos de ayuda.
 type HelpingPointUseCase interface {
 	GetAllPoints(c *gin.Context)
 	CreateHelpingPoint(c *gin.Context)
@@ -17,16 +19,21 @@ type HelpingPointUseCase interface {
 	DeleteHelpingPoint(c *gin.Context)
 }
 
+// helpingPointUseCase implementa la interfaz HelpingPointUseCase.
+// Contiene un repositorio de puntos de ayuda para interactuar con la base de datos.
 type helpingPointUseCase struct {
 	helpingPointRepository repository.HelpPointRepository
 }
 
+// NewHelpingPointUseCase crea una nueva instancia de helpingPointUseCase.
+// Recibe un repositorio de puntos de ayuda y retorna una instancia de HelpingPointUseCase.
 func NewHelpingPointUseCase(helpingPointRepository repository.HelpPointRepository) HelpingPointUseCase {
 	return &helpingPointUseCase{
 		helpingPointRepository: helpingPointRepository,
 	}
 }
 
+// GetAllPoints maneja la solicitud para obtener todos los puntos de ayuda.
 func (h helpingPointUseCase) GetAllPoints(c *gin.Context) {
 	helpPoints, err := h.helpingPointRepository.GetAllPoints()
 	if err != nil {
@@ -36,6 +43,8 @@ func (h helpingPointUseCase) GetAllPoints(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": helpPoints})
 }
 
+// CreateHelpingPoint maneja la solicitud para crear un nuevo punto de ayuda.
+// Valida los datos de entrada y verifica que el género y el nombre de la persona ayudada no contengan caracteres inválidos.
 func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 	var helpPoint domain.PuntoAyuda
 
@@ -48,8 +57,8 @@ func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsValidString(helpPoint.PeopleHelped.Gender) {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Género inválido"})
+	if !utils.IsValidString(helpPoint.PeopleHelped.Gender) || !utils.IsValidString(helpPoint.PeopleHelped.Name) {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "Se presentaron caracteres inválidos en el género o nombre de la persona ayudada"})
 		return
 	}
 
@@ -62,6 +71,8 @@ func (h helpingPointUseCase) CreateHelpingPoint(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": helpPoint})
 }
 
+// UpdateHelpingPoint maneja la solicitud para actualizar un punto de ayuda existente.
+// Verifica que el ID del punto de ayuda y el ID del usuario sean válidos antes de proceder con la actualización.
 func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 	helpingPointID := c.Param("id")
 	if helpingPointID == "" {
@@ -98,6 +109,8 @@ func (h helpingPointUseCase) UpdateHelpingPoint(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedHelpingPoint})
 }
 
+// DeleteHelpingPoint maneja la solicitud para eliminar un punto de ayuda.
+// Verifica que el ID del punto de ayuda sea válido y que el usuario tenga permisos para eliminarlo.
 func (h helpingPointUseCase) DeleteHelpingPoint(c *gin.Context) {
 	helpingPointID := c.Param("id")
 	if helpingPointID == "" {

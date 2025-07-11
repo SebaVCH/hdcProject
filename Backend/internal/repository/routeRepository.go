@@ -11,6 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
+// RouteRepository define la interfaz para las operaciones relacionadas con rutas.
+// Contiene métodos para obtener, crear, actualizar, eliminar y unirse a rutas.
 type RouteRepository interface {
 	FindAll() ([]domain.Route, error)
 	FindByID(routeId string) (domain.Route, error)
@@ -22,11 +24,15 @@ type RouteRepository interface {
 	GetMyParticipation(userID string) (map[string]int, error)
 }
 
+// routeRepository implementa la interfaz RouteRepository.
+// Contiene colecciones de rutas y puntos de ayuda para interactuar con la base de datos.
 type routeRepository struct {
 	RouteCollection     *mongo.Collection
 	HelpPointCollection *mongo.Collection
 }
 
+// NewRouteRepository crea una nueva instancia de routeRepository.
+// Recibe colecciones de rutas y puntos de ayuda y retorna una instancia de RouteRepository.
 func NewRouteRepository(routeCollection *mongo.Collection, helpPointCollection *mongo.Collection) RouteRepository {
 	return &routeRepository{
 		RouteCollection:     routeCollection,
@@ -34,6 +40,8 @@ func NewRouteRepository(routeCollection *mongo.Collection, helpPointCollection *
 	}
 }
 
+// FindAll obtiene todas las rutas de la base de datos.
+// Retorna un slice de rutas o un error si ocurre algún problema.
 func (r *routeRepository) FindAll() ([]domain.Route, error) {
 	cursor, err := r.RouteCollection.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -48,6 +56,8 @@ func (r *routeRepository) FindAll() ([]domain.Route, error) {
 	return routes, nil
 }
 
+// FindByID obtiene una ruta por su ID.
+// Recibe el ID como string, lo convierte a ObjectID y busca en la colección.
 func (r *routeRepository) FindByID(routeId string) (domain.Route, error) {
 	objID, err := bson.ObjectIDFromHex(routeId)
 	if err != nil {
@@ -62,6 +72,8 @@ func (r *routeRepository) FindByID(routeId string) (domain.Route, error) {
 	return route, nil
 }
 
+// CreateRoute crea una nueva ruta en la base de datos.
+// Asigna un nuevo ID, establece la fecha de creación, el estado y el código de invitación.
 func (r *routeRepository) CreateRoute(route *domain.Route) error {
 	route.ID = bson.NewObjectID()
 	route.DateCreated = time.Now()
@@ -77,6 +89,8 @@ func (r *routeRepository) CreateRoute(route *domain.Route) error {
 	return nil
 }
 
+// UpdateRoute actualiza una ruta existente en la base de datos.
+// Recibe un mapa de datos a actualizar y el ID de la ruta.
 func (r *routeRepository) UpdateRoute(data map[string]interface{}) (domain.Route, error) {
 	idStr, ok := data["_id"].(string)
 	if !ok {
@@ -102,6 +116,8 @@ func (r *routeRepository) UpdateRoute(data map[string]interface{}) (domain.Route
 	return updatedRoute, nil
 }
 
+// DeleteRoute elimina una ruta de la base de datos por su ID.
+// Convierte el ID de cadena a ObjectID y elimina el documento correspondiente.
 func (r *routeRepository) DeleteRoute(routeId string) error {
 	objID, err := bson.ObjectIDFromHex(routeId)
 	if err != nil {
@@ -112,6 +128,8 @@ func (r *routeRepository) DeleteRoute(routeId string) error {
 	return err
 }
 
+// FinishRoute marca una ruta como finalizada.
+// Recibe el ID de la ruta, lo convierte a ObjectID y actualiza su estado y fecha de finalización.
 func (r *routeRepository) FinishRoute(id string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -127,6 +145,9 @@ func (r *routeRepository) FinishRoute(id string) error {
 	return nil
 }
 
+// JoinRoute permite a un usuario unirse a una ruta utilizando un código de invitación.
+// Verifica si la ruta existe, si no está finalizada y si el usuario ya es parte del equipo.
+// Si todas las condiciones se cumplen, agrega al usuario al equipo de la ruta y retorna la ruta actualizada.
 func (r *routeRepository) JoinRoute(code string, userID string) (domain.Route, error) {
 	var route domain.Route
 	err := r.RouteCollection.FindOne(context.Background(), bson.M{"invite_code": code}).Decode(&route)
@@ -163,6 +184,8 @@ func (r *routeRepository) JoinRoute(code string, userID string) (domain.Route, e
 	return route, nil
 }
 
+// GetMyParticipation obtiene la participación de un usuario en rutas.
+// Recibe el ID del usuario, busca las rutas en las que participa y cuenta el total de rutas y puntos de ayuda.
 func (r *routeRepository) GetMyParticipation(userID string) (map[string]int, error) {
 	userObjID, err := bson.ObjectIDFromHex(userID)
 	if err != nil {

@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupRouteRouter configura las rutas para la gestión de rutas sociales.
+// Crea el repositorio de rutas, el caso de uso y el controlador, y define las rutas para crear, obtener, actualizar y eliminar rutas.
+// También define rutas para unirse a una ruta, finalizar una ruta y obtener la participación del usuario en una ruta.
 func SetupRouteRouter(r *gin.Engine) {
 	routeRepo := repository.NewRouteRepository(database.Client.Database("pip").Collection("route"), database.Client.Database("pip").Collection("helping_points"))
 	routeUseCase := usecase.NewRouteUseCase(routeRepo)

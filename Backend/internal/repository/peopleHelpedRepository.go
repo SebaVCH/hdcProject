@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// PeopleHelpedRepository define la interfaz para las operaciones relacionadas con personas ayudadas.
+// Contiene métodos para obtener, crear, eliminar y actualizar personas ayudadas.
+// Este archivo está "obsoleto" como se mencionó en varios archivos, ya que se ha cambiado el nombre de la entidad a "PersonaAyudada".
 type PeopleHelpedRepository interface {
 	GetPeopleHelped() ([]domain.PersonaAyudada, error)
 	CreatePersonHelped(person domain.PersonaAyudada) error
@@ -16,11 +19,15 @@ type PeopleHelpedRepository interface {
 	UpdatePersonHelped(updateData map[string]interface{}) (domain.PersonaAyudada, error)
 }
 
+// peopleHelpedRepository implementa la interfaz PeopleHelpedRepository.
+// Contiene colecciones de puntos de ayuda y personas ayudadas para interactuar con la base de datos.
 type peopleHelpedRepository struct {
 	HelpPointCollection     *mongo.Collection
 	PeopleHelpedCollections *mongo.Collection
 }
 
+// NewPeopleHelpedRepository crea una nueva instancia de peopleHelpedRepository.
+// Recibe colecciones de puntos de ayuda y personas ayudadas y retorna una instancia de PeopleHelpedRepository.
 func NewPeopleHelpedRepository(helpPointCollection *mongo.Collection, peopleHelpedCollection *mongo.Collection) PeopleHelpedRepository {
 	return &peopleHelpedRepository{
 		HelpPointCollection:     helpPointCollection,
@@ -28,6 +35,8 @@ func NewPeopleHelpedRepository(helpPointCollection *mongo.Collection, peopleHelp
 	}
 }
 
+// GetPeopleHelped obtiene todas las personas ayudadas de la base de datos.
+// Retorna un slice de personas ayudadas o un error si ocurre algún problema.
 func (ph *peopleHelpedRepository) GetPeopleHelped() ([]domain.PersonaAyudada, error) {
 	cursor, err := ph.PeopleHelpedCollections.Find(context.Background(), bson.M{})
 	if err != nil {
@@ -46,6 +55,8 @@ func (ph *peopleHelpedRepository) GetPeopleHelped() ([]domain.PersonaAyudada, er
 	return peopleHelped, nil
 }
 
+// CreatePersonHelped crea una nueva persona ayudada en la base de datos.
+// Asigna un ID y una fecha de registro a la persona ayudada.
 func (ph *peopleHelpedRepository) CreatePersonHelped(person domain.PersonaAyudada) error {
 	person.ID = bson.NewObjectID()
 	person.DateRegister = time.Now()
@@ -53,6 +64,8 @@ func (ph *peopleHelpedRepository) CreatePersonHelped(person domain.PersonaAyudad
 	return err
 }
 
+// DeletePersonHelped elimina una persona ayudada de la base de datos.
+// Recibe el ID de la persona ayudada como string, lo convierte a ObjectID y elimina el documento correspondiente.
 func (ph *peopleHelpedRepository) DeletePersonHelped(id string) error {
 	objID, err := bson.ObjectIDFromHex(id)
 	if err != nil {
@@ -62,6 +75,8 @@ func (ph *peopleHelpedRepository) DeletePersonHelped(id string) error {
 	return err
 }
 
+// UpdatePersonHelped actualiza una persona ayudada en la base de datos.
+// Recibe un mapa de datos a actualizar, verifica el ID de la persona ayudada y actualiza los campos correspondientes.
 func (ph *peopleHelpedRepository) UpdatePersonHelped(updateData map[string]interface{}) (domain.PersonaAyudada, error) {
 	idStr, ok := updateData["_id"].(string)
 	if !ok {

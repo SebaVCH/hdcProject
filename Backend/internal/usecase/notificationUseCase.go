@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+// NotificationUseCase define la interfaz para las operaciones relacionadas con notificaciones.
+// Contiene métodos para crear, eliminar, actualizar y obtener notificaciones, además de obtener notificaciones leídas y no leídas, y para marcar notificaciones como leídas.
 type NotificationUseCase interface {
 	CreateNotification(c *gin.Context)
 	DeleteNotification(c *gin.Context)
@@ -19,16 +21,22 @@ type NotificationUseCase interface {
 	MarkNotificationAsRead(c *gin.Context)
 }
 
+// notificationUseCase implementa la interfaz NotificationUseCase.
+// Contiene un repositorio de notificaciones para interactuar con la base de datos.
 type notificationUseCase struct {
 	notificationRepository repository.NotificationRepository
 }
 
+// NewNotificationUseCase crea una nueva instancia de notificationUseCase.
+// Recibe un repositorio de notificaciones y retorna una instancia de NotificationUseCase.
 func NewNotificationUseCase(notificationRepository repository.NotificationRepository) NotificationUseCase {
 	return &notificationUseCase{
 		notificationRepository: notificationRepository,
 	}
 }
 
+// CreateNotification maneja la solicitud para crear una nueva notificación.
+// Valida los datos de entrada y verifica que la descripción no contenga caracteres inválidos.
 func (n notificationUseCase) CreateNotification(c *gin.Context) {
 	var notification domain.Aviso
 	if err := c.ShouldBindJSON(&notification); err != nil {
@@ -50,6 +58,8 @@ func (n notificationUseCase) CreateNotification(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": notification})
 }
 
+// DeleteNotification maneja la solicitud para eliminar una notificación por su ID.
+// Verifica que el ID de la notificación sea válido y que el usuario tenga los permisos necesarios.
 func (n notificationUseCase) DeleteNotification(c *gin.Context) {
 	notificationID := c.Param("id")
 	if notificationID == "" {
@@ -66,6 +76,8 @@ func (n notificationUseCase) DeleteNotification(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Aviso eliminada correctamente"})
 }
 
+// UpdateNotification maneja la solicitud para actualizar una notificación existente.
+// Verifica que el ID de la notificación sea válido y que el usuario tenga los permisos necesarios para actualizarla.
 func (n notificationUseCase) UpdateNotification(c *gin.Context) {
 	notificationID := c.Param("id")
 	if notificationID == "" {
@@ -105,6 +117,8 @@ func (n notificationUseCase) UpdateNotification(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedNotification})
 }
 
+// GetNotifications maneja la solicitud para obtener todas las notificaciones.
+// Verifica que el usuario esté autenticado y obtiene las notificaciones desde el repositorio.
 func (n notificationUseCase) GetNotifications(c *gin.Context) {
 
 	notifications, err := n.notificationRepository.GetNotifications()
@@ -116,6 +130,7 @@ func (n notificationUseCase) GetNotifications(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
 }
 
+// GetUnreadNotifications maneja la solicitud para obtener las notificaciones no leídas del usuario.
 func (n notificationUseCase) GetUnreadNotifications(c *gin.Context) {
 	claims, _ := c.Get("user")
 	userClaims := claims.(jwt.MapClaims)
@@ -129,6 +144,8 @@ func (n notificationUseCase) GetUnreadNotifications(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
 }
 
+// GetReadNotifications maneja la solicitud para obtener las notificaciones leídas del usuario.
+// Verifica que el usuario esté autenticado y obtiene las notificaciones leídas desde el repositorio.
 func (n notificationUseCase) GetReadNotifications(c *gin.Context) {
 	claims, _ := c.Get("user")
 	userClaims := claims.(jwt.MapClaims)
@@ -142,6 +159,8 @@ func (n notificationUseCase) GetReadNotifications(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": notifications})
 }
 
+// MarkNotificationAsRead maneja la solicitud para marcar una notificación como leída.
+// Verifica que el ID de la notificación sea válido y actualiza su estado en la base de datos.
 func (n notificationUseCase) MarkNotificationAsRead(c *gin.Context) {
 	notificationID := c.Param("id")
 	claims, _ := c.Get("user")

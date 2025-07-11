@@ -1,3 +1,5 @@
+// Package usecase implementa la logica de negocios y validaciones.
+// Se encarga de interactuar con los repositorios y responde al llamado de los controladores.
 package usecase
 
 import (
@@ -8,21 +10,29 @@ import (
 	"net/http"
 )
 
+// AuthUseCase define la interfaz para las operaciones de autenticación.
+// Contiene métodos para iniciar sesión y registrar usuarios.
 type AuthUseCase interface {
 	Login(c *gin.Context)
 	Register(c *gin.Context)
 }
 
+// authUseCase implementa la interfaz AuthUseCase.
+// Contiene un repositorio de autenticación para interactuar con la base de datos.
 type authUseCase struct {
 	authRepository repository.AuthRepository
 }
 
+// NewAuthUseCase crea una nueva instancia de authUseCase.
+// Recibe un repositorio de autenticación y retorna una instancia de AuthUseCase.
 func NewAuthUseCase(authRepository repository.AuthRepository) AuthUseCase {
 	return &authUseCase{
 		authRepository: authRepository,
 	}
 }
 
+// Login maneja la solicitud de inicio de sesión.
+// Valida los datos de entrada, verifica las credenciales del usuario y retorna un token JWT si son válidas.
 func (a authUseCase) Login(c *gin.Context) {
 	var body struct {
 		Email    string `json:"email" binding:"required"`
@@ -48,6 +58,8 @@ func (a authUseCase) Login(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"token": token})
 }
 
+// Register maneja la solicitud de registro de un nuevo usuario.
+// Valida los datos de entrada y registra al usuario en la base de datos. Retorna un token JWT si el registro es exitoso.
 func (a authUseCase) Register(c *gin.Context) {
 	var user domain.Usuario
 

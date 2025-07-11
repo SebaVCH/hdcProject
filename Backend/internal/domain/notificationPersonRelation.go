@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// NotificationPersonRelation representa la relación entre una notificación y una persona.
+// Incluye campos para el ID de la notificación, el ID de la persona, la fecha en que se leyó la notificación y un campo booleano para indicar si se ha leído.
+// Este struct se utiliza para gestionar la bandeja de notificaciones (por usuario) e indicar si las notificaciones fueron o no leídas.
 type NotificationPersonRelation struct {
 	ID             bson.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
 	NotificationID bson.ObjectID `bson:"notification_id" json:"notification_id"`

@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupCalendarEventRouter configura las rutas para los eventos del calendario.
+// Crea el repositorio de eventos del calendario, el caso de uso y el controlador, y define las rutas para crear, obtener, actualizar y eliminar eventos.
 func SetupCalendarEventRouter(r *gin.Engine) {
 	calendarEventRepo := repository.NewCalendarEventRepository(database.Client.Database("pip").Collection("calendar_events"))
 	calendarEventUseCase := usecase.NewCalendarEventUseCase(calendarEventRepo)

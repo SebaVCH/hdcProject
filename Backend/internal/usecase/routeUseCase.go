@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+// RouteUseCase define la interfaz para las operaciones relacionadas con rutas.
+// Contiene métodos para obtener, crear, actualizar, eliminar rutas, finalizar rutas y unirse a ellas.
 type RouteUseCase interface {
 	FindAll(c *gin.Context)
 	FindByID(c *gin.Context)
@@ -20,14 +22,20 @@ type RouteUseCase interface {
 	GetMyParticipation(c *gin.Context)
 }
 
+// routeUseCase implementa la interfaz RouteUseCase.
+// Contiene un repositorio de rutas para interactuar con la base de datos.
 type routeUseCase struct {
 	routeRepository repository.RouteRepository
 }
 
+// NewRouteUseCase crea una nueva instancia de routeUseCase.
+// Recibe un repositorio de rutas y retorna una instancia de RouteUseCase.
 func NewRouteUseCase(repo repository.RouteRepository) RouteUseCase {
 	return &routeUseCase{routeRepository: repo}
 }
 
+// FindAll maneja la solicitud para obtener todas las rutas.
+// Retorna un JSON con todas las rutas o un error si ocurre algún problema.
 func (r routeUseCase) FindAll(c *gin.Context) {
 	routes, err := r.routeRepository.FindAll()
 	if err != nil {
@@ -37,6 +45,8 @@ func (r routeUseCase) FindAll(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": routes})
 }
 
+// FindByID maneja la solicitud para obtener una ruta por su ID.
+// Retorna un JSON con la ruta encontrada o un error si no se encuentra.
 func (r routeUseCase) FindByID(c *gin.Context) {
 	id := c.Param("id")
 	route, err := r.routeRepository.FindByID(id)
@@ -47,6 +57,8 @@ func (r routeUseCase) FindByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": route})
 }
 
+// CreateRoute maneja la solicitud para crear una nueva ruta.
+// Valida los datos de entrada y verifica que el título y la descripción no contengan caracteres inválidos.
 func (r routeUseCase) CreateRoute(c *gin.Context) {
 	var route domain.Route
 	if err := c.ShouldBindJSON(&route); err != nil {
@@ -68,6 +80,8 @@ func (r routeUseCase) CreateRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": route})
 }
 
+// UpdateRoute maneja la solicitud para actualizar una ruta existente.
+// Verifica que el ID de la ruta sea válido y que los datos de entrada sean correctos.
 func (r routeUseCase) UpdateRoute(c *gin.Context) {
 	routeID := c.Param("id")
 	if routeID == "" {
@@ -95,6 +109,8 @@ func (r routeUseCase) UpdateRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": updatedRoute})
 }
 
+// DeleteRoute maneja la solicitud para eliminar una ruta por su ID.
+// Si el ID no se proporciona, retorna un error 400 Bad Request.
 func (r routeUseCase) DeleteRoute(c *gin.Context) {
 	id := c.Param("id")
 	err := r.routeRepository.DeleteRoute(id)
@@ -106,6 +122,8 @@ func (r routeUseCase) DeleteRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Ruta eliminada correctamente"})
 }
 
+// FinishRoute maneja la solicitud para finalizar una ruta.
+// Verifica que el ID de la ruta sea válido y que la ruta pueda ser finalizada.
 func (r routeUseCase) FinishRoute(c *gin.Context) {
 	routeID := c.Param("id")
 	if routeID == "" {
@@ -122,6 +140,8 @@ func (r routeUseCase) FinishRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Ruta finalizada correctamente"})
 }
 
+// JoinRoute maneja la solicitud para unirse a una ruta utilizando un código de invitación.
+// Verifica que el código de invitación sea válido y que el usuario esté autenticado.
 func (r routeUseCase) JoinRoute(c *gin.Context) {
 	inviteCode := c.Param("code")
 	if inviteCode == "" {
@@ -156,6 +176,8 @@ func (r routeUseCase) JoinRoute(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": route})
 }
 
+// GetMyParticipation maneja la solicitud para obtener la participación de un usuario en una ruta (cantidad de rutas y puntos de ayuda).
+// Verifica que el ID del usuario sea válido y que el usuario tenga participaciones en rutas.
 func (r routeUseCase) GetMyParticipation(c *gin.Context) {
 	userID := c.Param("id")
 	if userID == "" {

@@ -1,3 +1,5 @@
+// Package database contiene la lógica para conectar a la base de datos MongoDB.
+// Este paquete se encarga de iniciar la conexión a la base de datos al arrancar la aplicación.
 package database
 
 import (
@@ -10,8 +12,12 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+// Client es la variable cliente de MongoDB que se utilizará de forma global para interactuar con la base de datos.
 var Client *mongo.Client
 
+// StartDB inicia la conexión a la base de datos MongoDB utilizando la URI proporcionada en las variables de entorno.
+// Si la conexión es exitosa, se asigna el cliente a la variable global Client que será utilizado para acceder a la base de datos y colecciones.
+// Si ocurre un error durante la conexión, se devuelve el error correspondiente.
 func StartDB() error {
 	var uri string
 

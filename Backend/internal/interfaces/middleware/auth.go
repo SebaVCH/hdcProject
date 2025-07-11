@@ -1,3 +1,5 @@
+// Package middleware define middlewares para la aplicación.
+// Este paquete contiene la lógica de autenticación, CORS y validación de roles de usuario.
 package middleware
 
 import (
@@ -9,6 +11,9 @@ import (
 	"strings"
 )
 
+// AuthMiddleware valida el token JWT en el header Authorization.
+// Si el token es válido, se extraen los claims y se añaden al contexto de la solicitud.
+// Si el token no es válido o no se proporciona, se devuelve un error 401 Unauthorized.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -37,6 +42,11 @@ func AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+// ValidateToken valída un token JWT y devuelve el token decodificado si es válido.
+// Es importante que el token esté en el formato "Bearer <token>".
+// Si el token es válido, devuelve el token decodificado y los claims asociados.
+// Si el token no es válido o ha expirado, devuelve un error.
 
 func ValidateToken(tokenString string) (*jwt.Token, error) {
 	if !strings.HasPrefix(tokenString, "Bearer ") {

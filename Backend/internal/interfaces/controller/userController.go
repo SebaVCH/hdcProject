@@ -31,6 +31,6 @@ func (u *userController) GetUserByID(c *gin.Context) {
 	u.userUseCase.GetUserByID(c)
 }
 
-func (u *userController) GetNameByID(c *gin.Context) {
-	u.userUseCase.GetNameByID(c)
+func (u *userController) GetPublicInfoByID(c *gin.Context) {
+	u.userUseCase.GetPublicInfoByID(c)
 }

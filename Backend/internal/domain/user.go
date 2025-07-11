@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Usuario representa al usuario propio de la aplicación.
+// Incluye campos para el ID, nombre, correo electrónico, contraseña, teléfono, ID de la institución, número de rutas completadas, lista de rutas, rol y fecha de registro.
 type Usuario struct {
 	ID              bson.ObjectID `bson:"_id,omitempty" json:"_id"`
 	Name            string        `bson:"name" json:"name"`

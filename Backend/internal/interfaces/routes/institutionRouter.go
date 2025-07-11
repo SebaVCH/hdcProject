@@ -9,6 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// SetupInstitutionRouter configura las rutas para las instituciones.
+// Crea el repositorio de instituciones, el caso de uso y el controlador, y define las rutas para obtener, crear, actualizar y eliminar instituciones.
+// Las rutas están protegidas por middleware de autenticación y autorización, permitiendo solo a los usuarios con rol de "admin" acceder a ellas.
 func SetupInstitutionRouter(r *gin.Engine) {
 	institutionRepo := repository.NewInstitutionRepository(database.Client.Database("pip").Collection("institutions"))
 	institutionUseCase := usecase.NewInstitutionUseCase(institutionRepo)

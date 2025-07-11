@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+// SendNotificationMail envía un correo electrónico de notificación al usuario con la información del aviso.
+// Utiliza una plantilla HTML para darle estructura al contenido del correo.
+// Recibe un objeto Usuario y un objeto Aviso como parámetros.
+// Devuelve un error si ocurre algún problema al enviar el correo.
 func SendNotificationMail(user domain.Usuario, notification domain.Aviso) error {
 
 	HTMLLoad, err := template.ParseFiles("internal/utils/Template_Notification.html")
@@ -45,6 +49,11 @@ func SendNotificationMail(user domain.Usuario, notification domain.Aviso) error 
 
 	return dialer.DialAndSend(newMail)
 }
+
+// SendRegistrationMail envía un correo electrónico de registro al usuario con su nombre y contraseña.
+// Utiliza una plantilla HTML para darle estructura al contenido del correo.
+// Recibe un objeto Usuario y una contraseña sin encriptar como parámetros, esto último en caso de olvidar la contraseña.
+// Devuelve un error si ocurre algún problema al enviar el correo.
 func SendRegistrationMail(user domain.Usuario, unhashedPass string) error {
 
 	HTMLLoad, err := template.ParseFiles("internal/utils/Template_Registration.html")

@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+// InstitutionUseCase define la interfaz para las operaciones relacionadas con instituciones.
+// Contiene métodos para obtener, crear, actualizar y eliminar instituciones.
 type InstitutionUseCase interface {
 	GetAllInstitutions(c *gin.Context)
 	GetInstitutionByID(c *gin.Context)
@@ -16,16 +18,21 @@ type InstitutionUseCase interface {
 	DeleteInstitution(c *gin.Context)
 }
 
+// institutionUseCase implementa la interfaz InstitutionUseCase.
+// Contiene un repositorio de instituciones para interactuar con la base de datos.
 type institutionUseCase struct {
 	institutionRepository repository.InstitutionRepository
 }
 
+// NewInstitutionUseCase crea una nueva instancia de institutionUseCase.
+// Recibe un repositorio de instituciones y retorna una instancia de InstitutionUseCase.
 func NewInstitutionUseCase(institutionRepository repository.InstitutionRepository) InstitutionUseCase {
 	return &institutionUseCase{
 		institutionRepository: institutionRepository,
 	}
 }
 
+// GetAllInstitutions maneja la solicitud para obtener todas las instituciones.
 func (i institutionUseCase) GetAllInstitutions(c *gin.Context) {
 	institutions, err := i.institutionRepository.GetAllInstitutions()
 	if err != nil {
@@ -35,6 +42,7 @@ func (i institutionUseCase) GetAllInstitutions(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": institutions})
 }
 
+// GetInstitutionByID maneja la solicitud para obtener una institución por su ID.
 func (i institutionUseCase) GetInstitutionByID(c *gin.Context) {
 	idSTR := c.Param("id")
 
@@ -51,6 +59,7 @@ func (i institutionUseCase) GetInstitutionByID(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": institution})
 }
 
+// CreateInstitution maneja la solicitud para crear una nueva institución.
 func (i institutionUseCase) CreateInstitution(c *gin.Context) {
 	var institution domain.Institution
 	if err := c.ShouldBindJSON(&institution); err != nil {
@@ -71,6 +80,7 @@ func (i institutionUseCase) CreateInstitution(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Institución creada con éxito."})
 }
 
+// UpdateInstitution maneja la solicitud para actualizar una institución existente.
 func (i institutionUseCase) UpdateInstitution(c *gin.Context) {
 	idSTR := c.Param("id")
 	if idSTR == "" {
@@ -111,6 +121,7 @@ func (i institutionUseCase) UpdateInstitution(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "Institución actualizada correctamente"})
 }
 
+// DeleteInstitution maneja la solicitud para eliminar una institución por su ID.
 func (i institutionUseCase) DeleteInstitution(c *gin.Context) {
 	idSTR := c.Param("id")
 

@@ -8,20 +8,28 @@ import (
 	"net/http"
 )
 
+// ExportDataUseCase define la interfaz para las operaciones de exportación de datos.
+// Contiene un método para exportar datos de personas ayudadas a un archivo Excel.
 type ExportDataUseCase interface {
 	ExportPeopleHelped(c *gin.Context)
 }
 
+// exportDataUseCase implementa la interfaz ExportDataUseCase.
+// Contiene un repositorio de exportación de datos para interactuar con la base de datos.
 type exportDataUseCase struct {
 	exportDataRepository repository.ExportDataRepository
 }
 
+// NewExportDataUseCase crea una nueva instancia de exportDataUseCase.
+// Recibe un repositorio de exportación de datos y retorna una instancia de ExportDataUseCase.
 func NewExportDataUseCase(exportDataRepository repository.ExportDataRepository) ExportDataUseCase {
 	return &exportDataUseCase{
 		exportDataRepository: exportDataRepository,
 	}
 }
 
+// ExportPeopleHelped maneja la solicitud para exportar datos de personas ayudadas a un archivo Excel.
+// Obtiene los datos de personas ayudadas del repositorio, crea un archivo Excel,
 func (ed exportDataUseCase) ExportPeopleHelped(c *gin.Context) {
 	peopleHelped, err := ed.exportDataRepository.GetPeopleHelpedData()
 	if err != nil {
