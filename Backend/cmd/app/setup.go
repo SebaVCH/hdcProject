@@ -6,6 +6,7 @@ import (
 	"github.com/SebaVCH/hdcProject/internal/config"
 	"github.com/SebaVCH/hdcProject/internal/infrastructure/database"
 	"github.com/SebaVCH/hdcProject/internal/interfaces/routes"
+	"github.com/SebaVCH/hdcProject/internal/utils"
 )
 
 // StartBackend inicia el backend de la aplicación.
@@ -21,6 +22,10 @@ func StartBackend() error {
 	}
 
 	if err := routes.SetupRouter().Run(":8080"); err != nil {
+		return err
+	}
+
+	if err := utils.CreateDefaultAdmin(database.Client.Database("pip").Collection("usuarios")); err != nil {
 		return err
 	}
 
