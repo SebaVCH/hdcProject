@@ -1,10 +1,10 @@
 import { HelpPoint, HelpedPerson } from "../models/HelpPoint"
 
 export type TPeopleHelpedBackend = {
-    _id: string
     age: number
     gender: string
     name: string
+    date?: Date
 }
 
 export type THelpPointBackend = {
@@ -17,11 +17,10 @@ export type THelpPointBackend = {
 }
 
 export type THelpPointCreateRequest = Omit<THelpPointBackend, '_id' | 'date_register'>
-export type THelpPointUpdateRequest = THelpPointBackend
+export type THelpPointUpdateRequest = Pick<THelpPointBackend, '_id' | 'people_helped'>
 
 export function MapHelpedPersonFromBackend(data: Partial<TPeopleHelpedBackend>): HelpedPerson {
     const person: Partial<HelpedPerson> = {
-        id: data._id,
         age: data.age,
         gender: data.gender,
         name: data.name
@@ -61,7 +60,6 @@ export function MapHelpPointToCreateRequest(
         route_id: data.routeID,
         coords: data.coords,
         people_helped: {
-            _id: data.peopleHelped.id,
             age: data.peopleHelped.age,
             gender: data.peopleHelped.gender,
             name: data.peopleHelped.name
@@ -75,15 +73,11 @@ export function MapHelpPointToUpdateRequest(
 ): THelpPointUpdateRequest {
     return {
         _id: data.id,
-        route_id: data.routeID,
-        coords: data.coords,
-        date_register: data.dateRegister.toISOString(),
         people_helped: {
-            _id: data.peopleHelped.id,
             age: data.peopleHelped.age,
             gender: data.peopleHelped.gender,
-            name: data.peopleHelped.name
+            name: data.peopleHelped.name,
+            date: new Date()
         },
-        author_id: data.authorID, 
     }
 }

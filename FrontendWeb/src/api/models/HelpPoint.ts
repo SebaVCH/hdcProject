@@ -1,6 +1,5 @@
 
 export type HelpedPerson = {
-    id : string 
     age : number
     gender : string 
     name : string 

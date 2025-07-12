@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import useSessionStore from '../../stores/useSessionStore';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import { useHelpPointUpdateDialog } from '../../context/HelpPointUpdateContext';
-import { useUpdateHelpPoint } from '../../api/hooks/HelpPointHooks';
+import { useHelpPoints, useUpdateHelpPoint } from '../../api/hooks/HelpPointHooks';
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -36,6 +36,7 @@ export default function DialogUpdateAtended() {
 
 
     const { mutate, data, isError, isSuccess, isPending, isIdle, reset, error } = useUpdateHelpPoint()
+    const { refetch } = useHelpPoints()
 
 
     useEffect(() => {
@@ -62,13 +63,13 @@ export default function DialogUpdateAtended() {
         mutate({...helpPoint, peopleHelped : {
             name,
             age,
-            gender,
-            id: ''
+            gender
         }})
     }
 
     useEffect(() => {
         if(isSuccess) {
+            refetch()
             setTimeout(() => {
                 handleClose()
             }, 2000)

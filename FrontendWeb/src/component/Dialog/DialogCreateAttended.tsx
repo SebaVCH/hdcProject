@@ -130,8 +130,7 @@ export default function DialogCreateAttended({ stateAttended, stateOpen, stateOn
             peopleHelped: {
                 name,
                 age,
-                gender,
-                id: ''
+                gender
             },
             authorID: authorID as string,
             disabled: false
