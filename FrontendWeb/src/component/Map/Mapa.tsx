@@ -117,7 +117,6 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
     const [ showHeatmap, setShowHeatmap ] = useState(false)
 
     useEffect(() => {
-
         if(enableTraceLine) {
             const map = helpPoints.reduce<Map<string, LatLngExpression[]>>((acc : Map<string, LatLngExpression[]>, hp) => {
                 if(hp.disabled) return acc 
