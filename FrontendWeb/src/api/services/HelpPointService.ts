@@ -21,14 +21,10 @@ export class HelpPointService {
     }
 
     static async UpdateHelpPoint( helpPoint : THelpPointUpdateRequest ) : Promise<HelpPoint> {
-        console.log("hp: ", helpPoint)
-        try{
-            const { data } = await axiosInstance.put(`/${this.RESOURCE_NAME}/${helpPoint._id}`, helpPoint)
-        } catch(e) {
-            console.log(e)
-        }
-        return (helpPoint as any) as HelpPoint
-        //return MapHelpPointFromBackend(data?.message as THelpPointBackend)
+        console.log(helpPoint)
+        const { data } = await axiosInstance.put(`/${this.RESOURCE_NAME}/${helpPoint._id}`, helpPoint)
+        console.log(data)
+        return MapHelpPointFromBackend(data?.message as THelpPointBackend)
     }
 
     static async DeleteHelpPoint( helpPointID : string ) : Promise<string> {

@@ -50,12 +50,32 @@ export default function RouteHistory() {
     const useQueryRouteByUserID = useRoutesByUser(userID)
     const useQueryHP= useHelpPoints()
 
-
+    const [ countFetched, setCountFetched ] = useState(0)
     useEffect(() => {
         if(useQueryHP.isSuccess) {
-            setHelpPoints(useQueryHP.data.map((hp) => {hp.disabled = true; return hp;}))
+            const hpsort = useQueryHP.data.sort((a, b) => {
+                if(a.dateRegister === b.dateRegister) return 0
+                else if(a.dateRegister < b.dateRegister) return -1 
+                else return 1
+            })
+            if(countFetched === 0) {
+                setHelpPoints(hpsort.map((hp) => {
+                    hp.disabled = true; return hp;
+                }))
+                setCountFetched(prev => prev + 1)
+            } else {
+                setHelpPoints(hpsort.map((hp, index) => {
+                    if(index < helpPoints.length) {
+                        hp.disabled = helpPoints[index].disabled
+                    } else {
+                        hp.disabled = true
+                    }
+                    return hp
+                }))
+                setCountFetched(prev => prev + 1)
+            }  
         }
-    }, [useQueryHP.isSuccess])
+    }, [useQueryHP.data])
 
     useEffect(() => {
         if(onlyUser && userID) {

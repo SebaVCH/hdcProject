@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { ListItemButton, ListItemText, Collapse, List, ListItemButtonProps, ListItem, IconButton, Fade } from "@mui/material"
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -6,6 +6,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import { useHelpPointUpdateDialog } from "../../context/HelpPointUpdateContext";
 import { HelpPoint } from "../../api/models/HelpPoint";
 import { Route } from "../../api/models/Route";
+import { useHelpPoints } from "../../api/hooks/HelpPointHooks";
+import { useProfile } from "../../api/hooks/UserHooks";
+import { useAuth } from "../../context/AuthContext";
+import { Role } from "../../Enums/Role";
 
 type ListRouteItemProps = {
     route : Route
@@ -17,11 +21,14 @@ type ListRouteItemProps = {
 
 export default function ListRouteItem({ route, stateHelpPoints, stateShowLocation, stateLocation, openRoot, onClick, ...props} : ListRouteItemProps) {
     
+
+    const userID = useProfile().data?.id
+    const { role } = useAuth()
     const [ open, setOpen ] = useState(openRoot)
     const [ helpPoints, setHelpPoints ] = stateHelpPoints
     const [ hpRoutes, setHPRoutes ] = useState<HelpPoint[]>([])
-
     const [ _, setHelpPointUpdate ] = useHelpPointUpdateDialog()
+    const hpQ = useHelpPoints()
 
 
     const [ , setLocation ] = stateLocation
@@ -51,6 +58,7 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
     }, [])
 
     useEffect(() => {
+        console.log(open, openRoot)
         setHelpPoints(prev => prev.map((hp) => {
             if( route.id === hp.routeID) {
                 hp.disabled = !open || !openRoot
@@ -81,18 +89,20 @@ export default function ListRouteItem({ route, stateHelpPoints, stateShowLocatio
                             <ListItem 
                                 key={index} 
                                 sx={{ padding : 0}}
-                                /*secondaryAction={
-                                    <Fade in={selectedIndex === index}>
-                                        <IconButton edge="end" aria-label="Editar Punto Ayuda" onClick={() => {
-                                            if(selectedIndex === index) {
-                                                setHelpPointUpdate(hp)
-                                            }
-                                        }}>
-                                            <EditIcon fontSize="small"/>
-                                        </IconButton>
-                                    </Fade>
-                                }
-                                */
+                                secondaryAction={ role === Role.admin || userID == hp.authorID ?
+                                        <Fade in={selectedIndex === index}>
+                                            <IconButton edge="end" aria-label="Editar Punto Ayuda" onClick={() => {
+                                                if(selectedIndex === index) {
+                                                    setHelpPointUpdate(hp)
+                                                }
+                                            }}>
+                                                <EditIcon fontSize="small"/>
+                                            </IconButton>
+                                        </Fade>
+                                        :
+                                        <></>
+                                    }
+                                
                             >
                                 <ListItemButton
                                     

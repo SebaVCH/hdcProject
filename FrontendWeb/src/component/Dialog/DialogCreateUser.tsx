@@ -8,11 +8,10 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { FormControl, FormHelperText, Input, InputLabel, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { isValidEmail } from '../../utils/verifyInput';
 import { useRegister } from '../../api/hooks/UserHooks';
 import { IUser } from '../../api/models/User';
 import ComboBox from '../Button/ComboBox';
-import { useCreateInstitution, useInstitutions } from '../../api/hooks/InstitutionHooks';
+import { useInstitutions } from '../../api/hooks/InstitutionHooks';
 import { Role } from '../../Enums/Role';
 
 
