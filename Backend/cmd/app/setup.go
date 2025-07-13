@@ -21,11 +21,11 @@ func StartBackend() error {
 		return err
 	}
 
-	if err := routes.SetupRouter().Run(":8080"); err != nil {
+	if err := utils.CreateDefaultAdmin(database.Client.Database("pip").Collection("usuarios")); err != nil {
 		return err
 	}
-
-	if err := utils.CreateDefaultAdmin(database.Client.Database("pip").Collection("usuarios")); err != nil {
+	
+	if err := routes.SetupRouter().Run(":8080"); err != nil {
 		return err
 	}
 
