@@ -4,11 +4,9 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import { Checkbox, FormControlLabel, TextField, Typography } from '@mui/material';
+import { Checkbox, FormControlLabel, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { useCreateNotice, useNotices, useNoticesMap } from '../../api/hooks/NoticeHooks';
+import { useCreateNotice, useNoticesMap } from '../../api/hooks/NoticeHooks';
 import { Notice } from '../../api/models/Notice';
 import { useProfile } from '../../api/hooks/UserHooks';
 import InputDescription from '../Input/InputDescription';
@@ -16,10 +14,10 @@ import CloseDialogButton from '../Button/CloseDialogButton';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(3),
+    padding: theme.spacing(1, 3),
   },
   '& .MuiDialogActions-root': {
-    padding: theme.spacing(1),
+    padding: theme.spacing(1, 1),
   },
 }));
 

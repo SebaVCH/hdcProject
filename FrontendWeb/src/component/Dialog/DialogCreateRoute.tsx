@@ -19,9 +19,17 @@ import { useCreateRoute } from '../../api/hooks/RouteHooks';
 import { Route } from '../../api/models/Route';
 import { useProfile } from '../../api/hooks/UserHooks';
 
+
+
+const inputFontSize = {
+    xs : '0.90rem',
+    sm : '0.95rem',
+    md : '1rem'
+}
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(3),
+    padding: theme.spacing(1, 3),
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
@@ -71,16 +79,9 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
         })
     }
 
-
-
     const handleClose = () => {
-        clearStates()
-        if(confirmation) {
-            setRouteStatus(true)
-        }
         setOpen(false)
     }
-
 
     const handleDescriptionInput = (e : React.ChangeEvent<HTMLInputElement>) => {
         setRoute({...route, description : e.target.value})
@@ -146,30 +147,57 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                 open={open} 
                 onClose={handleClose}
                 aria-labelledby='ruta-titulo'
+                keepMounted
+                slotProps={{
+                    transition : {
+                        onExited: () => {
+                            if(confirmation) {
+                                setRouteStatus(true)
+                            }   
+                            clearStates()
+                        }
+                    }
+                }}    
             >
-                <DialogTitle className='m-0 p-2' id="ruta-titulo">
-                    Crear Una Ruta
+                <DialogTitle className='m-0' id="ruta-titulo">
+                    Crear una Ruta
                 </DialogTitle>
                 <CloseDialogButton handleClose={handleClose} />
                 
-                <DialogContent className='flex flex-col gap-5'>
+                <DialogContent className='flex flex-col gap-10'>
                     {!acept ? 
                         <>
-                            <Typography variant="body1">
-                            Estás a punto de crear una nueva ruta social, durante la cual podrás: <br /><br />
-                            - Registrar a personas en situación de calle. <br />
-                            - Reportar riesgos presentes en ciertos sectores. <br /><br />
-                            Puedes finalizar la ruta en cualquier momento.
+                            <Typography variant="body1" sx={{ lineHeight: 2, fontSize: {
+                                xs : '0.75rem',
+                                sm : '0.75rem',
+                                md : '1rem' 
+                            }}}>
+                            Estás a punto de crear una nueva ruta social, durante la cual podrás: <br />
+                            {"\u2022"} Registrar a personas en situación de calle. <br />
+                            {"\u2022"} Reportar riesgos presentes en ciertos sectores. <br />
+                            {"\u2022"} Puedes finalizar la ruta en cualquier momento.
                             </Typography>
 
                             <TextField 
                                 variant='standard'
-                                label="Ingresa el Título de la Ruta"
+                                label="Nombre de la ruta"
                                 value={route.title}
                                 error={routeError.title !== ''}
+                                placeholder='Cómo reconocerás esta ruta'
                                 helperText={routeError.title}
                                 required
                                 onChange={handleTitleInput}
+                                slotProps={{
+                                    inputLabel : {
+                                        shrink : true
+                                    },
+                                    input: {
+                                        sx : {
+                                            fontSize: inputFontSize
+                                        }
+                                    }
+                                }}
+                            
                             />
                             <InputDescription
                                 variant='standard'
@@ -177,10 +205,20 @@ export default function DialogCreateRoute({ stateOpen } : DialogCreateRouteProps
                                 error={routeError.description !== ''}
                                 helperText={routeError.description}
                                 label='Descripción de la ruta'
-                                placeholder='Ingresa la descripción'
+                                placeholder='Explica la finalidad y objetivos de la ruta'
                                 value={route.description}
                                 maxLength={100}
                                 onChange={handleDescriptionInput}
+                                slotProps={{
+                                    inputLabel : {
+                                        shrink : true
+                                    },
+                                    input: {
+                                        sx : {
+                                            fontSize: inputFontSize
+                                        }
+                                    }
+                                }}
                             />
                         </>
                     :

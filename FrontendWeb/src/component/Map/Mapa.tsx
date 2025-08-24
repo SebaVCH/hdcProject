@@ -107,14 +107,15 @@ type MapaProps = {
     risks : Risk[]
     children ?: React.ReactNode
     enableTraceLine ?: boolean
+    showHeatmap ?: boolean
 } 
 
 
-export default function Mapa({ stateCurrentLocation, risks, helpPoints, children, enableTraceLine } : MapaProps) {
+export default function Mapa({ stateCurrentLocation, risks, helpPoints, children, enableTraceLine, showHeatmap } : MapaProps) {
 
     const [ currentLocation,  ] = stateCurrentLocation
     const [ mapTracedLineRoute, setMapTracedLineRoute ] = useState<Map<string, LatLngExpression[]>>(new Map<string, LatLngExpression[]>())
-    const [ showHeatmap, setShowHeatmap ] = useState(false)
+
 
     useEffect(() => {
         if(enableTraceLine) {
@@ -137,18 +138,6 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
     
     return (
         <>
-            <Box className="absolute top-12 left-1/2 transform -translate-x-1/2 z-10 bg-white p-2 rounded shadow">
-                <FormControlLabel
-                    control={
-                        <Switch
-                            checked={showHeatmap}
-                            onChange={(e) => setShowHeatmap(e.target.checked)}
-                            color="primary"
-                        />
-                    }
-                    label="Vista de Calor"
-                />
-            </Box>
             <MapContainer 
                 center={ [currentLocation.latitude || -29.959003986327698, currentLocation.longitude || -71.34176826076656] } 
                 zoom={ 30 } 
@@ -164,7 +153,7 @@ export default function Mapa({ stateCurrentLocation, risks, helpPoints, children
                 />
                 
                 <ZoomHandler />
-                <HeatmapLayer helpPoints={helpPoints} showHeatmap={showHeatmap} />
+                <HeatmapLayer helpPoints={helpPoints} showHeatmap={showHeatmap as boolean} />
 
                 {!showHeatmap && helpPoints.map((helpPoint, index) => (
                     helpPoint.disabled ? null : 

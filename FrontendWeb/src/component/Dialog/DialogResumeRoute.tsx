@@ -15,7 +15,7 @@ import { useRoute } from '../../api/hooks/RouteHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(3),
+    padding: theme.spacing(1, 3),
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
@@ -62,7 +62,7 @@ export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps)
                 aria-labelledby='ruta-titulo'
             >
                 <DialogTitle className='m-0 p-2' id="ruta-titulo">
-                    Crear Una Ruta
+                    Ruta
                 </DialogTitle>
                 <IconButton
                     aria-label="close"
@@ -78,8 +78,7 @@ export default function DialogResumeRoute({ stateOpen } : DialogResumeRiskProps)
                 </IconButton>
                 <DialogContent className='flex flex-col gap-5'>
                     <Typography variant='body1'>
-                        Listo! <br />
-                        Le muestro el código para que las demás personas puedan unirse 
+                        Comparte el código para que las demás personas puedan unirse 
                     </Typography>
                     <Paper sx={{ backgroundColor: '#dbdbd9'}} variant='elevation' elevation={0} className='flex px-2 py-1 items-center justify-between'>
                         <Typography>

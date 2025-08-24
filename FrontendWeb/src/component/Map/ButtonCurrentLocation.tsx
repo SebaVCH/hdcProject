@@ -61,7 +61,11 @@ export default function ButtonCurrentLocation({ stateShowLocation, stateErrorGeo
                         className={`absolute bottom-full text-center my-2 w-40 ${ errorGeolocation ? "lg:w-65" : "lg:w-60"}`}
                         sx={{
                             padding: 0,
-                            fontSize : 'small',
+                            fontSize : {
+                                xs : '0.65rem',
+                                sm : '0.80rem',
+                                md : '0.85rem'
+                            },
                             overflow: 'visible',
                             border: `1px solid ${errorGeolocation ? "#FFA726" : "#2c78db"}`, // #FFA726
                             '&:before': {

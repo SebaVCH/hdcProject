@@ -52,7 +52,7 @@ export default function MensajesFijados() {
     return (
         <div className={"absolute right-8 " + (computerDevice ? (routeStatus ? 'top-16' : 'top-8') : (routeStatus ? 'top-8' : 'top-6')) }>
             <Paper className="relative inline-block" sx={{ borderRadius : 9}}>
-                <Badge badgeContent={isSuccess? data.unread.length : 0} color="error" overlap="circular" >
+                <Badge badgeContent={isSuccess ? data.unread.length : 0} color="error" overlap="circular" >
                     <IconButton onClick={handleClick}>
                         { open ? <NotificationsNoneOutlinedIcon sx={{color : '#000000'}} fontSize={"large"}/> : <NotificationsIcon sx={{ color : '#000000'}} fontSize={"large"}/>}
                     </IconButton>
