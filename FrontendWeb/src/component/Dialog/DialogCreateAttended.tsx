@@ -18,6 +18,8 @@ import { TUserRegister } from '../../pages/home';
 import { useProfile } from '../../api/hooks/UserHooks';
 
 
+const SIN_ESPECIFICAR = "Sin especificar" 
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(3),
@@ -26,6 +28,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
+
 
 
 export type DialogCreateAttendedProps = { 
@@ -112,7 +115,6 @@ export default function DialogCreateAttended({ stateAttended, stateOpen, stateOn
     }
 
     const handleClose = () => {
-        clearStates()
         setOpen(false)
     }
 
@@ -123,14 +125,15 @@ export default function DialogCreateAttended({ stateAttended, stateOpen, stateOn
         }
         if(!authorID) {
             alert('ha ocurrido un error inesperado')
+            return
         }
         mutate({
-            routeID: (routeId as string), // cambiar luego
+            routeID: (routeId as string),
             coords: coords,
             peopleHelped: {
-                name,
-                age,
-                gender
+                name : name === '' ? SIN_ESPECIFICAR : name,
+                age  : age,
+                gender : gender === '' ? SIN_ESPECIFICAR : gender
             },
             authorID: authorID as string,
             disabled: false
@@ -155,6 +158,13 @@ export default function DialogCreateAttended({ stateAttended, stateOpen, stateOn
             onClose={handleClose}
             aria-labelledby='attended-titulo'
             keepMounted
+            slotProps={{
+                transition : {
+                    onExited: () => {
+                        clearStates()
+                    }
+                }
+            }}    
         >
             <DialogTitle className='m-0 p-2' id="attended-titulo">
                 {

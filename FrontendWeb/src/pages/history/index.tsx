@@ -34,7 +34,6 @@ function getFormatDate(a : Date, opt : string) {
 
 export default function RouteHistory() {
 
-    const { accessToken } = useSessionStore()
     const [ currentLocation, setCurrentLocation ] = useState<Position>({latitude : -29.959003986327698, longitude : -71.34176826076656})
     const [ mapRoutes, setMapRoutes ] = useState<Map<string, Route[]>>(new Map())
     const [ helpPoints, setHelpPoints ] = useState<HelpPoint[]>([])
@@ -43,6 +42,7 @@ export default function RouteHistory() {
     const [ opFecha, setOPFecha ] = useState('Día')
 
     const [ onlyUser, setOnlyUser ] = useState(false)
+    const [ showHeatmap, setShowHeatmap ] = useState(false)
     const [ routes, setRoutes ] = useState<Route[]>([])
 
     const userID = useProfile().data?.id
@@ -129,6 +129,7 @@ export default function RouteHistory() {
                     helpPoints={helpPoints}
                     risks={[]}
                     enableTraceLine
+                    showHeatmap={showHeatmap}
                 >
                     <HandlerLocationHistory stateShowLocation={[showLocation, setShowLocation]} stateLocation={[HPLocation, setHPLocation]} />
                 </Mapa>
@@ -140,6 +141,7 @@ export default function RouteHistory() {
                         stateShowLocation={[showLocation, setShowLocation]} 
                         stateRoutes={[mapRoutes, setMapRoutes]} 
                         stateHelpPoints={[helpPoints, setHelpPoints]}
+                        stateShowHeatmap={[showHeatmap, setShowHeatmap]}
                     />
                 </Paper>
             </div>

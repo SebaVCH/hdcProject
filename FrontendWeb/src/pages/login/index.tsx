@@ -86,7 +86,7 @@ export default function Login() {
                       <FormLabel htmlFor="email">Email</FormLabel>
                       <TextField
                         error={emailError !== ''}
-                        helperText={emailError}
+                        helperText={emailError == '' ? " " : emailError}
                         id="email"
                         type="email"
                         name="email"
@@ -97,14 +97,14 @@ export default function Login() {
                         fullWidth
                         variant="outlined"
                         sx={sxInput}
-                        onChange={(e) => setEmail(e.currentTarget.value)}                        
+                        onChange={(e) => setEmail(e.currentTarget.value)}                      
                       />
                     </FormControl>
                     <FormControl fullWidth>
                       <FormLabel htmlFor="password">Contraseña</FormLabel>
                       <TextField
                         error={passwordError !== ''}
-                        helperText={passwordError}
+                        helperText={passwordError === '' ? " " : passwordError}
                         id="password"
                         type="password"
                         name="password"
@@ -115,6 +115,13 @@ export default function Login() {
                         fullWidth
                         variant="outlined"
                         sx={sxInput}
+                        slotProps={{
+                          formHelperText : { 
+                            sx : {
+                              minHeight: '1.5em'  
+                            }
+                          }
+                        }}
                         onChange={(e) => setPassword(e.currentTarget.value)}
                       />
                     </FormControl>
@@ -128,8 +135,8 @@ export default function Login() {
                       Ingresar
                     </Button>
                     <Divider className="w-full" />
-                    <Typography variant='body2' alignSelf={'center'} textAlign={'center'} color="error">
-                      {error ? (error as any).error : ''}
+                    <Typography variant='body2' minHeight={"1.5em"} alignSelf={'center'} textAlign={'center'} color="error">
+                      {error ? (error as any).error : null}
                     </Typography>
                 
                     {/*<Typography alignSelf={'center'}
@@ -148,9 +155,9 @@ export default function Login() {
                     </Typography>*/}
                   </div>
                   <div className="flex w-1/2 md:w-1/2 flex-col items-center justify-center">
-                      <img src="https://aportes.hogardecristo.cl/wp-content/uploads/2021/08/HDC_RGB_full-color-horizontal.png.webp" loading="lazy"/>
+                      <img src="HDC_RGB_full-color-horizontal.png" loading="lazy"/>
                       <Typography variant='subtitle2' textAlign={'center'} fontSize={{
-                        xs : '0.4rem',
+                        xs : '0.65rem',
                         sm : '1rem',
                         md : '1rem',
                       }}>

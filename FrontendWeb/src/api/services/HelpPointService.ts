@@ -21,7 +21,6 @@ export class HelpPointService {
     }
 
     static async UpdateHelpPoint( helpPoint : THelpPointUpdateRequest ) : Promise<HelpPoint> {
-        console.log(helpPoint)
         const { data } = await axiosInstance.put(`/${this.RESOURCE_NAME}/${helpPoint._id}`, helpPoint)
         console.log(data)
         return MapHelpPointFromBackend(data?.message as THelpPointBackend)

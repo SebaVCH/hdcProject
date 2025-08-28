@@ -7,11 +7,15 @@ import EventIcon from '@mui/icons-material/Event';
 import GroupIcon from '@mui/icons-material/Group';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
+import { useState } from "react";
+import DialogSendNotice from "./Dialog/DialogSendNotice";
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 export default function DrawerList() {
 
     const navigate = useNavigate()
     const { clearSession } = useSessionStore()
+    const [ openDialogNotice, setOpenDialogNotice ] = useState(false)
 
     const onClickProfile = () => {
         navigate(`${import.meta.env.VITE_BASE_URL}/perfil`)
@@ -37,6 +41,10 @@ export default function DrawerList() {
 
     const onClickSchedule = () => {
         navigate(`${import.meta.env.VITE_BASE_URL}/calendario`)
+    }
+
+    const onClickSendNotice = () => {
+
     }
 
     const color = '#28bdc8'
@@ -73,6 +81,12 @@ export default function DrawerList() {
                     <Typography>Usuarios</Typography>
                 </div>
             </Button>
+            <Button fullWidth onClick={onClickSendNotice} color="info">
+                <div className="flex w-full justify-start px-2 gap-5 items-center">
+                    <CampaignIcon/>
+                    <Typography>Crear Aviso</Typography>
+                </div>
+            </Button>
             <div className="flex grow items-end w-full" >
                 <Button  fullWidth color="warning" onClick={onClickCerrarSesion}  >
                     <div className="flex w-full justify-start px-2 gap-5 items-center">
@@ -81,6 +95,7 @@ export default function DrawerList() {
                     </div>
                 </Button>
             </div>
+            <DialogSendNotice open={openDialogNotice} setOpen={setOpenDialogNotice} />
         </div>
     )
 };

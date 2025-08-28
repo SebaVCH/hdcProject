@@ -3,6 +3,7 @@ import ListDateItem from "./ListDateItem";
 import ComboBox from "../../component/Button/ComboBox";
 import { Route } from "../../api/models/Route";
 import { HelpPoint } from "../../api/models/HelpPoint";
+import { useState } from "react";
 
 
 
@@ -13,13 +14,15 @@ type ListHistoryProps = {
     stateShowLocation : [ boolean, React.Dispatch<React.SetStateAction<boolean>> ]
     stateLocation : [ number[], React.Dispatch<React.SetStateAction<number[]>> ] 
     stateOPFecha : [ string, React.Dispatch<React.SetStateAction<string>> ]
+    stateShowHeatmap : [boolean, React.Dispatch<React.SetStateAction<boolean>> ]
 }
 
-export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLocation, stateLocation, stateOPFecha, stateOnlyUser } : ListHistoryProps) {
+export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLocation, stateLocation, stateOPFecha, stateOnlyUser, stateShowHeatmap } : ListHistoryProps) {
 
     const [ routes,  ] = stateRoutes
     const [ opFecha, setOPFecha ] = stateOPFecha
     const [ onlyUser, setOnlyUser ] = stateOnlyUser
+    const [ heatMap, setHeatMap ] = stateShowHeatmap;
 
     
     return (
@@ -52,6 +55,12 @@ export default function ListHistory({ stateRoutes, stateHelpPoints, stateShowLoc
                                         control={<Checkbox onChange={(e : React.ChangeEvent<HTMLInputElement>) => {setOnlyUser(e.target.checked)}} size="small" />}
                                         label='Ver solo mis rutas'
                                         labelPlacement="end" 
+                                    />
+                                    <FormControlLabel
+                                        value={heatMap}
+                                        control={<Checkbox onChange={(e : React.ChangeEvent<HTMLInputElement>) => {setHeatMap(e.target.checked)}} size="small" />}
+                                        label='Activar mapa de calor'
+                                        labelPlacement="end"
                                     />
                             </div>
                         </FormControl>

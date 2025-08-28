@@ -49,7 +49,7 @@ export default function Home() {
 
     const stateDescriptionRisk = useState('')
     const [ attendedP, setAttendedP ] = useState<TUserRegister>({
-        name: '',
+        name: 'Sin especificar',
         age: -1,
         gender : 'Sin especificar'
     })

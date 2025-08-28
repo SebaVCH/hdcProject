@@ -11,7 +11,6 @@ import InputDescription from '../Input/InputDescription';
 import CloseDialogButton from '../Button/CloseDialogButton';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReplayIcon from '@mui/icons-material/Replay';
-import useSessionStore from '../../stores/useSessionStore';
 import { LocationMethod } from '../../Enums/LocationMethod';
 import { useCreateRisk, useRisks } from '../../api/hooks/RiskHooks';
 import { RiskStatus } from '../../Enums/RiskStatus';
@@ -19,7 +18,7 @@ import { useProfile } from '../../api/hooks/UserHooks';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
-    padding: theme.spacing(3),
+    padding: theme.spacing(0, 3),
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
@@ -85,14 +84,14 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
     }, [coords])
 
     const handleClose = () => {
-        reset()
         setOpen(false)
-        setRequired(false)
-        setDescription('')
-        setLocationMethod(LocationMethod.None)
-        setError(undefined)
-        setCreateButtonDisable(true)
-        setCoords([])
+        //reset()
+        //setRequired(false)
+        //setDescription('')
+        //setLocationMethod(LocationMethod.None)
+        //setError(undefined)
+        //setCreateButtonDisable(true)
+        //setCoords([])
     }
 
     const handleSubmit = () => {
@@ -120,7 +119,7 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
             refetch()
             setTimeout(() => {
                 handleClose()
-            }, 2000)   
+            }, 1000)   
         }
     }, [isSuccess])
 
@@ -131,6 +130,20 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
             onClose={handleClose}
             aria-labelledby='risk-titulo'
             keepMounted
+            slotProps={{
+                transition : {
+                    onExited: () => {
+                        reset()
+                        setRequired(false)
+                        setDescription('')
+                        setLocationMethod(LocationMethod.None)
+                        setError(undefined)
+                        setCreateButtonDisable(true)
+                        setCoords([])
+                    }
+                }
+            }}      
+            
         >
             <DialogTitle className='m-0 p-2' id="risk-titulo">
                 { 
@@ -146,9 +159,14 @@ export default function DialogCreateRisk({ stateOpen, stateOnSelectLocationMap, 
             <DialogContent>
                 { isIdle ? 
                     <div className='flex flex-col gap-4'>
-                        <Typography>
-                            Un riesgo identifica una zona de "cuidado" en el sector, 
-                            podrás explicar la razón del riesgo agregando una pequeña descripción.
+                        <Typography variant="body1" sx={{ lineHeight: 2, fontSize: {
+                                xs : '0.75rem',
+                                sm : '0.75rem',
+                                md : '0.95rem' 
+                            }}}>
+                            {"\u2022"} Un riesgo señala una zona de <b>alerta</b> en el sector. <br/>
+                            {"\u2022"} Podrás detallar la causa del riesgo agregando una breve descripción. <br />
+                            {"\u2022"} Se podrá actualizar a lo largo del tiempo, reflejando el estado actual del riesgo.
                         </Typography>
                         <InputDescription 
                             maxLength={100}
